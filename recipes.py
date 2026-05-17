@@ -1,7 +1,8 @@
 import json
 import os
 import httpx
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
+from typing import Optional
 
 router = APIRouter()
 
@@ -54,6 +55,7 @@ VALID_SUB_CODES = [
     "drinks_wine", "drinks_beer_cider", "drinks_soft_soda",
     "sweets_chocolate_bars", "sweets_nuts_driedfruit",
     "bakery_other", "bakery_bread_loaves",
+    "dry_canned_fruit",
 ]
 
 INGREDIENT_TRANSLATIONS = {
@@ -307,6 +309,40 @@ async def find_product_for_ingredient(db, ingredient_en: str):
     return min(per_store.values(), key=lambda x: x["price"])
 
 
+async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> dict:
+    """
+    Tagastab lähimate füüsiliste poodide chain -> min_distance_km mapping.
+    Kasutab sama haversine valemit mis compare_service.
+    """
+    rows = await db.fetch("""
+        WITH with_dist AS (
+            SELECT
+                s.chain,
+                2*6371*asin(sqrt(
+                    pow(sin(radians((s.lat - $1) / 2)), 2) +
+                    cos(radians($1)) * cos(radians(s.lat)) *
+                    pow(sin(radians((s.lon - $2) / 2)), 2)
+                )) AS distance_km
+            FROM stores s
+            WHERE s.lat IS NOT NULL
+              AND s.lon IS NOT NULL
+              AND COALESCE(s.is_online, false) = false
+              AND s.chain IS NOT NULL
+        )
+        SELECT chain, MIN(distance_km) AS min_distance_km
+        FROM with_dist
+        WHERE distance_km <= $3
+        GROUP BY chain
+        ORDER BY min_distance_km ASC
+    """, float(lat), float(lon), float(radius_km))
+
+    return {
+        r["chain"].lower(): round(float(r["min_distance_km"]), 2)
+        for r in rows
+        if r["chain"]
+    }
+
+
 @router.get("/recipes")
 async def get_recipes():
     recipes = []
@@ -333,10 +369,17 @@ async def get_recipes():
 
 
 @router.get("/recipes/{meal_id}/compare")
-async def get_recipe_compare(meal_id: str, request: Request):
+async def get_recipe_compare(
+    meal_id: str,
+    request: Request,
+    lat: Optional[float] = Query(None, description="Kasutaja laiuskraad"),
+    lon: Optional[float] = Query(None, description="Kasutaja pikkuskraad"),
+    radius_km: float = Query(10.0, ge=0.5, le=50.0, description="Raadius km"),
+):
     """
     Tagastab retsepti hinna võrdluse poodide kaupa.
-    Kasutab Claude Haiku't koostisosa matchimiseks (cache'itakse DB-sse).
+    Kui lat/lon on antud, filtreeritakse ainult lähimad poed radius_km raadiuses
+    ja tulemused sorteeritakse distantsi järgi.
     """
     db = request.app.state.db
     if not db:
@@ -356,6 +399,12 @@ async def get_recipe_compare(meal_id: str, request: Request):
         meal["strMeal"]
     )
 
+    # Leia lähimad poed kui koordinaadid on antud
+    nearby_chains: Optional[dict] = None
+    if lat is not None and lon is not None:
+        nearby_chains = await _get_nearby_chains(db, lat, lon, radius_km)
+
+    # Leia iga koostisosa jaoks tooted poodide kaupa
     ingredient_results = []
     for ing in ingredients:
         name_lower = ing["name_en"].lower().strip()
@@ -369,10 +418,22 @@ async def get_recipe_compare(meal_id: str, request: Request):
             "by_chain": per_store,
         })
 
+    # Kogu kõik unikaalsed poed — filtreeri asukoha järgi kui antud
     all_chains = set()
     for ir in ingredient_results:
         all_chains.update(ir["by_chain"].keys())
 
+    if nearby_chains is not None:
+        # Normaliseeri nearby_chains võtmed
+        nearby_keys = set(nearby_chains.keys())
+        # Barbora on Maxima — lisa mõlemad
+        if "barbora" in nearby_keys:
+            nearby_keys.add("maxima")
+        if "maxima" in nearby_keys:
+            nearby_keys.add("barbora")
+        all_chains = all_chains & nearby_keys
+
+    # Ehita iga poe jaoks kokkuvõte
     store_summaries = []
     for chain in all_chains:
         products = []
@@ -389,22 +450,36 @@ async def get_recipe_compare(meal_id: str, request: Request):
             else:
                 not_found.append(ir["ingredient_name"])
 
+        distance_km = None
+        if nearby_chains is not None:
+            distance_km = nearby_chains.get(chain)
+
         store_summaries.append({
             "chain": chain,
             "display_name": CHAIN_DISPLAY_NAMES.get(chain, chain.title()),
             "covered": len(products),
             "total": len(ingredient_results),
             "total_price": round(total_price, 2),
+            "distance_km": distance_km,
             "products": products,
             "not_found": not_found,
         })
 
-    store_summaries.sort(key=lambda x: (-x["covered"], x["total_price"]))
+    # Sorteeri: asukoha järgi kui lat/lon antud, muidu covered+hind
+    if nearby_chains is not None:
+        store_summaries.sort(key=lambda x: (
+            -(x["covered"]),
+            x["distance_km"] if x["distance_km"] is not None else 999,
+            x["total_price"],
+        ))
+    else:
+        store_summaries.sort(key=lambda x: (-x["covered"], x["total_price"]))
 
     return {
         "meal_id": meal_id,
         "recipe_name": estonian_name,
         "total_ingredients": len(ingredient_results),
+        "location_used": lat is not None and lon is not None,
         "stores": store_summaries,
     }
 
