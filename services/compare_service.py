@@ -120,13 +120,6 @@ async def _expand_groups(
     conn: asyncpg.Connection,
     basket_pids: List[int],
 ) -> Dict[int, List[int]]:
-    """
-    For each basket product_id that belongs to a product_group,
-    return a mapping: basket_pid -> [all member product_ids in that group].
-
-    Products not in any group are not included in the result —
-    callers should treat them as their own single-member group.
-    """
     if not basket_pids:
         return {}
 
@@ -166,9 +159,6 @@ async def _candidate_stores(
     limit: int,
     offset: int,
 ) -> List[asyncpg.Record]:
-    # Include all physical stores (is_online = false).
-    # store_price_source poed on füüsilised poed mis saavad hinnad teisest allikast
-    # (nt Selver füüsilised poed saavad hinnad e-Selverist) — need PEAVAD olema kandidaadid!
     physical_filter = """
       AND COALESCE(s.is_online, false) = false
     """
@@ -216,23 +206,11 @@ async def _latest_prices(
     product_ids: List[int],
     store_ids: List[int],
 ) -> List[asyncpg.Record]:
-    """
-    Fetch latest price per (product_id, physical store_id).
-
-    IMPORTANT: we intentionally skip v_latest_store_prices view — it does a
-    full 1.7M row scan with no index usage and takes 10+ minutes.
-
-    Instead we use DISTINCT ON with the existing index ix_prices_latest
-    (product_id, store_id, collected_at DESC) which is instant.
-    """
     if not product_ids or not store_ids:
         return []
 
     sql_distinct_on = """
     WITH effective_source AS (
-      -- Füüsiline pood -> millise store_id hindasid vaadata
-      -- store_price_source ütleb: füüsilise poe hind tuleb teisest store_id-st
-      -- (nt Wolt/Bolt store on reaalne hinna allikas füüsilisele Coop poele)
       SELECT s.id AS physical_store_id,
              COALESCE(sps.source_store_id, s.id) AS source_store_id
       FROM stores s
@@ -310,14 +288,14 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             raw_items = (body.get("grocery_list") or {}).get("items")
         raw_items = raw_items or []
 
-        # 2. Normalize
+        # 2. Normalize — quantity on float (kg-toodete jaoks 0.5 = 500g)
         normalized_items: List[Dict[str, Any]] = []
         for it in raw_items:
             if isinstance(it, dict):
                 name = str(it.get("product", "") or "").strip()
                 if not name:
                     continue
-                qty = int(it.get("quantity") or 1)
+                qty = float(it.get("quantity") or 1)
                 if qty <= 0:
                     continue
                 normalized_items.append({
@@ -330,9 +308,9 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if not name:
                     continue
                 try:
-                    qty = int(it[1]) if len(it) > 1 else 1
+                    qty = float(it[1]) if len(it) > 1 else 1.0
                 except Exception:
-                    qty = 1
+                    qty = 1.0
                 if qty <= 0:
                     continue
                 normalized_items.append({"product": name, "quantity": qty, "product_id": None})
@@ -341,26 +319,26 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": []}
 
         # 3. Aggregate by pid or name
-        qty_by_pid: Dict[int, int] = {}
-        qty_by_name: Dict[str, int] = {}
+        qty_by_pid: Dict[int, float] = {}
+        qty_by_name: Dict[str, float] = {}
         for it in normalized_items:
             pid = _as_int_or_none(it.get("product_id"))
-            qty = max(int(it.get("quantity") or 1), 1)
+            qty = max(float(it.get("quantity") or 1), 0.1)
             if pid is not None:
-                qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
+                qty_by_pid[pid] = qty_by_pid.get(pid, 0.0) + qty
             else:
                 nm = _norm(str(it.get("product") or ""))
                 if nm:
-                    qty_by_name[nm] = qty_by_name.get(nm, 0) + qty
+                    qty_by_name[nm] = qty_by_name.get(nm, 0.0) + qty
 
         # 4. Resolve names
         resolved_by_name = await _resolve_products_by_name(conn, list(qty_by_name.keys()))
         missing_products = [{"input": k} for k in qty_by_name if k not in resolved_by_name]
         for nm, rec in resolved_by_name.items():
             pid = int(_rv(rec, "id"))
-            qty = qty_by_name.get(nm, 0)
+            qty = qty_by_name.get(nm, 0.0)
             if qty > 0:
-                qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
+                qty_by_pid[pid] = qty_by_pid.get(pid, 0.0) + qty
 
         if not qty_by_pid:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
