@@ -263,6 +263,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                 WHERE p.name ILIKE $1
                   AND p.sub_code = ANY($2::text[])
                   AND pr.price > 0
+                  AND pr.collected_at > NOW() - INTERVAL '14 days'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%", sub_codes)
@@ -280,6 +281,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                     'baby_diapers','pet_cat_wet','pet_dog_wet','pet_cat_dry','pet_dog_dry'
                   )
                   AND pr.price > 0
+                  AND pr.collected_at > NOW() - INTERVAL '14 days'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%")
