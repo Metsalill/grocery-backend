@@ -60,27 +60,19 @@ async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optiona
 
 
 # Source priority: lower = preferred display representative
-# Chain must match source_url to get top priority
 SOURCE_PRIORITY_SQL = """
     CASE
-        WHEN p.chain = 'prisma' AND p.source_url ILIKE '%prisma%'     THEN 1
-        WHEN p.chain = 'selver' AND p.source_url ILIKE '%selver%'     THEN 2
-        WHEN p.chain = 'rimi'   AND p.source_url ILIKE '%rimi%'       THEN 3
-        WHEN p.chain = 'barbora' AND (p.source_url ILIKE '%barbora%'
-          OR p.source_url ILIKE '%maxima%')                            THEN 4
-        WHEN p.chain = 'coop'   AND (p.source_url ILIKE '%ecoop%'
-          OR p.source_url ILIKE '%wolt%')                              THEN 5
-        WHEN p.source_url ILIKE '%prisma%'                             THEN 6
-        WHEN p.source_url ILIKE '%selver%'                             THEN 7
-        WHEN p.source_url ILIKE '%rimi%'                               THEN 8
+        WHEN p.source_url ILIKE '%prisma%'                             THEN 1
+        WHEN p.source_url ILIKE '%selver%'                             THEN 2
+        WHEN p.source_url ILIKE '%rimi%'                               THEN 3
         WHEN p.source_url ILIKE '%barbora%'
-          OR p.source_url ILIKE '%maxima%'                             THEN 9
+          OR p.source_url ILIKE '%maxima%'                             THEN 4
         WHEN p.source_url ILIKE '%ecoop%'
           OR (p.source_url ILIKE '%coop%'
-              AND p.source_url NOT ILIKE '%wolt%')                     THEN 10
-        WHEN p.source_url ILIKE '%wolt%'                               THEN 11
-        WHEN p.source_url IS NULL OR p.source_url = ''                 THEN 12
-        ELSE 13
+              AND p.source_url NOT ILIKE '%wolt%')                     THEN 5
+        WHEN p.source_url ILIKE '%wolt%'                               THEN 6
+        WHEN p.source_url IS NULL OR p.source_url = ''                 THEN 7
+        ELSE 8
     END
 """
 
@@ -103,7 +95,6 @@ def _build_dedup_sql(where_sql: str) -> str:
             ORDER BY
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text),
                 {SOURCE_PRIORITY_SQL},
-                CASE WHEN p.name ILIKE 'Coop %%' THEN 1 ELSE 0 END,
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
@@ -146,7 +137,6 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
             ORDER BY
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text),
                 {SOURCE_PRIORITY_SQL},
-                CASE WHEN p.name ILIKE 'Coop %%' THEN 1 ELSE 0 END,
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
