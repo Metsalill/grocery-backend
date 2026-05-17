@@ -315,11 +315,15 @@ async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> di
     """
     Tagastab lähimate füüsiliste poodide chain -> min_distance_km mapping.
     Kasutab sama haversine valemit mis compare_service.
+    Maxima poed mapped -> 'barbora' (products.chain väärtus).
     """
     rows = await db.fetch("""
         WITH with_dist AS (
             SELECT
-                s.chain,
+                CASE
+                    WHEN LOWER(s.chain) = 'maxima' THEN 'barbora'
+                    ELSE LOWER(s.chain)
+                END AS chain,
                 2*6371*asin(sqrt(
                     pow(sin(radians((s.lat - $1) / 2)), 2) +
                     cos(radians($1)) * cos(radians(s.lat)) *
@@ -339,7 +343,7 @@ async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> di
     """, float(lat), float(lon), float(radius_km))
 
     return {
-        r["chain"].lower(): round(float(r["min_distance_km"]), 2)
+        r["chain"]: round(float(r["min_distance_km"]), 2)
         for r in rows
         if r["chain"]
     }
