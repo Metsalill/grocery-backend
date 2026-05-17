@@ -925,6 +925,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
             parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
         )
 
+        # DEBUG 1: mis JSON-LD andis
+        print(f"[DEBUG] ext_id={extract_ext_id(url)} flat_ld_price={flat_ld.get('price')!r}")
+
         if flat_ld.get("price") and not price:
             price = norm_price_str(str(flat_ld.get("price")))
             currency = currency or (flat_ld.get("currency") or "EUR")
@@ -1127,6 +1130,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
     ext_id = extract_ext_id(url)
     src_url = canonical_url(page) or url.split("?")[0]
 
+    # DEBUG 2: lõplik hind enne row-i
+    print(f"[DEBUG FINAL] ext_id={ext_id} price={price!r} currency={currency!r}")
+
     row = {
         "store_chain": STORE_CHAIN,
         "store_name": STORE_NAME,
@@ -1230,16 +1236,6 @@ async def _bulk_ingest_to_db(
     rows: List[Dict[str, str]],
     store_id: int,
 ) -> None:
-    """
-    Push all scraped rows into postgres by calling the DB function
-    upsert_product_and_price(...) for each product.
-
-    That function will:
-      - create/reuse products.id
-      - update ext_product_map
-      - insert/merge into prices
-    """
-
     if store_id <= 0:
         print("[rimi] STORE_ID not set or invalid, skipping DB ingest.")
         return
@@ -1261,26 +1257,15 @@ async def _bulk_ingest_to_db(
         for r in rows:
             # convert scraped price text -> numeric
             price_val = to_float_price(r.get("price", ""))
+
+            # DEBUG 3: ingest price
+            print(f"[DEBUG ingest] ext_id={r.get('ext_id')} price_raw={r.get('price')!r} price_val={price_val}")
+
             if price_val is None:
                 # skip rows with no valid price
                 continue
 
             try:
-                # Call the Postgres function you created in Railway:
-                # upsert_product_and_price(
-                #   in_source text,
-                #   in_ext_id text,
-                #   in_name text,
-                #   in_brand text,
-                #   in_size_text text,
-                #   in_ean_raw text,
-                #   in_price numeric,
-                #   in_currency text,
-                #   in_store_id integer,
-                #   in_seen_at timestamptz,
-                #   in_source_url text
-                # ) RETURNS integer (product_id)
-
                 product_id = await pool.fetchval(
                     """
                     SELECT upsert_product_and_price(
@@ -1297,24 +1282,21 @@ async def _bulk_ingest_to_db(
                         $10   -- in_source_url
                     );
                     """,
-                    "rimi",                               # $1 source label in ext_product_map.source
-                    r.get("ext_id") or "",                # $2 ext_id from PDP URL
-                    r.get("name") or "",                  # $3 product name
-                    r.get("brand") or "",                 # $4 brand
-                    r.get("size_text") or "",             # $5 size_text like "1 l" / "500 g"
-                    r.get("ean_raw") or "",               # $6 raw/parsed EAN/barcode
-                    price_val,                            # $7 numeric price
-                    (r.get("currency") or "EUR"),         # $8 currency
-                    store_id,                             # $9 store_id (e.g. 440 for Rimi ePood)
-                    r.get("source_url") or "",            # $10 canonical PDP URL
+                    "rimi",
+                    r.get("ext_id") or "",
+                    r.get("name") or "",
+                    r.get("brand") or "",
+                    r.get("size_text") or "",
+                    r.get("ean_raw") or "",
+                    price_val,
+                    (r.get("currency") or "EUR"),
+                    store_id,
+                    r.get("source_url") or "",
                 )
 
                 upserted += 1
-                # Optional debug:
-                # print(f"[rimi] upsert ok ext_id={r.get('ext_id')} -> product_id={product_id}")
 
             except Exception as ex:
-                # Don't crash the whole run if just one row is weird.
                 print(
                     f"[rimi] upsert_product_and_price FAILED "
                     f"ext_id={r.get('ext_id')} name={r.get('name')[:50]!r}: {ex}"
@@ -1360,7 +1342,6 @@ def main():
             "and skip category discovery"
         ),
     )
-    # ---- NEW: soft timeout in minutes ----
     ap.add_argument(
         "--soft-timeout-min",
         default=os.environ.get("SOFT_TIME_BUDGET_MIN", "0"),
@@ -1378,7 +1359,6 @@ def main():
     pdp_workers  = max(1, int(args.pdp_workers or "2"))
     cats         = read_categories(args.cats_file)
 
-    # deadline in monotonic seconds (or None)
     try:
         soft_minutes = float(args.soft_timeout_min or 0)
     except Exception:
@@ -1393,19 +1373,16 @@ def main():
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
 
-    # decide direct-only behavior
     direct_only_flag = str(args.direct_only).strip().lower()
     if direct_only_flag in ("1","true","yes","y"):
         direct_only = True
     elif direct_only_flag in ("0","false","no","n"):
         direct_only = False
     else:
-        # auto: if an ONLY list exists, go direct
         direct_only = bool(only_urls or only_ext)
 
     def pdps_from_only_lists() -> List[str]:
         urls: set[str] = set()
-        # URLs
         for u in only_urls:
             if not u:
                 continue
@@ -1418,14 +1395,12 @@ def main():
                 xid = extract_ext_id(u2)
                 if xid:
                     urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
-        # ext_ids
         for xid in only_ext:
             xid = (xid or "").strip()
             if xid:
                 urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
         return sorted(urls)
 
-    # Buffered writer for CSV (periodic flush).
     rows_for_csv: List[Dict[str,str]] = []
     rows_for_ingest: List[Dict[str,str]] = []
     last_flush = time.monotonic()
@@ -1442,7 +1417,6 @@ def main():
     all_pdps: List[str] = []
 
     with sync_playwright() as pw:
-        # 1) gather PDP URLs
         if direct_only:
             print(
                 "[rimi] DIRECT-ONLY: using ONLY list; "
@@ -1476,7 +1450,6 @@ def main():
                         file=sys.stderr,
                     )
 
-        # 2) dedupe and apply ONLY / SKIP filters
         seen, q = set(), []
         for u in all_pdps:
             if u and (u not in seen) and _is_full_pdp(u):
@@ -1508,7 +1481,6 @@ def main():
             )
             q = q2
 
-        # If time is already up, bail before PDP stage
         if _deadline_passed(deadline_ts):
             print(
                 "[rimi] soft-timeout reached before PDP parsing; "
@@ -1516,7 +1488,6 @@ def main():
             )
             flush_csv()
             print("[rimi] wrote 0 product rows (PDP phase skipped due to timeout).")
-            # We'll still attempt ingest (it's empty anyway)
             try:
                 store_id_env = int(os.environ.get("STORE_ID","440") or "440")
             except Exception:
@@ -1524,7 +1495,6 @@ def main():
             asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
             return
 
-        # 3) PDP parsing w/ round-robin pages
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
             locale="et-EE",
@@ -1556,7 +1526,6 @@ def main():
                         f"[rimi] ok ext_id={row['ext_id']} "
                         f"brand={row['brand'][:40]}"
                     )
-                    # Flush triggers: every 25 rows OR every 60s
                     if len(rows_for_csv) >= 25 or (
                         time.monotonic() - last_flush
                     ) > 60:
@@ -1566,12 +1535,10 @@ def main():
             if max_products and total >= max_products:
                 break
 
-        # Final CSV flush
         flush_csv()
         ctx.close()
         browser.close()
 
-    # 4) Bulk-ingest to DB
     try:
         store_id_env = int(os.environ.get("STORE_ID","440") or "440")
     except Exception:
