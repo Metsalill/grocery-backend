@@ -9,6 +9,8 @@ router = APIRouter()
 
 MAX_LIMIT = 50  # server-side hard cap
 
+PRICE_FRESHNESS_FILTER = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id AND pr.collected_at > NOW() - INTERVAL '14 days')"
+
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     chains = row.get("available_chains") or []
@@ -76,12 +78,10 @@ SOURCE_PRIORITY_SQL = """
 
 
 def _build_dedup_sql(where_sql: str) -> str:
-    price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
-
     if where_sql.strip().upper().startswith("WHERE"):
-        combined_where = f"{where_sql} AND {price_filter}"
+        combined_where = f"{where_sql} AND {PRICE_FRESHNESS_FILTER}"
     else:
-        combined_where = f"WHERE {price_filter}"
+        combined_where = f"WHERE {PRICE_FRESHNESS_FILTER}"
 
     return f"""
         WITH base AS (
@@ -107,6 +107,7 @@ def _build_dedup_sql(where_sql: str) -> str:
             JOIN stores s ON s.id = pr.store_id
             LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
             WHERE s.chain IS NOT NULL AND s.chain != ''
+              AND pr.collected_at > NOW() - INTERVAL '14 days'
             GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
         )
         SELECT b.*, gc.chains AS available_chains
@@ -116,12 +117,10 @@ def _build_dedup_sql(where_sql: str) -> str:
 
 
 def _build_personalized_sql(where_sql: str, user_id: int) -> str:
-    price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
-
     if where_sql.strip().upper().startswith("WHERE"):
-        combined_where = f"{where_sql} AND {price_filter}"
+        combined_where = f"{where_sql} AND {PRICE_FRESHNESS_FILTER}"
     else:
-        combined_where = f"WHERE {price_filter}"
+        combined_where = f"WHERE {PRICE_FRESHNESS_FILTER}"
 
     return f"""
         WITH base AS (
@@ -150,6 +149,7 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
             JOIN stores s ON s.id = pr.store_id
             LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
             WHERE s.chain IS NOT NULL AND s.chain != ''
+              AND pr.collected_at > NOW() - INTERVAL '14 days'
             GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
         )
         SELECT b.*, gc.chains AS available_chains
