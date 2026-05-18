@@ -3,10 +3,6 @@ name: "Rimi - Category Crawl (Playwright) + optional DB upsert"
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: "prices (default) or metadata (crawl to improve NAME/BRAND)"
-        required: false
-        default: "prices"
       categories_multiline:
         description: "Rimi category URLs (one per line). If omitted, we use the SH-coded roots."
         required: false
@@ -32,10 +28,10 @@ on:
         required: false
         default: "4"
   schedule:
-    - cron: "19 3 * * *"   # Every day at 03:19 UTC
+    - cron: "0 2 */2 * *"   # Every 2 days at 02:00 UTC (metadata only)
 
 concurrency:
-  group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
+  group: rimi-scrape
   cancel-in-progress: true
 
 jobs:
@@ -57,9 +53,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       STORE_ID: "440"
-      MODE: ${{ github.event.inputs.mode || 'prices' }}
-      MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
-      MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
+      MODE: "metadata"
       SOFT_TIME_BUDGET_MIN: "140"
 
     steps:
@@ -111,12 +105,6 @@ jobs:
           rm -rf data artifacts
           mkdir -p data artifacts
 
-      - name: Show selected mode
-        run: |
-          echo "MODE=${MODE}"
-          echo "MODE_IS_PRICES=${MODE_IS_PRICES}"
-          echo "MODE_IS_METADATA=${MODE_IS_METADATA}"
-
       - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
@@ -159,41 +147,36 @@ jobs:
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
           head -12 data/rimi_categories.txt || true
 
-      - name: Build skip list (metadata mode only)
-        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
-        shell: bash
+      - name: Install psql client
+        if: ${{ env.DATABASE_URL != '' }}
         run: |
-          set -euo pipefail
-          : > data/rimi_skip_ext_ids.txt
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-          SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
-          FROM public.prices p
-          JOIN public.stores s ON s.id = p.store_id
-          WHERE s.chain='Rimi' AND s.is_online = TRUE
-            AND p.source_url ~ '/p/[0-9]+'
-            AND p.collected_at > NOW() - INTERVAL '20 hours'
-            AND p.price > 0
-          ORDER BY 1;
-          SQL
-          echo "Skip list rows (metadata mode): $(wc -l < data/rimi_skip_ext_ids.txt)"
-          echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-      - name: Build target list (missing NAME or BRAND)
-        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
+      - name: Build target list (missing NAME, BRAND or MANUFACTURER)
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/rimi_only_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_only_ext_ids.txt
-          SELECT ext_id
-          FROM public.rimi_side_norm
-          WHERE COALESCE(BTRIM(name),'') = '' OR COALESCE(BTRIM(brand),'') = ''
+          SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+          FROM public.products p
+          JOIN public.prices pr ON pr.product_id = p.id
+          JOIN public.stores s ON s.id = pr.store_id
+          WHERE s.chain = 'Rimi'
+            AND s.is_online = TRUE
+            AND p.source_url ~ '/p/[0-9]+'
+            AND (
+              COALESCE(BTRIM(p.name), '') = ''
+              OR COALESCE(BTRIM(p.brand), '') = ''
+              OR COALESCE(BTRIM(p.manufacturer), '') = ''
+            )
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing metadata): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Shard ONLY list for this runner
-        if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
           SHARDS: 6
@@ -222,7 +205,6 @@ jobs:
           echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
-          echo "MODE=${MODE}"
           echo "::endgroup::"
 
           REQ_DELAY="${REQ_DELAY:-0.15}"
@@ -232,23 +214,12 @@ jobs:
           PDP_WORKERS="${PDP_WORKERS:-4}"
           TIME_BUDGET="${TIME_BUDGET:-140}"
 
-          # Prices mode: ei kasuta skip listi — kõik tooted scrape'itakse iga kord
-          SKIP_FLAG=()
-          if [ "${MODE}" = "metadata" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
-            echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
-            SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
+          if [ ! -s data/rimi_only_ext_ids.sharded.txt ]; then
+            echo "::notice::No metadata targets for this shard — skipping crawl."
+            exit 0
           fi
 
-          ONLY_FLAG=()
-          if [ "${MODE}" = "metadata" ]; then
-            if [ -s data/rimi_only_ext_ids.sharded.txt ]; then
-              echo "Restricting crawl to ONLY ${SHARD} shard targets"
-              ONLY_FLAG=(--only-ext-file data/rimi_only_ext_ids.sharded.txt)
-            else
-              echo "::notice::No ONLY targets for this shard — skipping crawl."
-              exit 0
-            fi
-          fi
+          echo "Targets: $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
 
           set +e
           set +o pipefail
@@ -261,8 +232,7 @@ jobs:
               --req-delay "$REQ_DELAY" \
               --pdp-workers "$PDP_WORKERS" \
               --output-csv "$OUTPUT_CSV" \
-              "${SKIP_FLAG[@]}" \
-              "${ONLY_FLAG[@]}" \
+              --only-ext-file data/rimi_only_ext_ids.sharded.txt \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
@@ -323,25 +293,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rimi-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
+          name: rimi-scrape-shard-${{ matrix.shard }}-${{ github.run_id }}
           path: |
             data/rimi_products.csv
             data/rimi_run.log
             data/rimi_run.err
             artifacts/*.png
             artifacts/*.html
-            data/_skip_count.txt
-            data/rimi_skip_ext_ids.txt
             data/rimi_only_ext_ids.txt
             data/rimi_only_ext_ids.sharded.txt
           if-no-files-found: warn
           retention-days: 7
-
-      - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
         if: ${{ env.DATABASE_URL != '' }}
@@ -446,14 +408,37 @@ jobs:
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load_staging.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load_staging.sql
 
+      - name: Upsert metadata to products table
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- Uuenda ainult tühjad väljad — ei kirjuta üle olemasolevat
+          UPDATE public.products p
+          SET
+            brand        = COALESCE(NULLIF(BTRIM(p.brand),''),        NULLIF(BTRIM(s.brand),''),        p.brand),
+            manufacturer = COALESCE(NULLIF(BTRIM(p.manufacturer),''), NULLIF(BTRIM(s.manufacturer),''), p.manufacturer),
+            size_text    = COALESCE(NULLIF(BTRIM(p.size_text),''),    NULLIF(BTRIM(s.size_text),''),    p.size_text),
+            ean          = COALESCE(NULLIF(BTRIM(p.ean),''),          NULLIF(BTRIM(s.ean_norm),''),     p.ean)
+          FROM public.staging_rimi_products s
+          WHERE p.source_url LIKE '%/p/' || s.ext_id
+            AND (
+              COALESCE(BTRIM(p.brand),'') = ''
+              OR COALESCE(BTRIM(p.manufacturer),'') = ''
+              OR COALESCE(BTRIM(p.size_text),'') = ''
+            );
+
+          SELECT COUNT(*) AS updated_rows FROM staging_rimi_products;
+          TRUNCATE staging_rimi_products;
+          SQL
+
       - name: Upsert to candidates + refresh
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SELECT COUNT(*) AS staging_rows FROM staging_rimi_products;
-
           CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext ON rimi_candidates(ext_id);
 
           WITH up AS (
@@ -498,18 +483,7 @@ jobs:
           END$$;
           SQL
 
-      - name: Sanity check (rows & zero-price count)
-        if: ${{ env.DATABASE_URL != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SELECT COUNT(*) AS candidates_total,
-                 SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
-          FROM public.rimi_candidates;
-          SQL
-
-      - name: Adopt Rimi candidates with EANs (optional helpers)
+      - name: Adopt Rimi candidates with EANs
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
@@ -529,86 +503,4 @@ jobs:
             END IF;
           END
           $do$;
-          SQL
-
-      # -----------------------------------------------------------------------
-      # Push Rimi prices → prices table
-      # FIX: DISTINCT ON (rc.ext_id) in Step 1 ensures each ext_id maps to
-      # exactly one product_id before hitting ext_product_map, preventing the
-      # "ON CONFLICT DO UPDATE cannot affect row a second time" error caused
-      # by multiple candidates sharing the same name matching the same product.
-      # DISTINCT ON (product_id) in Step 2 further collapses any remaining
-      # duplicates before the final INSERT into prices.
-      # -----------------------------------------------------------------------
-      - name: Push Rimi prices → prices table
-        if: ${{ env.DATABASE_URL != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-
-          -- Step 1: map rimi_candidates → products via ext_product_map
-          WITH mapped AS (
-            SELECT DISTINCT ON (rc.ext_id)
-              rc.ext_id,
-              p.id AS product_id
-            FROM public.rimi_candidates rc
-            JOIN public.products p
-              ON lower(trim(p.name)) = lower(trim(rc.name))
-            WHERE COALESCE(rc.price, 0) > 0
-              AND COALESCE(rc.name, '') <> ''
-            ORDER BY rc.ext_id, p.id ASC
-          )
-          INSERT INTO public.ext_product_map (
-            source, ext_id, product_id, reason, confidence, last_seen, updated_at
-          )
-          SELECT
-            'rimi', m.ext_id, m.product_id,
-            'name_match', 0.8, now(), now()
-          FROM mapped m
-          ON CONFLICT (source, ext_id) DO UPDATE
-            SET product_id = EXCLUDED.product_id,
-                last_seen  = EXCLUDED.last_seen,
-                updated_at = EXCLUDED.updated_at;
-
-          -- Step 2: push prices → prices table
-          WITH rimi_store AS (
-            SELECT id FROM public.stores
-            WHERE chain = 'Rimi' AND COALESCE(is_online, false) = true
-            ORDER BY id LIMIT 1
-          ),
-          deduped AS (
-            SELECT DISTINCT ON (epm.product_id)
-              epm.product_id,
-              (SELECT id FROM rimi_store)                              AS store_id,
-              rc.price,
-              COALESCE(NULLIF(rc.currency, ''), 'EUR')                AS currency,
-              'https://www.rimi.ee/epood/ee/tooted/p/' || rc.ext_id   AS source_url
-            FROM public.rimi_candidates rc
-            JOIN public.ext_product_map epm
-              ON epm.ext_id = rc.ext_id AND epm.source = 'rimi'
-            WHERE rc.price IS NOT NULL
-              AND rc.price > 0
-            ORDER BY epm.product_id, rc.price ASC
-          )
-          INSERT INTO public.prices (
-            product_id, store_id, price, currency,
-            collected_at, source, source_url
-          )
-          SELECT
-            product_id, store_id, price, currency,
-            now(), 'rimi', source_url
-          FROM deduped
-          ON CONFLICT (product_id, store_id) DO UPDATE
-            SET price        = EXCLUDED.price,
-                currency     = EXCLUDED.currency,
-                collected_at = EXCLUDED.collected_at,
-                source       = EXCLUDED.source,
-                source_url   = EXCLUDED.source_url;
-
-          -- Step 3: report
-          SELECT COUNT(*) AS prices_for_rimi_online
-          FROM public.prices pr
-          JOIN public.stores s ON s.id = pr.store_id
-          WHERE s.chain = 'Rimi' AND COALESCE(s.is_online, false) = true;
           SQL
