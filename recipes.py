@@ -275,6 +275,10 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                   AND p.name NOT ILIKE '%kotlet%'
                   AND p.name NOT ILIKE '%guljass%'
                   AND p.name NOT ILIKE '%šašlõkk%'
+                  AND p.name NOT ILIKE '%mesimuraka%'
+                  AND p.name NOT ILIKE '%mesikõpp%'
+                  AND p.name NOT ILIKE '%mesine%'
+                  AND p.name NOT ILIKE '%tarretis%'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%", sub_codes)
@@ -302,6 +306,10 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                   AND p.name NOT ILIKE '%kotlet%'
                   AND p.name NOT ILIKE '%guljass%'
                   AND p.name NOT ILIKE '%šašlõkk%'
+                  AND p.name NOT ILIKE '%mesimuraka%'
+                  AND p.name NOT ILIKE '%mesikõpp%'
+                  AND p.name NOT ILIKE '%mesine%'
+                  AND p.name NOT ILIKE '%tarretis%'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%")
