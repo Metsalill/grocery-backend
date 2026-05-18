@@ -159,8 +159,8 @@ jobs:
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
           head -12 data/rimi_categories.txt || true
 
-      - name: Build skip list (priced in last 20h)
-        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
+      - name: Build skip list (metadata mode only)
+        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -172,9 +172,10 @@ jobs:
           WHERE s.chain='Rimi' AND s.is_online = TRUE
             AND p.source_url ~ '/p/[0-9]+'
             AND p.collected_at > NOW() - INTERVAL '20 hours'
+            AND p.price > 0
           ORDER BY 1;
           SQL
-          echo "Skip list rows (priced in last 20h): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "Skip list rows (metadata mode): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
       - name: Build target list (missing NAME or BRAND)
@@ -231,8 +232,9 @@ jobs:
           PDP_WORKERS="${PDP_WORKERS:-4}"
           TIME_BUDGET="${TIME_BUDGET:-140}"
 
+          # Prices mode: ei kasuta skip listi — kõik tooted scrape'itakse iga kord
           SKIP_FLAG=()
-          if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
+          if [ "${MODE}" = "metadata" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
@@ -546,9 +548,6 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 
           -- Step 1: map rimi_candidates → products via ext_product_map
-          -- DISTINCT ON (rc.ext_id) ensures each ext_id maps to exactly one
-          -- product_id, preventing duplicate (source, ext_id) conflicts when
-          -- multiple products share the same name.
           WITH mapped AS (
             SELECT DISTINCT ON (rc.ext_id)
               rc.ext_id,
@@ -573,9 +572,6 @@ jobs:
                 updated_at = EXCLUDED.updated_at;
 
           -- Step 2: push prices → prices table
-          -- DISTINCT ON (product_id) collapses any remaining duplicates
-          -- (e.g. two ext_ids mapping to the same product_id) before INSERT
-          -- so ON CONFLICT DO UPDATE never sees the same row twice.
           WITH rimi_store AS (
             SELECT id FROM public.stores
             WHERE chain = 'Rimi' AND COALESCE(is_online, false) = true
