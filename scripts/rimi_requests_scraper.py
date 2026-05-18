@@ -73,7 +73,6 @@ def parse_category_page(html: str, cat_url: str) -> Tuple[List[Dict], int, int]:
 
         ext_id = str(data.get("id") or "")
         name = (data.get("name") or "").strip()
-        price = data.get("price")
         brand = (data.get("brand") or "").strip() if data.get("brand") else ""
         category = (data.get("category") or "").strip()
 
@@ -96,6 +95,39 @@ def parse_category_page(html: str, cat_url: str) -> Tuple[List[Dict], int, int]:
             name, re.I
         )
         size_text = size_match.group(1) if size_match else ""
+
+        # --- PRICE LOGIC ---
+        # sr-only span tekst: "2.59 € per kg" või "2.55 € per tk"
+        sr_only = card.select_one(".price-tag .sr-only")
+        sr_text = sr_only.get_text(strip=True) if sr_only else ""
+        is_kg = "per kg" in sr_text
+
+        price = None
+
+        # 1) Soodushind: price-label div (major + cents) — ainult soodushinna puhul olemas
+        price_label = card.select_one(".price-label .price-label__price")
+        if price_label:
+            major = price_label.select_one(".major")
+            cents = price_label.select_one(".cents")
+            if major:
+                price_str = major.get_text(strip=True)
+                if cents:
+                    price_str += "." + cents.get_text(strip=True)
+                price = to_float_price(price_str)
+                if price:
+                    print(f"  [rimi-req] SALE ext_id={ext_id} price={price}")
+
+        # 2) Tavahind sr-only span-ist: "2.59 € per kg" või "2.55 € per tk"
+        if price is None and sr_text:
+            m = re.search(r"([\d]+[.,][\d]+)\s*€", sr_text)
+            if m:
+                price = to_float_price(m.group(1))
+
+        # 3) Fallback: JSON hind — ainult tk-toodete jaoks (kg-toodete JSON hind on vale)
+        if price is None and not is_kg:
+            json_price = data.get("price")
+            if json_price is not None:
+                price = to_float_price(str(json_price))
 
         products.append({
             "ext_id": ext_id,
