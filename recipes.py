@@ -182,7 +182,7 @@ Estonian translations:
 - mustard → "sinep"
 - soy sauce → "sojakaste"
 - white wine → "valge vein"
-- red wine → "punane vein"
+- red wine → "punane vein", "merlot", "cabernet", "shiraz", "malbec", "pinot noir", "tempranillo", "syrah"
 
 Valid sub_codes: {json.dumps(VALID_SUB_CODES)}
 
@@ -191,6 +191,8 @@ Examples:
 - "egg yolks" → {{"search_terms": ["muna"], "sub_codes": ["dairy_eggs"]}}
 - "parmesan" → {{"search_terms": ["parmesan", "parmigiano", "grana padano", "dziugas"], "sub_codes": ["cheese_regular", "cheese_delicatessen"]}}
 - "spaghetti" → {{"search_terms": ["spaghetti"], "sub_codes": ["dry_pasta_rice"]}}
+- "red wine" → {{"search_terms": ["punane vein", "merlot", "cabernet", "shiraz", "malbec", "pinot noir", "tempranillo", "syrah"], "sub_codes": ["drinks_wine"]}}
+- "white wine" → {{"search_terms": ["valge vein", "chardonnay", "sauvignon", "riesling", "pinot grigio"], "sub_codes": ["drinks_wine"]}}
 - "water" → {{"search_terms": [], "sub_codes": []}}
 - "salt" → {{"search_terms": [], "sub_codes": []}}
 
@@ -294,7 +296,9 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
 
         for r in rows:
             chain = (r["chain"] or "").lower()
-            if chain not in results_by_chain:
+            price = float(r["min_price"])
+            # FIX: võta odavaim toode per chain, mitte esimene
+            if chain not in results_by_chain or price < results_by_chain[chain]["price"]:
                 results_by_chain[chain] = {
                     "product_id": r["id"],
                     "name": r["name"],
@@ -303,7 +307,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                     "brand": r["brand"] or "",
                     "size_text": r["size_text"] or "",
                     "is_per_kg": (r["size_text"] or "").lower() == "kg",
-                    "price": float(r["min_price"]),
+                    "price": price,
                     "quantity": 1,
                 }
 
@@ -318,11 +322,6 @@ async def find_product_for_ingredient(db, ingredient_en: str):
 
 
 async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> dict:
-    """
-    Tagastab lähimate füüsiliste poodide chain -> min_distance_km mapping.
-    Kasutab sama haversine valemit mis compare_service.
-    Maxima poed mapped -> 'barbora' (products.chain väärtus).
-    """
     rows = await db.fetch("""
         WITH with_dist AS (
             SELECT
@@ -388,11 +387,6 @@ async def get_recipe_compare(
     lon: Optional[float] = Query(None, description="Kasutaja pikkuskraad"),
     radius_km: float = Query(10.0, ge=0.5, le=50.0, description="Raadius km"),
 ):
-    """
-    Tagastab retsepti hinna võrdluse poodide kaupa.
-    Kui lat/lon on antud, filtreeritakse ainult lähimad poed radius_km raadiuses
-    ja tulemused sorteeritakse distantsi järgi.
-    """
     db = request.app.state.db
     if not db:
         raise HTTPException(status_code=503, detail="DB unavailable")
@@ -411,12 +405,10 @@ async def get_recipe_compare(
         meal["strMeal"]
     )
 
-    # Leia lähimad poed kui koordinaadid on antud
     nearby_chains: Optional[dict] = None
     if lat is not None and lon is not None:
         nearby_chains = await _get_nearby_chains(db, lat, lon, radius_km)
 
-    # Leia iga koostisosa jaoks tooted poodide kaupa
     ingredient_results = []
     for ing in ingredients:
         name_lower = ing["name_en"].lower().strip()
@@ -430,22 +422,18 @@ async def get_recipe_compare(
             "by_chain": per_store,
         })
 
-    # Kogu kõik unikaalsed poed — filtreeri asukoha järgi kui antud
     all_chains = set()
     for ir in ingredient_results:
         all_chains.update(ir["by_chain"].keys())
 
     if nearby_chains is not None:
-        # Normaliseeri nearby_chains võtmed
         nearby_keys = set(nearby_chains.keys())
-        # Barbora on Maxima — lisa mõlemad
         if "barbora" in nearby_keys:
             nearby_keys.add("maxima")
         if "maxima" in nearby_keys:
             nearby_keys.add("barbora")
         all_chains = all_chains & nearby_keys
 
-    # Ehita iga poe jaoks kokkuvõte
     store_summaries = []
     for chain in all_chains:
         products = []
@@ -477,7 +465,6 @@ async def get_recipe_compare(
             "not_found": not_found,
         })
 
-    # Sorteeri: asukoha järgi kui lat/lon antud, muidu covered+hind
     if nearby_chains is not None:
         store_summaries.sort(key=lambda x: (
             -(x["covered"]),
@@ -498,7 +485,6 @@ async def get_recipe_compare(
 
 @router.get("/recipes/{meal_id}/basket")
 async def get_recipe_basket(meal_id: str, request: Request):
-    """Legacy endpoint."""
     db = request.app.state.db
     if not db:
         raise HTTPException(status_code=503, detail="DB unavailable")
@@ -545,7 +531,7 @@ async def get_recipe_basket(meal_id: str, request: Request):
 
 @router.get("/recipes/{meal_id}")
 async def get_recipe(meal_id: str):
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=15.0) as client:
         try:
             resp = await client.get(f"{THEMEALDB_BASE}/lookup.php?i={meal_id}")
             data = resp.json()
