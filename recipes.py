@@ -93,6 +93,8 @@ INGREDIENT_TRANSLATIONS = {
 }
 
 MEASURE_TRANSLATIONS = {
+    "as required": "maitse järgi",
+    "as needed": "maitse järgi",
     "tbs": "spl", "tbsp": "spl", "tablespoon": "spl", "tablespoons": "spl",
     "tsp": "tl", "teaspoon": "tl", "teaspoons": "tl",
     "cup": "tass", "cups": "tassi",
