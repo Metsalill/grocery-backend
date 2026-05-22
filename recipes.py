@@ -570,18 +570,23 @@ async def get_recipe_compare(
     if lat is not None and lon is not None:
         nearby_chains = await _get_nearby_chains(db, lat, lon, radius_km)
 
-    ingredient_results = []
-    for ing in ingredients:
+    import asyncio
+
+    async def _resolve_one(ing):
         name_lower = ing["name_en"].lower().strip()
         if name_lower in SKIP_INGREDIENTS:
-            continue
+            return None
         per_store = await find_products_per_store_for_ingredient(db, ing["name_en"])
-        ingredient_results.append({
+        return {
             "ingredient_name": ing["name_et"],
             "ingredient_name_en": ing["name_en"],
             "measure": ing["measure_et"],
             "by_chain": per_store,
-        })
+        }
+
+    tasks = [_resolve_one(ing) for ing in ingredients]
+    results = await asyncio.gather(*tasks)
+    ingredient_results = [r for r in results if r is not None]
 
     all_chains = set()
     for ir in ingredient_results:
@@ -664,21 +669,24 @@ async def get_recipe_basket(meal_id: str, request: Request):
         meal["strMeal"]
     )
 
-    matched = []
-    not_found = []
+    import asyncio
 
-    for ing in ingredients:
+    async def _resolve_basket_ing(ing):
         product = await find_product_for_ingredient(db, ing["name_en"])
         if product:
             product["ingredient_name"] = ing["name_et"]
             product["measure"] = ing["measure_et"]
-            matched.append(product)
-        else:
-            not_found.append({
-                "name_en": ing["name_en"],
-                "name_et": ing["name_et"],
-                "measure": ing["measure_et"],
-            })
+            return ("matched", product)
+        return ("not_found", {
+            "name_en": ing["name_en"],
+            "name_et": ing["name_et"],
+            "measure": ing["measure_et"],
+        })
+
+    tasks = [_resolve_basket_ing(ing) for ing in ingredients]
+    results = await asyncio.gather(*tasks)
+    matched = [r[1] for r in results if r[0] == "matched"]
+    not_found = [r[1] for r in results if r[0] == "not_found"]
 
     return {
         "meal_id": meal_id,
