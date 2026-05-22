@@ -97,21 +97,10 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
-        ),
-        group_chains AS (
-            SELECT
-                COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text) AS dedup_key,
-                ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain) AS chains
-            FROM prices pr
-            JOIN stores s ON s.id = pr.store_id
-            LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
-            WHERE s.chain IS NOT NULL AND s.chain != ''
-              AND pr.collected_at > NOW() - INTERVAL '14 days'
-            GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
         )
         SELECT b.*, gc.chains AS available_chains
         FROM base b
-        LEFT JOIN group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
     """
 
 
@@ -139,21 +128,10 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
-        ),
-        group_chains AS (
-            SELECT
-                COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text) AS dedup_key,
-                ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain) AS chains
-            FROM prices pr
-            JOIN stores s ON s.id = pr.store_id
-            LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
-            WHERE s.chain IS NOT NULL AND s.chain != ''
-              AND pr.collected_at > NOW() - INTERVAL '14 days'
-            GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
         )
         SELECT b.*, gc.chains AS available_chains
         FROM base b
-        LEFT JOIN group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
     """
 
 
