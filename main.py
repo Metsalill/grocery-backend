@@ -106,8 +106,13 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     try:
-        app.state.db = await asyncpg.create_pool(DATABASE_URL, timeout=DB_CONNECT_TIMEOUT)
-        logger.info("✅ DB pool created")
+        app.state.db = await asyncpg.create_pool(
+            DATABASE_URL,
+            timeout=DB_CONNECT_TIMEOUT,
+            min_size=10,
+            max_size=30,
+        )
+        logger.info("✅ DB pool created (min=10, max=30)")
     except Exception as e:
         app.state.db = None
         logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
