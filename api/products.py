@@ -59,7 +59,6 @@ async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optiona
         return None
 
 
-# Source priority: lower = preferred display representative
 SOURCE_PRIORITY_SQL = """
     CASE
         WHEN p.source_url ILIKE '%prisma%'                             THEN 1
@@ -203,7 +202,6 @@ async def list_products(
                 dedup_sql = _build_dedup_sql(where_sql)
                 order_clause = "ORDER BY name"
 
-            count_sql = f"SELECT COUNT(*) FROM ({dedup_sql}) AS deduped"
             params_with_paging = params + [limit, offset]
             data_sql = (
                 f"SELECT * FROM ({dedup_sql}) AS deduped\n"
@@ -211,18 +209,22 @@ async def list_products(
                 f"LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
             )
 
-            total_row = await conn.fetchrow(count_sql, *params)
-            total = total_row[0] if total_row else 0
             rows = await conn.fetch(data_sql, *params_with_paging)
 
         items = [_row_to_safe_product(dict(r)) for r in rows]
 
+        # Total: kui saime täis lehe, on tõenäoliselt rohkem
+        # COUNT päring eemaldatud — liiga aeglane suure andmemahu juures
+        has_more = len(items) == limit
+        estimated_total = offset + len(items) + (1 if has_more else 0)
+
         return {
             "items": items,
-            "total": total,
+            "total": estimated_total,
             "offset": offset,
             "limit": limit,
             "count": len(items),
+            "has_more": has_more,
             "filters": {
                 "q": q or None,
                 "main_code": main_code,
