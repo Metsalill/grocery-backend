@@ -217,14 +217,17 @@ async def translate_instructions_claude(instructions: str, recipe_name: str) -> 
 
     prompt = f"""Tõlgi järgmine retsepti valmistamisjuhend eesti keelde. Retsept: "{recipe_name}".
 
-Juhised tõlkimiseks:
-- Tõlgi loomulikus eesti keeles
-- Säilita lõigud ja struktuur
+Reeglid:
+- Tõlgi loomulikus ja selges eesti keeles
+- Kulinaariterminid jäta originaalis kui pole head vastet (al dente jne)
 - Temperatuurid jäta samaks (180C jne)
-- Mõõdud jäta samaks (g, ml, tbs→spl, tsp→tl)
-- Ära lisa selgitusi, tagasta ainult tõlge
+- Mõõdud: tbs/tbsp→spl, tsp→tl, muud jäta samaks
+- Ära kasuta markdown vormindust (mitte **, mitte #, mitte *)
+- Kasuta formaati "SAMM 1", "SAMM 2" jne sammude jaoks
+- "tongs" → "tangid", "beat eggs" → "klopi munad lahti", "season" → "maitsesta"
+- Ära lisa pealkirja ega selgitusi — tagasta ainult tõlgitud juhend
 
-Tekst tõlkimiseks:
+Tekst:
 {instructions}"""
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -243,7 +246,12 @@ Tekst tõlkimiseks:
         )
         data = resp.json()
         if "content" in data:
-            return data["content"][0]["text"].strip()
+            import re
+            text = data["content"][0]["text"].strip()
+            text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
+            text = re.sub(r'\*([^*]+)\*', r'\1', text)
+            text = re.sub(r'^#+\s+', '', text, flags=re.MULTILINE)
+            return text
         return instructions
 
 
