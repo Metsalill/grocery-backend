@@ -92,6 +92,56 @@ INGREDIENT_TRANSLATIONS = {
     "rosemary": "rosmariin", "basmati rice": "riis",
 }
 
+MEASURE_TRANSLATIONS = {
+    "tbs": "spl", "tbsp": "spl", "tablespoon": "spl", "tablespoons": "spl",
+    "tsp": "tl", "teaspoon": "tl", "teaspoons": "tl",
+    "cup": "tass", "cups": "tassi",
+    "oz": "g", "lb": "g",
+    "g": "g", "kg": "kg", "ml": "ml", "l": "l",
+    "medium": "tk", "large": "tk", "small": "tk",
+    "clove": "küüs", "cloves": "küünt",
+    "slice": "viil", "slices": "viilu",
+    "bunch": "kamp", "handful": "peotäis",
+    "pinch": "näputäis", "to serve": "serveerimiseks",
+    "to taste": "maitse järgi",
+    "juice of": "mahl",
+    "chopped": "hakitud", "diced": "kuubikuteks", "sliced": "viilutatud",
+    "grated": "riivitud", "minced": "hakitud", "crushed": "purustatud",
+    "finely chopped": "peenelt hakitud", "roughly chopped": "jämedalt hakitud",
+    "halved": "pooleks", "quartered": "neljaks",
+}
+
+CATEGORY_TRANSLATIONS = {
+    "Seafood": "Mereannid", "Chicken": "Kana", "Beef": "Veiseliha",
+    "Pasta": "Pasta", "Dessert": "Magustoit", "Vegetarian": "Taimetoit",
+    "Pork": "Sealiha", "Lamb": "Lambaliha", "Breakfast": "Hommikusöök",
+    "Side": "Lisand", "Starter": "Eelroog", "Vegan": "Vegantoit",
+    "Miscellaneous": "Muud", "Goat": "Kitseliha", "Fish": "Kala",
+}
+
+AREA_TRANSLATIONS = {
+    "British": "Briti", "Italian": "Itaalia", "Japanese": "Jaapani",
+    "French": "Prantsuse", "American": "Ameerika", "Chinese": "Hiina",
+    "Mexican": "Mehhiko", "Indian": "India", "Thai": "Tai",
+    "Greek": "Kreeka", "Spanish": "Hispaania", "Russian": "Vene",
+    "Turkish": "Türgi", "Moroccan": "Maroko", "Malaysian": "Malaisia",
+    "Vietnamese": "Vietnami", "Canadian": "Kanada", "Croatian": "Horvaatia",
+    "Dutch": "Hollandi", "Egyptian": "Egiptuse", "Filipino": "Filipiini",
+    "Irish": "Iiri", "Jamaican": "Jamaika", "Kenyan": "Keenia",
+    "Polish": "Poola", "Portuguese": "Portugali", "Tunisian": "Tuneesia",
+    "Unknown": "Tundmatu",
+}
+
+
+def translate_measure(measure: str) -> str:
+    if not measure:
+        return ""
+    result = measure.strip()
+    for en, et in MEASURE_TRANSLATIONS.items():
+        import re
+        result = re.sub(r'\b' + re.escape(en) + r'\b', et, result, flags=re.IGNORECASE)
+    return result
+
 
 def translate_ingredient(name: str) -> str:
     name_lower = name.lower().strip()
@@ -113,8 +163,99 @@ def parse_ingredients(meal: dict) -> list[dict]:
                 "name_en": ingredient.strip(),
                 "name_et": translate_ingredient(ingredient.strip()),
                 "measure": measure.strip() if measure else "",
+                "measure_et": translate_measure(measure.strip() if measure else ""),
             })
     return ingredients
+
+
+async def get_cached_translation(db, meal_id: str) -> Optional[dict]:
+    row = await db.fetchrow(
+        "SELECT instructions_et, category_et, area_et FROM recipe_translations WHERE meal_id = $1",
+        meal_id
+    )
+    if row:
+        return {
+            "instructions_et": row["instructions_et"],
+            "category_et": row["category_et"],
+            "area_et": row["area_et"],
+        }
+    return None
+
+
+async def save_translation_cache(db, meal_id: str, instructions_et: str, category_et: str, area_et: str):
+    await db.execute(
+        """INSERT INTO recipe_translations (meal_id, instructions_et, category_et, area_et)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (meal_id) DO UPDATE
+           SET instructions_et = EXCLUDED.instructions_et,
+               category_et = EXCLUDED.category_et,
+               area_et = EXCLUDED.area_et,
+               created_at = NOW()""",
+        meal_id, instructions_et, category_et, area_et
+    )
+
+
+async def translate_instructions_claude(instructions: str, recipe_name: str) -> str:
+    if not ANTHROPIC_API_KEY:
+        return instructions
+
+    prompt = f"""Tõlgi järgmine retsepti valmistamisjuhend eesti keelde. Retsept: "{recipe_name}".
+
+Juhised tõlkimiseks:
+- Tõlgi loomulikus eesti keeles
+- Säilita lõigud ja struktuur
+- Temperatuurid jäta samaks (180C jne)
+- Mõõdud jäta samaks (g, ml, tbs→spl, tsp→tl)
+- Ära lisa selgitusi, tagasta ainult tõlge
+
+Tekst tõlkimiseks:
+{instructions}"""
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            ANTHROPIC_API_URL,
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 2000,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+        )
+        data = resp.json()
+        if "content" in data:
+            return data["content"][0]["text"].strip()
+        return instructions
+
+
+async def get_or_create_translation(db, meal_id: str, meal: dict, recipe_name: str) -> dict:
+    cached = await get_cached_translation(db, meal_id)
+    if cached:
+        return cached
+
+    instructions = meal.get("strInstructions", "")
+    category = meal.get("strCategory", "")
+    area = meal.get("strArea", "")
+
+    try:
+        instructions_et = await translate_instructions_claude(instructions, recipe_name)
+    except Exception as e:
+        print(f"[recipes] Translation error for {meal_id}: {e}")
+        instructions_et = instructions
+
+    category_et = CATEGORY_TRANSLATIONS.get(category, category)
+    area_et = AREA_TRANSLATIONS.get(area, area)
+
+    await save_translation_cache(db, meal_id, instructions_et, category_et, area_et)
+
+    return {
+        "instructions_et": instructions_et,
+        "category_et": category_et,
+        "area_et": area_et,
+    }
 
 
 async def get_cached_ingredient(db, ingredient_en: str):
@@ -223,23 +364,18 @@ Return ONLY valid JSON for "{ingredient_en}":"""
 
 
 async def resolve_ingredient(db, ingredient_en: str) -> dict:
-    """Cache → Claude API → salvesta cache."""
     name_lower = ingredient_en.lower().strip()
-
     if name_lower in SKIP_INGREDIENTS:
         return {"search_terms": [], "sub_codes": []}
-
     cached = await get_cached_ingredient(db, name_lower)
     if cached:
         return cached
-
     try:
         result = await ask_claude_for_ingredient(ingredient_en)
     except Exception as e:
         print(f"[recipes] Claude API error for '{ingredient_en}': {e}")
         import traceback; traceback.print_exc()
         result = {"search_terms": [name_lower], "sub_codes": []}
-
     await save_ingredient_cache(db, name_lower, result["search_terms"], result["sub_codes"])
     return result
 
@@ -257,8 +393,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
     for term in search_terms:
         if sub_codes:
             rows = await db.fetch("""
-                SELECT
-                    p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
+                SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
                     MIN(pr.price) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
@@ -268,24 +403,16 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                   AND pr.collected_at > NOW() - INTERVAL '14 days'
                   AND p.name NOT ILIKE '%kaitstud%'
                   AND p.name NOT ILIKE '%geograafilise%'
-                  AND p.name NOT ILIKE '%ritolunimetusega%'
                   AND p.name NOT ILIKE '%strooganov%'
                   AND p.name NOT ILIKE '%valmistoit%'
                   AND p.name NOT ILIKE '%praad%'
                   AND p.name NOT ILIKE '%kotlet%'
-                  AND p.name NOT ILIKE '%guljass%'
-                  AND p.name NOT ILIKE '%šašlõkk%'
-                  AND p.name NOT ILIKE '%mesimuraka%'
-                  AND p.name NOT ILIKE '%mesik%'
-                  AND p.name NOT ILIKE '%mesine%'
-                  AND p.name NOT ILIKE '%tarretis%'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%", sub_codes)
         else:
             rows = await db.fetch("""
-                SELECT
-                    p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
+                SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
                     MIN(pr.price) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
@@ -299,17 +426,10 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                   AND pr.collected_at > NOW() - INTERVAL '14 days'
                   AND p.name NOT ILIKE '%kaitstud%'
                   AND p.name NOT ILIKE '%geograafilise%'
-                  AND p.name NOT ILIKE '%ritolunimetusega%'
                   AND p.name NOT ILIKE '%strooganov%'
                   AND p.name NOT ILIKE '%valmistoit%'
                   AND p.name NOT ILIKE '%praad%'
                   AND p.name NOT ILIKE '%kotlet%'
-                  AND p.name NOT ILIKE '%guljass%'
-                  AND p.name NOT ILIKE '%šašlõkk%'
-                  AND p.name NOT ILIKE '%mesimuraka%'
-                  AND p.name NOT ILIKE '%mesik%'
-                  AND p.name NOT ILIKE '%mesine%'
-                  AND p.name NOT ILIKE '%tarretis%'
                 GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
                 ORDER BY p.chain, min_price ASC
             """, f"%{term}%")
@@ -317,7 +437,6 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
         for r in rows:
             chain = (r["chain"] or "").lower()
             price = float(r["min_price"])
-            # FIX: võta odavaim toode per chain, mitte esimene
             if chain not in results_by_chain or price < results_by_chain[chain]["price"]:
                 results_by_chain[chain] = {
                     "product_id": r["id"],
@@ -355,8 +474,7 @@ async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> di
                     pow(sin(radians((s.lon - $2) / 2)), 2)
                 )) AS distance_km
             FROM stores s
-            WHERE s.lat IS NOT NULL
-              AND s.lon IS NOT NULL
+            WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL
               AND COALESCE(s.is_online, false) = false
               AND s.chain IS NOT NULL
         )
@@ -369,8 +487,7 @@ async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> di
 
     return {
         r["chain"]: round(float(r["min_distance_km"]), 2)
-        for r in rows
-        if r["chain"]
+        for r in rows if r["chain"]
     }
 
 
@@ -387,8 +504,8 @@ async def get_recipes():
                     "id": meal["idMeal"],
                     "name": estonian_name,
                     "name_en": meal["strMeal"],
-                    "category": meal["strCategory"],
-                    "area": meal["strArea"],
+                    "category": CATEGORY_TRANSLATIONS.get(meal["strCategory"], meal["strCategory"]),
+                    "area": AREA_TRANSLATIONS.get(meal["strArea"], meal["strArea"]),
                     "image": meal["strMealThumb"],
                     "instructions_preview": meal["strInstructions"][:300] + "...",
                     "youtube": meal.get("strYoutube", ""),
@@ -403,9 +520,9 @@ async def get_recipes():
 async def get_recipe_compare(
     meal_id: str,
     request: Request,
-    lat: Optional[float] = Query(None, description="Kasutaja laiuskraad"),
-    lon: Optional[float] = Query(None, description="Kasutaja pikkuskraad"),
-    radius_km: float = Query(10.0, ge=0.5, le=50.0, description="Raadius km"),
+    lat: Optional[float] = Query(None),
+    lon: Optional[float] = Query(None),
+    radius_km: float = Query(10.0, ge=0.5, le=50.0),
 ):
     db = request.app.state.db
     if not db:
@@ -438,7 +555,7 @@ async def get_recipe_compare(
         ingredient_results.append({
             "ingredient_name": ing["name_et"],
             "ingredient_name_en": ing["name_en"],
-            "measure": ing["measure"],
+            "measure": ing["measure_et"],
             "by_chain": per_store,
         })
 
@@ -530,13 +647,13 @@ async def get_recipe_basket(meal_id: str, request: Request):
         product = await find_product_for_ingredient(db, ing["name_en"])
         if product:
             product["ingredient_name"] = ing["name_et"]
-            product["measure"] = ing["measure"]
+            product["measure"] = ing["measure_et"]
             matched.append(product)
         else:
             not_found.append({
                 "name_en": ing["name_en"],
                 "name_et": ing["name_et"],
-                "measure": ing["measure"],
+                "measure": ing["measure_et"],
             })
 
     return {
@@ -550,7 +667,9 @@ async def get_recipe_basket(meal_id: str, request: Request):
 
 
 @router.get("/recipes/{meal_id}")
-async def get_recipe(meal_id: str):
+async def get_recipe(meal_id: str, request: Request):
+    db = getattr(request.app.state, "db", None)
+
     async with httpx.AsyncClient(timeout=15.0) as client:
         try:
             resp = await client.get(f"{THEMEALDB_BASE}/lookup.php?i={meal_id}")
@@ -560,14 +679,27 @@ async def get_recipe(meal_id: str):
                 (name for mid, name in FEATURED_MEALS if mid == meal_id),
                 meal["strMeal"]
             )
+
+            translation = None
+            if db:
+                try:
+                    translation = await get_or_create_translation(db, meal_id, meal, estonian_name)
+                except Exception as e:
+                    print(f"[recipes] Translation error: {e}")
+
+            instructions_et = translation["instructions_et"] if translation else meal["strInstructions"]
+            category_et = translation["category_et"] if translation else CATEGORY_TRANSLATIONS.get(meal["strCategory"], meal["strCategory"])
+            area_et = translation["area_et"] if translation else AREA_TRANSLATIONS.get(meal["strArea"], meal["strArea"])
+
             return {
                 "id": meal["idMeal"],
                 "name": estonian_name,
                 "name_en": meal["strMeal"],
-                "category": meal["strCategory"],
-                "area": meal["strArea"],
+                "category": category_et,
+                "area": area_et,
                 "image": meal["strMealThumb"],
-                "instructions": meal["strInstructions"],
+                "instructions": instructions_et,
+                "instructions_en": meal["strInstructions"],
                 "youtube": meal.get("strYoutube", ""),
                 "ingredients": parse_ingredients(meal),
             }
