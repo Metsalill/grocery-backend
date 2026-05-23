@@ -14,9 +14,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _finishing = false;
 
   static const List<String> _slideAssets = [
-    'assets/onboarding/onboarding_slide_1.png',
-    'assets/onboarding/onboarding_slide_2.png',
-    'assets/onboarding/onboarding_slide_3.png',
+    'assets/onboarding/onboarding_clean_slide_1.png',
+    'assets/onboarding/onboarding_clean_slide_2.png',
+    'assets/onboarding/onboarding_clean_slide_3.png',
   ];
 
   bool get _isLast => _index == _slideAssets.length - 1;
