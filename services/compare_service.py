@@ -416,7 +416,9 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         async def _resolve_recipe_item(item):
             ing_en = item["ingredient_name_en"]
             ing_et = item["product"]
-            per_chain = await _find_cheapest_per_chain(conn, ing_en)
+            # Kasuta eraldi connection-it paralleelpäringute jaoks
+            async with db.acquire() as recipe_conn:
+                per_chain = await _find_cheapest_per_chain(recipe_conn, ing_en)
             return ing_et, per_chain
 
         if recipe_items:
