@@ -39,6 +39,11 @@ VALID_SUB_CODES = [
     "dry_canned_fruit",
 ]
 
+# Barbora tooted on DB-s chain='barbora', aga stores tabelis chain='Maxima'
+CHAIN_ALIASES: Dict[str, str] = {
+    "barbora": "maxima",
+}
+
 # ---------------- helpers ----------------
 
 def _round2(x: Optional[float]) -> Optional[float]:
@@ -115,7 +120,8 @@ Return ONLY valid JSON:
 
 
 async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
-    """Leiab iga keti odavaima toote retsepti koostisosa jaoks."""
+    """Leiab iga keti odavaima toote retsepti koostisosa jaoks.
+    Tagastab canonical chain key-ga (barbora -> maxima alias)."""
     name_lower = ingredient_en.lower().strip()
     if name_lower in SKIP_INGREDIENTS:
         return {}
@@ -137,7 +143,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
     if not search_terms:
         return {}
 
-    results_by_chain: Dict[str, Dict] = {}
+    raw_by_chain: Dict[str, Dict] = {}
 
     for term in search_terms:
         if sub_codes:
@@ -180,8 +186,8 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
         for r in rows:
             chain = (r["chain"] or "").lower()
             price = float(r["min_price"])
-            if chain not in results_by_chain or price < results_by_chain[chain]["price"]:
-                results_by_chain[chain] = {
+            if chain not in raw_by_chain or price < raw_by_chain[chain]["price"]:
+                raw_by_chain[chain] = {
                     "product_id": r["id"],
                     "name": r["name"],
                     "chain": chain,
@@ -189,7 +195,13 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
                     "price": price,
                 }
 
-    print(f"DEBUG _find_cheapest_per_chain({ingredient_en}): {list(results_by_chain.keys())}")
+    # Alias barbora -> maxima (stores tabelis on chain='Maxima')
+    results_by_chain: Dict[str, Dict] = {}
+    for chain_key, product in raw_by_chain.items():
+        canonical = CHAIN_ALIASES.get(chain_key, chain_key)
+        if canonical not in results_by_chain or product["price"] < results_by_chain[canonical]["price"]:
+            results_by_chain[canonical] = product
+
     return results_by_chain
 
 
@@ -409,8 +421,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "product_id": _as_int_or_none(it.get("product_id")),
                 })
 
-        print(f"DEBUG compare: recipe_items={len(recipe_items)}, normal_items={len(normal_items)}")
-
         # --- Retsepti koostisosad: leia iga keti odavaim per koostisosa ---
         import asyncio
         recipe_by_chain: Dict[str, Dict[str, Dict]] = {}
@@ -426,11 +436,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             tasks = [_resolve_recipe_item(it) for it in recipe_items]
             recipe_results = await asyncio.gather(*tasks)
             for ing_et, per_chain in recipe_results:
-                print(f"DEBUG recipe result: {ing_et} -> chains: {list(per_chain.keys())}")
                 for chain_key, product in per_chain.items():
                     recipe_by_chain.setdefault(chain_key, {})[ing_et] = product
-
-        print(f"DEBUG recipe_by_chain keys: {list(recipe_by_chain.keys())}")
 
         # --- Tavalised tooted ---
         qty_by_pid: Dict[int, float] = {}
@@ -477,8 +484,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
 
         # Candidate stores
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
-        print(f"DEBUG stores found: {len(stores)}, chains: {list({(_rv(s,'chain') or '').lower() for s in stores})}")
-
         if not stores:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
@@ -532,7 +537,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "line_total": _round2(best_price * qty),
                     })
 
-            # Retsepti koostisosad
+            # Retsepti koostisosad — chain on juba canonical (barbora->maxima aliasega)
             chain_recipe = recipe_by_chain.get(chain, {})
             for item in recipe_items:
                 ing_et = item["product"]
@@ -588,8 +593,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
 
         results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
-
-        print(f"DEBUG final results count: {len(results)}")
 
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
