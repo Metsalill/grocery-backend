@@ -545,9 +545,16 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "ingredient": ing_et,
                     })
 
+            # require_all kehtib ainult tavalistele toodetele
+            # retsepti koostisosad on alati valikulised
+            normal_found = sum(1 for pid in qty_by_pid if any(
+                by_store.get(sid, {}).get(mid) is not None
+                for mid in group_members.get(pid, [pid])
+            ))
+
             if lines_found == 0:
                 total_price = None
-            elif require_all and lines_found < required_total:
+            elif require_all and qty_by_pid and normal_found < required_normal:
                 total_price = None
             else:
                 total_price = _round2(total)
