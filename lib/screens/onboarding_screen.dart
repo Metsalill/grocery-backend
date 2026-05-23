@@ -225,7 +225,7 @@ class _IllustrationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 26,
             offset: const Offset(0, 16),
           ),
@@ -319,7 +319,7 @@ class _CartIllustration extends StatelessWidget {
             width: 205,
             height: 185,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.28),
+              color: Colors.white.withValues(alpha: 0.28),
               borderRadius: BorderRadius.circular(34),
             ),
             child: Stack(
@@ -342,7 +342,7 @@ class _CartIllustration extends StatelessWidget {
                   child: Icon(
                     Icons.shopping_cart_rounded,
                     size: 130,
-                    color: Colors.black.withOpacity(0.52),
+                    color: Colors.black.withValues(alpha: 0.52),
                   ),
                 ),
                 Positioned(
@@ -397,7 +397,7 @@ class _CompareIllustration extends StatelessWidget {
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -468,7 +468,7 @@ class _CompareIllustration extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 12,
                   offset: const Offset(0, 7),
                 ),
@@ -540,7 +540,7 @@ class _SavingsIllustration extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFC94B7C).withOpacity(0.24),
+                  color: const Color(0xFFC94B7C).withValues(alpha: 0.24),
                   blurRadius: 18,
                   offset: const Offset(0, 12),
                 ),
@@ -566,7 +566,7 @@ class _SavingsIllustration extends StatelessWidget {
                 Positioned.fill(
                   child: Icon(
                     Icons.shopping_basket_rounded,
-                    color: Colors.white.withOpacity(0.92),
+                    color: Colors.white.withValues(alpha: 0.92),
                     size: 142,
                   ),
                 ),
@@ -587,7 +587,7 @@ class _SavingsIllustration extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -711,7 +711,7 @@ class _BottomPanel extends StatelessWidget {
                 Text(
                   slide.body,
                   style: TextStyle(
-                    color: dark.withOpacity(0.68),
+                    color: dark.withValues(alpha: 0.68),
                     fontSize: 15.5,
                     height: 1.48,
                     fontWeight: FontWeight.w700,
@@ -728,7 +728,7 @@ class _BottomPanel extends StatelessWidget {
               onPressed: finishing ? null : onPrimaryTap,
               style: FilledButton.styleFrom(
                 backgroundColor: isLast ? pink : Colors.black,
-                disabledBackgroundColor: pink.withOpacity(0.45),
+                disabledBackgroundColor: pink.withValues(alpha: 0.45),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -813,7 +813,7 @@ class _PathIndicator extends StatelessWidget {
                     boxShadow: selected
                         ? [
                             BoxShadow(
-                              color: const Color(0xFFC94B7C).withOpacity(0.24),
+                              color: const Color(0xFFC94B7C).withValues(alpha: 0.24),
                               blurRadius: 14,
                               offset: const Offset(0, 7),
                             ),
@@ -878,7 +878,7 @@ class _BrandPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(17),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -940,7 +940,7 @@ class _SkipPill extends StatelessWidget {
           child: Text(
             'Jäta vahele',
             style: TextStyle(
-              color: dark.withOpacity(0.64),
+              color: dark.withValues(alpha: 0.64),
               fontSize: 14,
               fontWeight: FontWeight.w900,
             ),
@@ -1050,7 +1050,7 @@ class _SoftBackground extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  const Color(0xFFC94B7C).withOpacity(0.09),
+                  const Color(0xFFC94B7C).withValues(alpha: 0.09),
                   const Color(0xFFF4F0EA),
                   const Color(0xFFF4F0EA),
                 ],
@@ -1125,7 +1125,7 @@ class _CircleButton extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.24),
+            color: color.withValues(alpha: 0.24),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -1155,7 +1155,7 @@ class _ProductBlob extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.38),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.24),
+            color: color.withValues(alpha: 0.24),
             blurRadius: 12,
             offset: const Offset(0, 7),
           ),
@@ -1174,7 +1174,7 @@ class _Wheel extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.black.withOpacity(0.52), width: 3),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.52), width: 3),
       ),
     );
   }
@@ -1196,7 +1196,7 @@ class _Coin extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 4),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF4B342).withOpacity(0.24),
+            color: const Color(0xFFF4B342).withValues(alpha: 0.24),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -1277,15 +1277,15 @@ class _PathIndicatorPainter extends CustomPainter {
 class _CardPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final palePink = Paint()..color = const Color(0xFFC94B7C).withOpacity(0.08);
-    final paleGreen = Paint()..color = const Color(0xFF78AE57).withOpacity(0.07);
+    final palePink = Paint()..color = const Color(0xFFC94B7C).withValues(alpha: 0.08);
+    final paleGreen = Paint()..color = const Color(0xFF78AE57).withValues(alpha: 0.07);
 
     canvas.drawCircle(Offset(size.width * 0.86, size.height * 0.16), 24, palePink);
     canvas.drawCircle(Offset(size.width * 0.13, size.height * 0.73), 38, paleGreen);
     canvas.drawCircle(Offset(size.width * 0.88, size.height * 0.72), 28, palePink);
 
     final brush = Paint()
-      ..color = const Color(0xFFB59A89).withOpacity(0.13)
+      ..color = const Color(0xFFB59A89).withValues(alpha: 0.13)
       ..strokeWidth = 9
       ..strokeCap = StrokeCap.round;
 
