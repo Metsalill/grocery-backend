@@ -189,6 +189,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
                     "price": price,
                 }
 
+    print(f"DEBUG _find_cheapest_per_chain({ingredient_en}): {list(results_by_chain.keys())}")
     return results_by_chain
 
 
@@ -381,8 +382,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             raw_items = (body.get("grocery_list") or {}).get("items") or []
 
         # Normaliseeri — eralda retsepti koostisosad tavalistest toodetest
-        recipe_items: List[Dict] = []   # ingredient_name_en on olemas
-        normal_items: List[Dict] = []   # tavalised tooted product_id-ga või nimega
+        recipe_items: List[Dict] = []
+        normal_items: List[Dict] = []
 
         for it in raw_items:
             if not isinstance(it, dict):
@@ -408,15 +409,15 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "product_id": _as_int_or_none(it.get("product_id")),
                 })
 
+        print(f"DEBUG compare: recipe_items={len(recipe_items)}, normal_items={len(normal_items)}")
+
         # --- Retsepti koostisosad: leia iga keti odavaim per koostisosa ---
-        # Tulemus: {chain: {ingredient_et: {product_id, name, price}}}
         import asyncio
         recipe_by_chain: Dict[str, Dict[str, Dict]] = {}
 
         async def _resolve_recipe_item(item):
             ing_en = item["ingredient_name_en"]
             ing_et = item["product"]
-            # Kasuta eraldi connection-it paralleelpäringute jaoks
             async with db.acquire() as recipe_conn:
                 per_chain = await _find_cheapest_per_chain(recipe_conn, ing_en)
             return ing_et, per_chain
@@ -425,10 +426,13 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             tasks = [_resolve_recipe_item(it) for it in recipe_items]
             recipe_results = await asyncio.gather(*tasks)
             for ing_et, per_chain in recipe_results:
-                for chain, product in per_chain.items():
-                    recipe_by_chain.setdefault(chain, {})[ing_et] = product
+                print(f"DEBUG recipe result: {ing_et} -> chains: {list(per_chain.keys())}")
+                for chain_key, product in per_chain.items():
+                    recipe_by_chain.setdefault(chain_key, {})[ing_et] = product
 
-        # --- Tavalised tooted: product_id või nimi ---
+        print(f"DEBUG recipe_by_chain keys: {list(recipe_by_chain.keys())}")
+
+        # --- Tavalised tooted ---
         qty_by_pid: Dict[int, float] = {}
         qty_by_name: Dict[str, float] = {}
 
@@ -448,7 +452,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             pid = int(_rv(rec, "id"))
             qty_by_pid[pid] = qty_by_pid.get(pid, 0.0) + qty_by_name.get(nm, 0.0)
 
-        # Metadata + group expansion for normal products
         metadata: Dict[int, asyncpg.Record] = {}
         group_members: Dict[int, List[int]] = {}
         all_pids_for_prices: List[int] = []
@@ -469,12 +472,13 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             if extra_pids:
                 metadata.update(await _fetch_products_by_id(conn, extra_pids))
 
-        # Kui pole ühtegi toodet
         if not qty_by_pid and not recipe_items:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
 
         # Candidate stores
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
+        print(f"DEBUG stores found: {len(stores)}, chains: {list({(_rv(s,'chain') or '').lower() for s in stores})}")
+
         if not stores:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
@@ -547,8 +551,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "ingredient": ing_et,
                     })
 
-            # require_all kehtib ainult tavalistele toodetele
-            # retsepti koostisosad on alati valikulised
             normal_found = sum(1 for pid in qty_by_pid if any(
                 by_store.get(sid, {}).get(mid) is not None
                 for mid in group_members.get(pid, [pid])
@@ -586,6 +588,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
 
         results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
+
+        print(f"DEBUG final results count: {len(results)}")
 
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
