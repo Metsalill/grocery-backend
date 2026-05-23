@@ -2,13 +2,11 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, confloat, conint
 from typing import List, Tuple, Dict, Any
-
 from utils.throttle import throttle
 from services.compare_service import compare_basket_service
 
-router = APIRouter(prefix="")  # route stays /compare
+router = APIRouter(prefix="")
 
-# ---- server-side caps ----
 MAX_ITEMS = 50
 MIN_RADIUS = 0.1
 MAX_RADIUS = 50.0
@@ -17,8 +15,9 @@ MAX_STORES = 50
 
 class GroceryItem(BaseModel):
     product: str
-    quantity: confloat(ge=0.1) = 1.0  # float kg-toodete jaoks (0.5 = 500g)
+    quantity: confloat(ge=0.1) = 1.0
     product_id: int | None = None
+    ingredient_name_en: str | None = None  # retsepti koostisosa inglise keeles
 
 
 class GroceryList(BaseModel):
@@ -50,11 +49,15 @@ def _normalize_items(gl: GroceryList) -> List[Dict[str, Any]]:
         name = (it.product or "").strip()
         if not name:
             continue
-        out.append({
+        item: Dict[str, Any] = {
             "product": name,
             "quantity": float(it.quantity),
             "product_id": it.product_id,
-        })
+        }
+        # Retsepti koostisosa — edasta backendile et Claude API saaks otsida
+        if it.ingredient_name_en:
+            item["ingredient_name_en"] = it.ingredient_name_en
+        out.append(item)
     return out
 
 
@@ -111,7 +114,6 @@ async def compare_basket(body: CompareRequest, request: Request):
         }
 
         payload_out = await compare_basket_service(pool, payload_in)
-
         return {
             "results": payload_out.get("results", []),
             "totals": payload_out.get("totals", {}),
@@ -119,7 +121,6 @@ async def compare_basket(body: CompareRequest, request: Request):
             "radius_km": payload_out.get("radius_km", radius_km),
             "missing_products": payload_out.get("missing_products", []),
         }
-
     except HTTPException:
         raise
     except Exception as e:
