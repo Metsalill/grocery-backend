@@ -1,15 +1,45 @@
 # services/compare_service.py
 from __future__ import annotations
 
+import os
+import json
+import httpx
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Dict, List, Optional, Tuple, Iterable
 
 import asyncpg
 from asyncpg import exceptions as pgerr
 
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+
+SKIP_INGREDIENTS = {
+    "water", "salt", "black pepper", "pepper", "white pepper",
+    "mixed herbs", "seasoning", "oil spray", "to taste",
+}
+
+VALID_SUB_CODES = [
+    "dry_pasta_rice", "dairy_eggs", "dairy_milk", "dairy_butter_margarine",
+    "dairy_cream_sourcream", "dairy_yogurt_kefir", "cheese_regular",
+    "cheese_delicatessen", "dairy_cheese_slices", "meat_poultry", "meat_beef_lamb_game",
+    "meat_minced", "meat_pork", "meat_hams", "meat_sausages",
+    "fish_fresh", "fish_salted_smoked", "fish_other", "fish_processed",
+    "produce_root_veg", "produce_mushrooms", "produce_tropical",
+    "produce_herbs_salads_sprouts", "produce_smoothies_fresh_juices",
+    "dry_flour_sugar_baking", "dry_canned_veg", "dry_other", "dry_ready_meals_jars",
+    "frozen_bakery", "frozen_veg", "frozen_berries_fruit", "frozen_ready_meals",
+    "frozen_meat", "frozen_other", "frozen_desserts_icecream",
+    "oils_olive", "oils_other", "oils_vinegar",
+    "sauces_ketchup_mayo", "sauces_pasta_cooking", "sauces_soy_worcester",
+    "sauces_other", "sauces_marinades",
+    "spices_herbs_spice_mix", "spices_broth_stock",
+    "drinks_wine", "drinks_beer_cider", "drinks_soft_soda",
+    "sweets_chocolate_bars", "sweets_nuts_driedfruit",
+    "bakery_other", "bakery_bread_loaves",
+    "dry_canned_fruit",
+]
 
 # ---------------- helpers ----------------
-
 
 def _round2(x: Optional[float]) -> Optional[float]:
     if x is None:
@@ -37,8 +67,132 @@ async def _acquire(conn_or_pool: Any) -> Tuple[asyncpg.Connection, bool]:
     raise TypeError("Expected asyncpg Connection or Pool")
 
 
-# ---------------- product resolution ----------------
+# ---------------- recipe ingredient resolution ----------------
 
+async def _get_cached_ingredient(conn, ingredient_en: str):
+    row = await conn.fetchrow(
+        "SELECT search_terms, sub_codes FROM recipe_ingredient_cache WHERE ingredient_en = $1",
+        ingredient_en.lower().strip()
+    )
+    if row:
+        return {"search_terms": list(row["search_terms"]), "sub_codes": list(row["sub_codes"])}
+    return None
+
+
+async def _ask_claude_for_ingredient(ingredient_en: str) -> dict:
+    if not ANTHROPIC_API_KEY:
+        return {"search_terms": [ingredient_en.lower()], "sub_codes": []}
+
+    prompt = f"""You help match recipe ingredients to Estonian grocery store product names.
+
+Ingredient: "{ingredient_en}"
+
+CRITICAL: search_terms MUST be Estonian words used in store databases. sub_codes MUST come from the list.
+
+Valid sub_codes: {json.dumps(VALID_SUB_CODES)}
+
+Return ONLY valid JSON:
+{{"search_terms": ["estonian_word"], "sub_codes": ["sub_code"]}}"""
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.post(
+            ANTHROPIC_API_URL,
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 200,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+        )
+        data = resp.json()
+        text = data["content"][0]["text"].strip()
+        text = text.replace("```json", "").replace("```", "").strip()
+        return json.loads(text)
+
+
+async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
+    """Leiab iga keti odavaima toote retsepti koostisosa jaoks."""
+    name_lower = ingredient_en.lower().strip()
+    if name_lower in SKIP_INGREDIENTS:
+        return {}
+
+    cached = await _get_cached_ingredient(conn, name_lower)
+    if not cached:
+        try:
+            cached = await _ask_claude_for_ingredient(ingredient_en)
+            await conn.execute(
+                """INSERT INTO recipe_ingredient_cache (ingredient_en, search_terms, sub_codes)
+                   VALUES ($1, $2, $3) ON CONFLICT (ingredient_en) DO NOTHING""",
+                name_lower, cached["search_terms"], cached["sub_codes"]
+            )
+        except Exception:
+            return {}
+
+    search_terms = cached.get("search_terms", [])
+    sub_codes = cached.get("sub_codes", [])
+    if not search_terms:
+        return {}
+
+    results_by_chain: Dict[str, Dict] = {}
+
+    for term in search_terms:
+        if sub_codes:
+            rows = await conn.fetch("""
+                SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
+                    MIN(pr.price) as min_price
+                FROM products p
+                JOIN prices pr ON pr.product_id = p.id
+                WHERE p.name ILIKE $1
+                  AND p.sub_code = ANY($2::text[])
+                  AND pr.price > 0
+                  AND pr.collected_at > NOW() - INTERVAL '14 days'
+                  AND p.name NOT ILIKE '%kaitstud%'
+                  AND p.name NOT ILIKE '%strooganov%'
+                  AND p.name NOT ILIKE '%valmistoit%'
+                GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
+                ORDER BY p.chain, min_price ASC
+            """, f"%{term}%", sub_codes)
+        else:
+            rows = await conn.fetch("""
+                SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
+                    MIN(pr.price) as min_price
+                FROM products p
+                JOIN prices pr ON pr.product_id = p.id
+                WHERE p.name ILIKE $1
+                  AND p.sub_code NOT IN (
+                    'hh_other','hh_cleaners','hh_laundry','hh_dishwashing',
+                    'pcare_oral_care','pcare_other','pcare_feminine_hygiene',
+                    'baby_diapers','pet_cat_wet','pet_dog_wet','pet_cat_dry','pet_dog_dry'
+                  )
+                  AND pr.price > 0
+                  AND pr.collected_at > NOW() - INTERVAL '14 days'
+                  AND p.name NOT ILIKE '%kaitstud%'
+                  AND p.name NOT ILIKE '%strooganov%'
+                  AND p.name NOT ILIKE '%valmistoit%'
+                GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
+                ORDER BY p.chain, min_price ASC
+            """, f"%{term}%")
+
+        for r in rows:
+            chain = (r["chain"] or "").lower()
+            price = float(r["min_price"])
+            if chain not in results_by_chain or price < results_by_chain[chain]["price"]:
+                results_by_chain[chain] = {
+                    "product_id": r["id"],
+                    "name": r["name"],
+                    "chain": chain,
+                    "image_url": r["image_url"] or "",
+                    "price": price,
+                }
+
+    return results_by_chain
+
+
+# ---------------- product resolution ----------------
 
 async def _resolve_products_by_name(
     conn: asyncpg.Connection,
@@ -76,25 +230,6 @@ async def _resolve_products_by_name(
         rows = await conn.fetch(sql_products_only, keys)
 
     by_norm: Dict[str, asyncpg.Record] = {_rv(r, "match_key"): r for r in rows}
-
-    unresolved = [k for k in keys if k not in by_norm]
-    ean_candidates = [k for k in unresolved if k.isdigit() and 8 <= len(k) <= 14]
-    if ean_candidates:
-        ean_rows = await conn.fetch(
-            """
-            WITH keys AS (SELECT unnest($1::text[]) AS ean_norm)
-            SELECT DISTINCT ON (keys.ean_norm)
-              keys.ean_norm AS match_key,
-              p.id, p.ean, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
-            FROM products p
-            JOIN keys ON regexp_replace(p.ean,'\\D','','g') = keys.ean_norm
-            ORDER BY keys.ean_norm, p.id
-            """,
-            ean_candidates,
-        )
-        for r in ean_rows:
-            by_norm[_rv(r, "match_key")] = r
-
     return by_norm
 
 
@@ -115,23 +250,18 @@ async def _fetch_products_by_id(
 
 # ---------------- product group expansion ----------------
 
-
 async def _expand_groups(
     conn: asyncpg.Connection,
     basket_pids: List[int],
 ) -> Dict[int, List[int]]:
     if not basket_pids:
         return {}
-
     try:
         rows = await conn.fetch(
             """
-            SELECT
-                pgm_basket.product_id  AS basket_pid,
-                pgm_all.product_id     AS member_pid
+            SELECT pgm_basket.product_id AS basket_pid, pgm_all.product_id AS member_pid
             FROM product_group_members pgm_basket
-            JOIN product_group_members pgm_all
-              ON pgm_all.group_id = pgm_basket.group_id
+            JOIN product_group_members pgm_all ON pgm_all.group_id = pgm_basket.group_id
             WHERE pgm_basket.product_id = ANY($1::int[])
             """,
             basket_pids,
@@ -141,75 +271,54 @@ async def _expand_groups(
 
     result: Dict[int, List[int]] = {}
     for r in rows:
-        basket_pid = int(r["basket_pid"])
-        member_pid = int(r["member_pid"])
-        result.setdefault(basket_pid, []).append(member_pid)
-
+        result.setdefault(int(r["basket_pid"]), []).append(int(r["member_pid"]))
     return result
 
 
 # ---------------- stores ----------------
 
-
 async def _candidate_stores(
-    conn: asyncpg.Connection,
-    lat: Optional[float],
-    lon: Optional[float],
-    radius_km: float,
-    limit: int,
-    offset: int,
+    conn, lat, lon, radius_km, limit, offset
 ) -> List[asyncpg.Record]:
-    physical_filter = """
-      AND COALESCE(s.is_online, false) = false
-    """
+    physical_filter = "AND COALESCE(s.is_online, false) = false"
 
-    async def _no_coords(f: str) -> List[asyncpg.Record]:
+    if lat is None or lon is None:
         return await conn.fetch(
             f"SELECT id, name, chain, lat, lon, NULL::double precision AS distance_km "
-            f"FROM stores s WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL {f} "
+            f"FROM stores s WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL {physical_filter} "
             f"ORDER BY id OFFSET $1 LIMIT $2",
             int(offset), int(limit),
         )
 
-    async def _haversine(f: str) -> List[asyncpg.Record]:
-        return await conn.fetch(
-            f"""
-            WITH params(lat,lon,radius_km) AS (VALUES ($1::float8,$2::float8,$3::float8)),
-            with_dist AS (
-              SELECT s.id, s.name, s.chain, s.lat, s.lon,
-                2*6371*asin(sqrt(
-                  pow(sin(radians((s.lat-(SELECT lat FROM params))/2)),2)+
-                  cos(radians((SELECT lat FROM params)))*cos(radians(s.lat))*
-                  pow(sin(radians((s.lon-(SELECT lon FROM params))/2)),2)
-                )) AS distance_km
-              FROM stores s
-              WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL {f}
-            )
-            SELECT * FROM with_dist
-            WHERE distance_km <= (SELECT radius_km FROM params)
-            ORDER BY distance_km, chain, name
-            OFFSET $4 LIMIT $5
-            """,
-            float(lat), float(lon), float(radius_km), int(offset), int(limit),
+    return await conn.fetch(
+        f"""
+        WITH params(lat,lon,radius_km) AS (VALUES ($1::float8,$2::float8,$3::float8)),
+        with_dist AS (
+          SELECT s.id, s.name, s.chain, s.lat, s.lon,
+            2*6371*asin(sqrt(
+              pow(sin(radians((s.lat-(SELECT lat FROM params))/2)),2)+
+              cos(radians((SELECT lat FROM params)))*cos(radians(s.lat))*
+              pow(sin(radians((s.lon-(SELECT lon FROM params))/2)),2)
+            )) AS distance_km
+          FROM stores s
+          WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL {physical_filter}
         )
-
-    if lat is None or lon is None:
-        return await _no_coords(physical_filter)
-    return await _haversine(physical_filter)
+        SELECT * FROM with_dist
+        WHERE distance_km <= (SELECT radius_km FROM params)
+        ORDER BY distance_km, chain, name
+        OFFSET $4 LIMIT $5
+        """,
+        float(lat), float(lon), float(radius_km), int(offset), int(limit),
+    )
 
 
 # ---------------- prices ----------------
 
-
-async def _latest_prices(
-    conn: asyncpg.Connection,
-    product_ids: List[int],
-    store_ids: List[int],
-) -> List[asyncpg.Record]:
+async def _latest_prices(conn, product_ids, store_ids):
     if not product_ids or not store_ids:
         return []
 
-    sql_distinct_on = """
+    sql = """
     WITH effective_source AS (
       SELECT s.id AS physical_store_id,
              COALESCE(sps.source_store_id, s.id) AS source_store_id
@@ -229,52 +338,36 @@ async def _latest_prices(
         AND p.store_id IN (SELECT source_store_id FROM effective_source)
       ORDER BY p.product_id, p.store_id, p.collected_at DESC
     )
-    SELECT l.product_id,
-           es.physical_store_id AS store_id,
-           l.price,
-           l.collected_at
+    SELECT l.product_id, es.physical_store_id AS store_id, l.price, l.collected_at
     FROM latest l
     JOIN effective_source es ON es.source_store_id = l.store_id;
     """
-
-    sql_no_host_map = """
-    SELECT DISTINCT ON (p.product_id, p.store_id)
-           p.product_id, p.store_id, p.price, p.collected_at
-    FROM prices p
-    WHERE p.product_id = ANY($1::int[])
-      AND p.store_id = ANY($2::int[])
-    ORDER BY p.product_id, p.store_id, p.collected_at DESC;
-    """
-
     try:
-        return await conn.fetch(sql_distinct_on, product_ids, store_ids)
-    except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-        return await conn.fetch(sql_no_host_map, product_ids, store_ids)
-
-
-# ---------------- helpers ----------------
-
-
-def _as_int_or_none(v: Any) -> Optional[int]:
-    if v is None:
-        return None
-    if isinstance(v, int):
-        return v
-    if isinstance(v, float):
-        return int(v)
-    try:
-        return int(str(v))
+        return await conn.fetch(sql, product_ids, store_ids)
     except Exception:
-        return None
+        return await conn.fetch(
+            """SELECT DISTINCT ON (p.product_id, p.store_id)
+               p.product_id, p.store_id, p.price, p.collected_at
+               FROM prices p
+               WHERE p.product_id = ANY($1::int[]) AND p.store_id = ANY($2::int[])
+               ORDER BY p.product_id, p.store_id, p.collected_at DESC""",
+            product_ids, store_ids
+        )
+
+
+def _as_int_or_none(v):
+    if v is None: return None
+    if isinstance(v, int): return v
+    if isinstance(v, float): return int(v)
+    try: return int(str(v))
+    except: return None
 
 
 # ---------------- main service ----------------
 
-
 async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any]:
     conn, should_release = await _acquire(db)
     try:
-        # 1. Extract fields
         lat = body.get("lat")
         lon = body.get("lon")
         radius_km = float(body.get("radius_km") or 5.0)
@@ -283,45 +376,61 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         include_lines = bool(body.get("include_lines") or False)
         require_all = bool(body.get("require_all_items") or False)
 
-        raw_items = body.get("items")
-        if raw_items is None and "grocery_list" in body:
-            raw_items = (body.get("grocery_list") or {}).get("items")
-        raw_items = raw_items or []
+        raw_items = body.get("items") or []
+        if not raw_items and "grocery_list" in body:
+            raw_items = (body.get("grocery_list") or {}).get("items") or []
 
-        # 2. Normalize — quantity on float (kg-toodete jaoks 0.5 = 500g)
-        normalized_items: List[Dict[str, Any]] = []
+        # Normaliseeri — eralda retsepti koostisosad tavalistest toodetest
+        recipe_items: List[Dict] = []   # ingredient_name_en on olemas
+        normal_items: List[Dict] = []   # tavalised tooted product_id-ga või nimega
+
         for it in raw_items:
-            if isinstance(it, dict):
-                name = str(it.get("product", "") or "").strip()
-                if not name:
-                    continue
-                qty = float(it.get("quantity") or 1)
-                if qty <= 0:
-                    continue
-                normalized_items.append({
+            if not isinstance(it, dict):
+                continue
+            name = str(it.get("product", "") or "").strip()
+            if not name:
+                continue
+            qty = float(it.get("quantity") or 1)
+            if qty <= 0:
+                continue
+
+            ingredient_en = str(it.get("ingredient_name_en", "") or "").strip()
+            if ingredient_en:
+                recipe_items.append({
+                    "product": name,
+                    "ingredient_name_en": ingredient_en,
+                    "quantity": qty,
+                })
+            else:
+                normal_items.append({
                     "product": name,
                     "quantity": qty,
                     "product_id": _as_int_or_none(it.get("product_id")),
                 })
-            elif isinstance(it, (list, tuple)) and len(it) >= 1:
-                name = str(it[0] or "").strip()
-                if not name:
-                    continue
-                try:
-                    qty = float(it[1]) if len(it) > 1 else 1.0
-                except Exception:
-                    qty = 1.0
-                if qty <= 0:
-                    continue
-                normalized_items.append({"product": name, "quantity": qty, "product_id": None})
 
-        if not normalized_items:
-            return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": []}
+        # --- Retsepti koostisosad: leia iga keti odavaim per koostisosa ---
+        # Tulemus: {chain: {ingredient_et: {product_id, name, price}}}
+        import asyncio
+        recipe_by_chain: Dict[str, Dict[str, Dict]] = {}
 
-        # 3. Aggregate by pid or name
+        async def _resolve_recipe_item(item):
+            ing_en = item["ingredient_name_en"]
+            ing_et = item["product"]
+            per_chain = await _find_cheapest_per_chain(conn, ing_en)
+            return ing_et, per_chain
+
+        if recipe_items:
+            tasks = [_resolve_recipe_item(it) for it in recipe_items]
+            recipe_results = await asyncio.gather(*tasks)
+            for ing_et, per_chain in recipe_results:
+                for chain, product in per_chain.items():
+                    recipe_by_chain.setdefault(chain, {})[ing_et] = product
+
+        # --- Tavalised tooted: product_id või nimi ---
         qty_by_pid: Dict[int, float] = {}
         qty_by_name: Dict[str, float] = {}
-        for it in normalized_items:
+
+        for it in normal_items:
             pid = _as_int_or_none(it.get("product_id"))
             qty = max(float(it.get("quantity") or 1), 0.1)
             if pid is not None:
@@ -331,112 +440,125 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if nm:
                     qty_by_name[nm] = qty_by_name.get(nm, 0.0) + qty
 
-        # 4. Resolve names
         resolved_by_name = await _resolve_products_by_name(conn, list(qty_by_name.keys()))
         missing_products = [{"input": k} for k in qty_by_name if k not in resolved_by_name]
         for nm, rec in resolved_by_name.items():
             pid = int(_rv(rec, "id"))
-            qty = qty_by_name.get(nm, 0.0)
-            if qty > 0:
-                qty_by_pid[pid] = qty_by_pid.get(pid, 0.0) + qty
+            qty_by_pid[pid] = qty_by_pid.get(pid, 0.0) + qty_by_name.get(nm, 0.0)
 
-        if not qty_by_pid:
+        # Metadata + group expansion for normal products
+        metadata: Dict[int, asyncpg.Record] = {}
+        group_members: Dict[int, List[int]] = {}
+        all_pids_for_prices: List[int] = []
+
+        if qty_by_pid:
+            basket_pids = sorted(qty_by_pid.keys())
+            metadata = await _fetch_products_by_id(conn, basket_pids)
+            for nm, rec in resolved_by_name.items():
+                pid = int(_rv(rec, "id"))
+                if pid not in metadata:
+                    metadata[pid] = rec
+            group_members = await _expand_groups(conn, basket_pids)
+            all_pids_for_prices = sorted({
+                mid for pid in basket_pids
+                for mid in group_members.get(pid, [pid])
+            })
+            extra_pids = [p for p in all_pids_for_prices if p not in metadata]
+            if extra_pids:
+                metadata.update(await _fetch_products_by_id(conn, extra_pids))
+
+        # Kui pole ühtegi toodet
+        if not qty_by_pid and not recipe_items:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
 
-        # 5. Product metadata
-        basket_pids = sorted(qty_by_pid.keys())
-        metadata = await _fetch_products_by_id(conn, basket_pids)
-        for nm, rec in resolved_by_name.items():
-            pid = int(_rv(rec, "id"))
-            if pid not in metadata:
-                metadata[pid] = rec
-
-        # 6. Expand product groups
-        group_members: Dict[int, List[int]] = await _expand_groups(conn, basket_pids)
-
-        all_pids_for_prices: List[int] = sorted({
-            mid
-            for pid in basket_pids
-            for mid in group_members.get(pid, [pid])
-        })
-
-        extra_pids = [p for p in all_pids_for_prices if p not in metadata]
-        if extra_pids:
-            extra_meta = await _fetch_products_by_id(conn, extra_pids)
-            metadata.update(extra_meta)
-
-        # 7. Candidate stores
+        # Candidate stores
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
         if not stores:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
 
-        # 8. Latest prices for ALL pids (basket + group members)
-        price_rows = await _latest_prices(conn, all_pids_for_prices, store_ids)
+        # Hinnad tavalistele toodetele
         by_store: Dict[int, Dict[int, float]] = {}
-        for r in price_rows:
-            sid = int(_rv(r, "store_id"))
-            pid = int(_rv(r, "product_id"))
-            by_store.setdefault(sid, {})[pid] = float(_rv(r, "price"))
+        if all_pids_for_prices:
+            price_rows = await _latest_prices(conn, all_pids_for_prices, store_ids)
+            for r in price_rows:
+                sid = int(_rv(r, "store_id"))
+                pid = int(_rv(r, "product_id"))
+                by_store.setdefault(sid, {})[pid] = float(_rv(r, "price"))
 
-        # 9. Per-store results
-        required = len(basket_pids)
-        results: List[Dict[str, Any]] = []
+        required_normal = len(qty_by_pid)
+        required_recipe = len(recipe_items)
+        required_total = required_normal + required_recipe
+
+        results: List[Dict] = []
         best_total: Optional[float] = None
         best_store_id: Optional[int] = None
 
         for s in stores:
             sid = int(_rv(s, "id"))
+            chain = (_rv(s, "chain") or "").lower()
             s_prices = by_store.get(sid, {})
             lines = []
             total = 0.0
             lines_found = 0
 
+            # Tavalised tooted
             for pid, qty in qty_by_pid.items():
                 members = group_members.get(pid, [pid])
-
-                best_member_pid: Optional[int] = None
-                best_member_price: Optional[float] = None
+                best_pid = None
+                best_price = None
                 for mid in members:
                     p = s_prices.get(mid)
-                    if p is not None and (best_member_price is None or p < best_member_price):
-                        best_member_price = p
-                        best_member_pid = mid
-
-                if best_member_price is None:
+                    if p is not None and (best_price is None or p < best_price):
+                        best_price = p
+                        best_pid = mid
+                if best_price is None:
                     continue
-
-                line_total = best_member_price * qty
                 lines_found += 1
-                total += line_total
-
+                total += best_price * qty
                 if include_lines:
-                    meta = metadata.get(best_member_pid) if best_member_pid else metadata.get(pid)
+                    meta = metadata.get(best_pid) if best_pid else metadata.get(pid)
                     lines.append({
-                        "product_id": best_member_pid,
-                        "basket_product_id": pid,
-                        "ean": _rv(meta, "ean") if meta else None,
-                        "product_name": _rv(meta, "name") if meta else f"#{best_member_pid}",
+                        "product_id": best_pid,
+                        "product_name": _rv(meta, "name") if meta else f"#{best_pid}",
                         "qty": qty,
-                        "unit_price": _round2(best_member_price),
-                        "line_total": _round2(line_total),
-                        "matched_via_group": best_member_pid != pid,
+                        "unit_price": _round2(best_price),
+                        "line_total": _round2(best_price * qty),
+                    })
+
+            # Retsepti koostisosad
+            chain_recipe = recipe_by_chain.get(chain, {})
+            for item in recipe_items:
+                ing_et = item["product"]
+                product = chain_recipe.get(ing_et)
+                if product is None:
+                    continue
+                lines_found += 1
+                total += product["price"] * item["quantity"]
+                if include_lines:
+                    lines.append({
+                        "product_id": product["product_id"],
+                        "product_name": product["name"],
+                        "qty": item["quantity"],
+                        "unit_price": _round2(product["price"]),
+                        "line_total": _round2(product["price"] * item["quantity"]),
+                        "ingredient": ing_et,
                     })
 
             if lines_found == 0:
                 total_price = None
-            elif require_all and lines_found < required:
+            elif require_all and lines_found < required_total:
                 total_price = None
             else:
                 total_price = _round2(total)
 
-            result: Dict[str, Any] = {
+            result = {
                 "store_id": sid,
                 "chain": _rv(s, "chain"),
                 "store_name": _rv(s, "name"),
                 "distance_km": _round2(float(_rv(s, "distance_km"))) if _rv(s, "distance_km") is not None else None,
                 "lines_found": lines_found,
-                "required_lines": required,
+                "required_lines": required_total,
                 "total_price": total_price,
             }
             if include_lines:
@@ -447,8 +569,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 best_total = total_price
                 best_store_id = sid
 
-        # 10. Sort
-        def sort_key(x: Dict[str, Any]) -> Tuple[int, int, float, float]:
+        def sort_key(x):
             complete = 1 if (x.get("total_price") is not None and x.get("lines_found") == x.get("required_lines")) else 0
             price = x.get("total_price") if x.get("total_price") is not None else float("inf")
             dist = x.get("distance_km") if x.get("distance_km") is not None else float("inf")
@@ -457,7 +578,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
 
-        # 11. Totals
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
             win = next((r for r in results if r["store_id"] == best_store_id), None)
