@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -17,66 +16,61 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const Color _beige = Color(0xFFF4F0EA);
   static const Color _dark = Color(0xFF1A1A1A);
 
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
+  final PageController _controller = PageController();
   double _page = 0;
-  bool _isFinishing = false;
+  int _index = 0;
+  bool _finishing = false;
 
-  late final List<_OnboardingSlideData> _slides = const [
-    _OnboardingSlideData(
+  static const List<_SlideData> _slides = [
+    _SlideData(
       title: 'Lisa tooted korvi',
       body: 'Sirvi tooteid või otsi retsepte. Lisa kõik mida vajad ühte korvi.',
-      animationUrl:
-          'https://assets-v2.lottiefiles.com/a/c63598e0-1cc8-11ef-b651-87d0cbf880cf/PHbHpmSsg4.lottie',
-      fallbackIcon: Icons.add_shopping_cart_rounded,
+      tag: 'Päris',
+      lottieUrl: 'https://assets3.lottiefiles.com/packages/lf20_UJNc2t.json',
+      icon: Icons.add_rounded,
       accent: _pink,
-      softAccent: Color(0xFFF7D6E4),
-      tag: 'Korv',
+      type: _IllustrationType.cart,
     ),
-    _OnboardingSlideData(
+    _SlideData(
       title: 'Võrdleme kõigi poodidega',
       body:
           'Seivy kontrollib automaatselt Rimi, Selveri, Prisma, Coopi ja Maxima hinnad sinu ümbruses.',
-      animationUrl:
-          'https://assets-v2.lottiefiles.com/a/88860ad6-e54e-11ee-a8e1-c707cdb69e95/lGzhoxAQWj.lottie',
-      fallbackIcon: Icons.compare_arrows_rounded,
-      accent: Color(0xFF2F8AB2),
-      softAccent: Color(0xFFD7EDF6),
       tag: 'Võrdlus',
+      lottieUrl: 'https://assets4.lottiefiles.com/packages/lf20_gb5bmwlm.json',
+      icon: Icons.search_rounded,
+      accent: _pink,
+      type: _IllustrationType.compare,
     ),
-    _OnboardingSlideData(
+    _SlideData(
       title: 'Leia odavaim ostukorv',
       body:
           'Näed koheselt kust tuleb kogu korv kõige soodsamalt - mitte ühe toote hind, vaid kogusumma.',
-      animationUrl:
-          'https://assets-v2.lottiefiles.com/a/61973c1e-116a-11ee-bc94-37a228360b3b/CejsK8x000.lottie',
-      fallbackIcon: Icons.savings_rounded,
-      accent: Color(0xFF4FA34D),
-      softAccent: Color(0xFFDFF2DA),
       tag: 'Sääst',
+      lottieUrl: 'https://assets3.lottiefiles.com/packages/lf20_RItkEz.json',
+      icon: Icons.euro_rounded,
+      accent: _pink,
+      type: _IllustrationType.savings,
     ),
   ];
 
-  bool get _isLastSlide => _currentIndex == _slides.length - 1;
+  bool get _isLast => _index == _slides.length - 1;
 
   @override
   void initState() {
     super.initState();
-    _pageController.addListener(_handlePageScroll);
+    _controller.addListener(_onScroll);
   }
 
-  void _handlePageScroll() {
-    final nextPage = _pageController.page ?? _currentIndex.toDouble();
+  void _onScroll() {
+    final nextPage = _controller.page ?? _index.toDouble();
     if (nextPage == _page) return;
-
     setState(() => _page = nextPage);
   }
 
-  Future<void> _finishOnboarding() async {
-    if (_isFinishing) return;
+  Future<void> _finish() async {
+    if (_finishing) return;
 
-    setState(() => _isFinishing = true);
-
+    setState(() => _finishing = true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_done', true);
 
@@ -84,22 +78,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.of(context).pushReplacementNamed('/home');
   }
 
-  Future<void> _handlePrimaryAction() async {
-    if (_isLastSlide) {
-      await _finishOnboarding();
+  Future<void> _next() async {
+    if (_isLast) {
+      await _finish();
       return;
     }
 
-    await _pageController.nextPage(
-      duration: const Duration(milliseconds: 560),
+    await _controller.nextPage(
+      duration: const Duration(milliseconds: 620),
       curve: Curves.easeOutCubic,
     );
   }
 
   @override
   void dispose() {
-    _pageController
-      ..removeListener(_handlePageScroll)
+    _controller
+      ..removeListener(_onScroll)
       ..dispose();
     super.dispose();
   }
@@ -110,131 +104,105 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: _beige,
       body: SafeArea(
         bottom: false,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(0.48),
-                      _beige,
-                      _beige,
-                    ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final height = constraints.maxHeight;
+            final heroHeight = height * 0.56;
+
+            return Stack(
+              children: [
+                const _SoftBackground(),
+                Positioned(
+                  top: 14,
+                  left: 16,
+                  child: _BrandPill(pink: _pink, dark: _dark),
+                ),
+                Positioned(
+                  top: 14,
+                  right: 16,
+                  child: _SkipPill(
+                    dark: _dark,
+                    enabled: !_finishing,
+                    onTap: _finish,
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: -80,
-              left: -70,
-              child: _BlurredBlob(
-                size: 230,
-                color: _pink.withOpacity(0.13),
-              ),
-            ),
-            Positioned(
-              top: 110,
-              right: -90,
-              child: _BlurredBlob(
-                size: 210,
-                color: _slides[_currentIndex].accent.withOpacity(0.13),
-              ),
-            ),
-            Column(
-              children: [
-                Expanded(
-                  flex: 55,
+                Positioned(
+                  top: 64,
+                  left: 0,
+                  right: 0,
+                  height: heroHeight - 58,
                   child: PageView.builder(
-                    controller: _pageController,
+                    controller: _controller,
                     itemCount: _slides.length,
-                    onPageChanged: (index) {
+                    onPageChanged: (value) {
                       setState(() {
-                        _currentIndex = index;
-                        _page = index.toDouble();
+                        _index = value;
+                        _page = value.toDouble();
                       });
                     },
                     itemBuilder: (context, index) {
-                      return _AnimatedIllustrationPage(
+                      return _SlideHero(
+                        slide: _slides[index],
                         page: _page,
                         index: index,
-                        slide: _slides[index],
-                        dark: _dark,
                       );
                     },
                   ),
                 ),
-                Expanded(
-                  flex: 45,
-                  child: _BottomContent(
-                    slide: _slides[_currentIndex],
-                    slides: _slides,
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: height * 0.45,
+                  child: _BottomPanel(
+                    slide: _slides[_index],
                     page: _page,
-                    currentIndex: _currentIndex,
-                    isLastSlide: _isLastSlide,
-                    isFinishing: _isFinishing,
-                    onPrimaryAction: _handlePrimaryAction,
+                    currentIndex: _index,
+                    isLast: _isLast,
+                    finishing: _finishing,
+                    onPrimaryTap: _next,
                     dark: _dark,
                     pink: _pink,
                   ),
                 ),
               ],
-            ),
-            Positioned(
-              top: 10,
-              right: 18,
-              child: _SkipButton(
-                onPressed: _finishOnboarding,
-                isLoading: _isFinishing,
-                dark: _dark,
-              ),
-            ),
-            Positioned(
-              top: 12,
-              left: 18,
-              child: _BrandMark(pink: _pink, dark: _dark),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _AnimatedIllustrationPage extends StatelessWidget {
-  const _AnimatedIllustrationPage({
+class _SlideHero extends StatelessWidget {
+  const _SlideHero({
+    required this.slide,
     required this.page,
     required this.index,
-    required this.slide,
-    required this.dark,
   });
 
+  final _SlideData slide;
   final double page;
   final int index;
-  final _OnboardingSlideData slide;
-  final Color dark;
 
   @override
   Widget build(BuildContext context) {
     final distance = (page - index).clamp(-1.0, 1.0).toDouble();
-    final progress = distance.abs();
-    final scale = ui.lerpDouble(1, 0.9, progress)!;
-    final yOffset = ui.lerpDouble(0, 26, progress)!;
-    final rotation = ui.lerpDouble(0, distance * -0.05, progress)!;
+    final hidden = distance.abs();
+    final scale = ui.lerpDouble(1, 0.88, hidden)!;
+    final rotate = ui.lerpDouble(0, distance * -0.045, hidden)!;
 
     return Transform.translate(
-      offset: Offset(distance * -42, yOffset),
+      offset: Offset(distance * -34, ui.lerpDouble(0, 18, hidden)!),
       child: Transform.rotate(
-        angle: rotation,
+        angle: rotate,
         child: Transform.scale(
           scale: scale,
           child: Opacity(
-            opacity: ui.lerpDouble(1, 0.58, progress)!,
+            opacity: ui.lerpDouble(1, 0.58, hidden)!,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 64, 24, 10),
-              child: _IllustrationCard(slide: slide, dark: dark),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _IllustrationCard(slide: slide),
             ),
           ),
         ),
@@ -244,68 +212,150 @@ class _AnimatedIllustrationPage extends StatelessWidget {
 }
 
 class _IllustrationCard extends StatelessWidget {
-  const _IllustrationCard({
-    required this.slide,
-    required this.dark,
-  });
+  const _IllustrationCard({required this.slide});
 
-  final _OnboardingSlideData slide;
-  final Color dark;
+  final _SlideData slide;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8EDE3),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 26,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _CardPatternPainter())),
+          Positioned(
+            top: 18,
+            left: 18,
+            child: _MiniTag(slide: slide),
+          ),
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 46, 20, 42),
+              child: _MockupIllustration(type: slide.type),
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.001,
+                child: Lottie.network(
+                  slide.lottieUrl,
+                  fit: BoxFit.contain,
+                  repeat: true,
+                  animate: true,
+                  frameRate: FrameRate.max,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(slide.icon, color: slide.accent);
+                  },
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 18,
+            bottom: 18,
+            child: _FloatingAccent(slide: slide),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MockupIllustration extends StatelessWidget {
+  const _MockupIllustration({required this.type});
+
+  final _IllustrationType type;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child;
+    if (type == _IllustrationType.cart) {
+      child = const _CartIllustration();
+    } else if (type == _IllustrationType.compare) {
+      child = const _CompareIllustration();
+    } else {
+      child = const _SavingsIllustration();
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      child: child,
+    );
+  }
+}
+
+class _CartIllustration extends StatelessWidget {
+  const _CartIllustration();
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(38),
-              boxShadow: [
-                BoxShadow(
-                  color: slide.accent.withOpacity(0.20),
-                  blurRadius: 34,
-                  offset: const Offset(0, 22),
-                ),
-              ],
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  slide.softAccent,
-                ],
-              ),
-            ),
+        Positioned(
+          top: 16,
+          right: 60,
+          child: _CircleButton(
+            color: Color(0xFFC94B7C),
+            icon: Icons.add_rounded,
+            size: 50,
           ),
         ),
-        Positioned(
-          top: 22,
-          left: 22,
-          child: _SlideTag(slide: slide),
-        ),
-        Positioned(
-          right: 20,
-          bottom: 20,
-          child: _PriceBubble(accent: slide.accent),
-        ),
-        Positioned(
-          left: 22,
-          bottom: 26,
-          child: _StoreBadges(accent: slide.accent),
-        ),
-        Positioned.fill(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(28, 30, 28, 38),
-            child: Lottie.network(
-              slide.animationUrl,
-              fit: BoxFit.contain,
-              repeat: true,
-              animate: true,
-              frameRate: FrameRate.max,
-              errorBuilder: (context, error, stackTrace) {
-                return _FallbackAnimation(slide: slide);
-              },
+        Transform.rotate(
+          angle: -0.07,
+          child: Container(
+            width: 205,
+            height: 185,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.28),
+              borderRadius: BorderRadius.circular(34),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  top: 36,
+                  child: Row(
+                    children: const [
+                      _ProductBlob(color: Color(0xFFF7C766), size: 42),
+                      SizedBox(width: 8),
+                      _ProductBlob(color: Color(0xFF78AE57), size: 58),
+                      SizedBox(width: 8),
+                      _ProductBlob(color: Color(0xFFE58A5D), size: 48),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 32,
+                  child: Icon(
+                    Icons.shopping_cart_rounded,
+                    size: 130,
+                    color: Colors.black.withOpacity(0.52),
+                  ),
+                ),
+                Positioned(
+                  bottom: 19,
+                  left: 45,
+                  child: _Wheel(),
+                ),
+                Positioned(
+                  bottom: 19,
+                  right: 45,
+                  child: _Wheel(),
+                ),
+              ],
             ),
           ),
         ),
@@ -314,68 +364,333 @@ class _IllustrationCard extends StatelessWidget {
   }
 }
 
-class _BottomContent extends StatelessWidget {
-  const _BottomContent({
+class _CompareIllustration extends StatelessWidget {
+  const _CompareIllustration();
+
+  static const List<_StoreRow> _rows = [
+    _StoreRow('RIMI', Color(0xFFE21B2D), '78,56 €', 0.78),
+    _StoreRow('SELVER', Color(0xFFFFC928), '72,43 €', 0.62),
+    _StoreRow('PRISMA', Color(0xFF49A35B), '69,18 €', 0.86),
+    _StoreRow('COOP', Color(0xFF0A75BC), '73,00 €', 0.54),
+    _StoreRow('MAXIMA', Color(0xFF0A3F92), '79,21 €', 0.68),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          top: 8,
+          right: 58,
+          child: _CircleButton(
+            color: Color(0xFFC94B7C),
+            icon: Icons.search_rounded,
+            size: 48,
+          ),
+        ),
+        Container(
+          width: 220,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final row in _rows) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: row.color,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        row.name,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: row.color == const Color(0xFFFFC928)
+                              ? const Color(0xFF1A1A1A)
+                              : Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 50,
+                      child: Text(
+                        row.price,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: row.progress,
+                          minHeight: 8,
+                          backgroundColor: const Color(0xFFEFE7DF),
+                          valueColor: AlwaysStoppedAnimation<Color>(row.color),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (row != _rows.last) const SizedBox(height: 9),
+              ],
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 18,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 7),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.favorite_rounded,
+                  color: Color(0xFFC94B7C),
+                  size: 15,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Hinnad uuenevad automaatselt',
+                  style: TextStyle(
+                    color: Color(0xFF8B7C72),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SavingsIllustration extends StatelessWidget {
+  const _SavingsIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          top: 10,
+          left: 54,
+          child: Transform.rotate(
+            angle: -0.28,
+            child: _CircleButton(
+              color: Color(0xFFC94B7C),
+              icon: Icons.percent_rounded,
+              size: 45,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 20,
+          right: 54,
+          child: _Coin(size: 50),
+        ),
+        Positioned(
+          top: 82,
+          right: 24,
+          child: _Coin(size: 42),
+        ),
+        Positioned(
+          bottom: 38,
+          child: Container(
+            width: 190,
+            height: 128,
+            decoration: BoxDecoration(
+              color: const Color(0xFFC94B7C),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFC94B7C).withOpacity(0.24),
+                  blurRadius: 18,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: -58,
+                  left: 28,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: const [
+                      _ProductBlob(color: Color(0xFF70A747), size: 54),
+                      SizedBox(width: 8),
+                      _ProductBlob(color: Color(0xFFF0B344), size: 84),
+                      SizedBox(width: 8),
+                      _ProductBlob(color: Color(0xFFD6E8F0), size: 66),
+                    ],
+                  ),
+                ),
+                Positioned.fill(
+                  child: Icon(
+                    Icons.shopping_basket_rounded,
+                    color: Colors.white.withOpacity(0.92),
+                    size: 142,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          right: 22,
+          bottom: 22,
+          child: Transform.rotate(
+            angle: 0.12,
+            child: Container(
+              width: 116,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Odavaim ostukorv',
+                    style: TextStyle(
+                      color: Color(0xFF8B7C72),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    '69,18 €',
+                    style: TextStyle(
+                      color: Color(0xFFC94B7C),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.7,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.storefront_rounded,
+                        color: Color(0xFF49A35B),
+                        size: 12,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Prisma',
+                        style: TextStyle(
+                          color: Color(0xFF49A35B),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BottomPanel extends StatelessWidget {
+  const _BottomPanel({
     required this.slide,
-    required this.slides,
     required this.page,
     required this.currentIndex,
-    required this.isLastSlide,
-    required this.isFinishing,
-    required this.onPrimaryAction,
+    required this.isLast,
+    required this.finishing,
+    required this.onPrimaryTap,
     required this.dark,
     required this.pink,
   });
 
-  final _OnboardingSlideData slide;
-  final List<_OnboardingSlideData> slides;
+  final _SlideData slide;
   final double page;
   final int currentIndex;
-  final bool isLastSlide;
-  final bool isFinishing;
-  final Future<void> Function() onPrimaryAction;
+  final bool isLast;
+  final bool finishing;
+  final VoidCallback onPrimaryTap;
   final Color dark;
   final Color pink;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 26),
+      padding: const EdgeInsets.fromLTRB(24, 23, 24, 22),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 28,
-            offset: Offset(0, -12),
-          ),
-        ],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _JourneyIndicator(
-            slides: slides,
-            page: page,
-            currentIndex: currentIndex,
-            dark: dark,
-          ),
+          _PathIndicator(page: page, currentIndex: currentIndex),
           const SizedBox(height: 24),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 360),
+            duration: const Duration(milliseconds: 300),
             switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
             transitionBuilder: (child, animation) {
-              final slideAnimation = Tween<Offset>(
-                begin: const Offset(0.08, 0),
-                end: Offset.zero,
-              ).animate(animation);
-
               return FadeTransition(
                 opacity: animation,
-                child: SlideTransition(position: slideAnimation, child: child),
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.05, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
               );
             },
             child: Column(
@@ -386,10 +701,10 @@ class _BottomContent extends StatelessWidget {
                   slide.title,
                   style: TextStyle(
                     color: dark,
-                    fontSize: 31,
-                    height: 1.04,
+                    fontSize: 27,
+                    height: 1.02,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.9,
+                    letterSpacing: -1,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -397,9 +712,9 @@ class _BottomContent extends StatelessWidget {
                   slide.body,
                   style: TextStyle(
                     color: dark.withOpacity(0.68),
-                    fontSize: 16.5,
-                    height: 1.45,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15.5,
+                    height: 1.48,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -408,51 +723,47 @@ class _BottomContent extends StatelessWidget {
           const Spacer(),
           SizedBox(
             width: double.infinity,
-            height: 60,
+            height: 58,
             child: FilledButton(
-              onPressed: isFinishing ? null : onPrimaryAction,
+              onPressed: finishing ? null : onPrimaryTap,
               style: FilledButton.styleFrom(
-                backgroundColor: isLastSlide ? pink : dark,
-                disabledBackgroundColor: pink.withOpacity(0.42),
+                backgroundColor: isLast ? pink : Colors.black,
+                disabledBackgroundColor: pink.withOpacity(0.45),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(18),
                 ),
               ),
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                child: isFinishing
+                duration: const Duration(milliseconds: 180),
+                child: finishing
                     ? const SizedBox(
-                        key: ValueKey('loading'),
-                        height: 22,
                         width: 22,
+                        height: 22,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2.6,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
+                          color: Colors.white,
+                          strokeWidth: 2.5,
                         ),
                       )
                     : Row(
-                        key: ValueKey(isLastSlide),
+                        key: ValueKey(isLast),
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            isLastSlide ? 'Alusta' : 'Järgmine',
+                            isLast ? 'Alusta' : 'Järgmine',
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 16,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 0.1,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Icon(
-                            isLastSlide
+                            isLast
                                 ? Icons.shopping_basket_rounded
                                 : Icons.arrow_forward_rounded,
-                            size: 22,
+                            size: 21,
                           ),
                         ],
                       ),
@@ -465,230 +776,91 @@ class _BottomContent extends StatelessWidget {
   }
 }
 
-class _JourneyIndicator extends StatelessWidget {
-  const _JourneyIndicator({
-    required this.slides,
+class _PathIndicator extends StatelessWidget {
+  const _PathIndicator({
     required this.page,
     required this.currentIndex,
-    required this.dark,
   });
 
-  final List<_OnboardingSlideData> slides;
   final double page;
   final int currentIndex;
-  final Color dark;
 
   @override
   Widget build(BuildContext context) {
-    final progress = (page / (slides.length - 1)).clamp(0.0, 1.0).toDouble();
+    final progress = (page / 2).clamp(0.0, 1.0).toDouble();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                Container(
-                  height: 8,
+    return SizedBox(
+      height: 42,
+      child: CustomPaint(
+        painter: _PathIndicatorPainter(progress: progress),
+        child: Row(
+          children: List.generate(3, (index) {
+            final active = index <= currentIndex;
+            final selected = index == currentIndex;
+
+            return Expanded(
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  width: selected ? 106 : 42,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEDE4DA),
+                    color: active
+                        ? const Color(0xFFC94B7C)
+                        : const Color(0xFFF3EEE8),
                     borderRadius: BorderRadius.circular(999),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFC94B7C).withOpacity(0.24),
+                              blurRadius: 14,
+                              offset: const Offset(0, 7),
+                            ),
+                          ]
+                        : null,
                   ),
-                ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOut,
-                  height: 8,
-                  width: math.max(28, constraints.maxWidth * progress),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    gradient: LinearGradient(
-                      colors: [
-                        slides.first.accent,
-                        slides[currentIndex].accent,
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: (constraints.maxWidth - 34) * progress,
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: slides[currentIndex].accent,
-                        width: 3,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        active ? Icons.check_rounded : null,
+                        color: Colors.white,
+                        size: active ? 17 : 0,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: slides[currentIndex].accent.withOpacity(0.28),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
+                      if (!active)
+                        Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Color(0xFFBEB4AC),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      if (selected) ...[
+                        const SizedBox(width: 7),
+                        Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ],
-                    ),
-                    child: Icon(
-                      Icons.shopping_basket_rounded,
-                      color: slides[currentIndex].accent,
-                      size: 18,
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             );
-          },
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            for (var i = 0; i < slides.length; i++) ...[
-              Expanded(
-                child: _MorphingStepPill(
-                  slide: slides[i],
-                  isActive: i == currentIndex,
-                  index: i,
-                  dark: dark,
-                ),
-              ),
-              if (i != slides.length - 1) const SizedBox(width: 8),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MorphingStepPill extends StatelessWidget {
-  const _MorphingStepPill({
-    required this.slide,
-    required this.isActive,
-    required this.index,
-    required this.dark,
-  });
-
-  final _OnboardingSlideData slide;
-  final bool isActive;
-  final int index;
-  final Color dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-      height: 44,
-      padding: EdgeInsets.symmetric(horizontal: isActive ? 12 : 8),
-      decoration: BoxDecoration(
-        color: isActive ? slide.accent.withOpacity(0.12) : const Color(0xFFF7F3EE),
-        borderRadius: BorderRadius.circular(isActive ? 16 : 24),
-        border: Border.all(
-          color: isActive ? slide.accent.withOpacity(0.36) : Colors.transparent,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: isActive ? 25 : 22,
-            height: isActive ? 25 : 22,
-            decoration: BoxDecoration(
-              color: isActive ? slide.accent : Colors.white,
-              borderRadius: BorderRadius.circular(isActive ? 9 : 14),
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: TextStyle(
-                  color: isActive ? Colors.white : dark.withOpacity(0.42),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            child: isActive
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Text(
-                      slide.tag,
-                      maxLines: 1,
-                      overflow: TextOverflow.fade,
-                      softWrap: false,
-                      style: TextStyle(
-                        color: slide.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FallbackAnimation extends StatelessWidget {
-  const _FallbackAnimation({required this.slide});
-
-  final _OnboardingSlideData slide;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.92, end: 1),
-        duration: const Duration(milliseconds: 900),
-        curve: Curves.elasticOut,
-        builder: (context, value, child) {
-          return Transform.scale(scale: value, child: child);
-        },
-        child: Container(
-          width: 170,
-          height: 170,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                slide.accent.withOpacity(0.92),
-                slide.accent.withOpacity(0.68),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: slide.accent.withOpacity(0.25),
-                blurRadius: 32,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
-          child: Icon(
-            slide.fallbackIcon,
-            color: Colors.white,
-            size: 76,
-          ),
+          }),
         ),
       ),
     );
   }
 }
 
-class _BrandMark extends StatelessWidget {
-  const _BrandMark({
+class _BrandPill extends StatelessWidget {
+  const _BrandPill({
     required this.pink,
     required this.dark,
   });
@@ -699,18 +871,25 @@ class _BrandMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+      height: 46,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.82),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 26,
-            height: 26,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: pink,
               borderRadius: BorderRadius.circular(9),
@@ -718,7 +897,7 @@ class _BrandMark extends StatelessWidget {
             child: const Icon(
               Icons.bar_chart_rounded,
               color: Colors.white,
-              size: 17,
+              size: 18,
             ),
           ),
           const SizedBox(width: 8),
@@ -726,9 +905,9 @@ class _BrandMark extends StatelessWidget {
             'Seivy',
             style: TextStyle(
               color: dark,
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
-              letterSpacing: -0.3,
+              letterSpacing: -0.4,
             ),
           ),
         ],
@@ -737,64 +916,67 @@ class _BrandMark extends StatelessWidget {
   }
 }
 
-class _SkipButton extends StatelessWidget {
-  const _SkipButton({
-    required this.onPressed,
-    required this.isLoading,
+class _SkipPill extends StatelessWidget {
+  const _SkipPill({
     required this.dark,
+    required this.enabled,
+    required this.onTap,
   });
 
-  final VoidCallback onPressed;
-  final bool isLoading;
   final Color dark;
+  final bool enabled;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: isLoading ? null : onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: dark,
-        backgroundColor: Colors.white.withOpacity(0.82),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-      ),
-      child: Text(
-        'Jäta vahele',
-        style: TextStyle(
-          color: dark.withOpacity(0.72),
-          fontWeight: FontWeight.w900,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 13),
+          child: Text(
+            'Jäta vahele',
+            style: TextStyle(
+              color: dark.withOpacity(0.64),
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-class _SlideTag extends StatelessWidget {
-  const _SlideTag({required this.slide});
+class _MiniTag extends StatelessWidget {
+  const _MiniTag({required this.slide});
 
-  final _OnboardingSlideData slide;
+  final _SlideData slide;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.88),
-        borderRadius: BorderRadius.circular(999),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(13),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(slide.fallbackIcon, size: 17, color: slide.accent),
-          const SizedBox(width: 7),
+          Icon(slide.icon, color: slide.accent, size: 16),
+          const SizedBox(width: 6),
           Text(
             slide.tag,
             style: TextStyle(
-              color: slide.accent,
+              color: slide.type == _IllustrationType.savings
+                  ? const Color(0xFF4FA34D)
+                  : slide.accent,
+              fontSize: 12,
               fontWeight: FontWeight.w900,
-              fontSize: 13,
             ),
           ),
         ],
@@ -803,35 +985,47 @@ class _SlideTag extends StatelessWidget {
   }
 }
 
-class _PriceBubble extends StatelessWidget {
-  const _PriceBubble({required this.accent});
+class _FloatingAccent extends StatelessWidget {
+  const _FloatingAccent({required this.slide});
 
-  final Color accent;
+  final _SlideData slide;
 
   @override
   Widget build(BuildContext context) {
+    if (slide.type == _IllustrationType.cart) {
+      return _CircleButton(color: slide.accent, icon: Icons.add_rounded, size: 44);
+    }
+
+    if (slide.type == _IllustrationType.compare) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: const Icon(
+          Icons.verified_rounded,
+          color: Color(0xFF4FA34D),
+          size: 20,
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.94),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 16,
-            offset: Offset(0, 8),
-          ),
-        ],
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.auto_awesome_rounded, size: 17, color: accent),
-          const SizedBox(width: 6),
+          Icon(Icons.auto_awesome_rounded, color: Color(0xFF4FA34D), size: 17),
+          SizedBox(width: 6),
           Text(
             '-18%',
             style: TextStyle(
-              color: accent,
+              color: Color(0xFF4FA34D),
               fontWeight: FontWeight.w900,
               fontSize: 15,
             ),
@@ -842,51 +1036,57 @@ class _PriceBubble extends StatelessWidget {
   }
 }
 
-class _StoreBadges extends StatelessWidget {
-  const _StoreBadges({required this.accent});
-
-  final Color accent;
-
-  static const List<String> _stores = ['Rimi', 'Selver', 'Prisma', 'Coop', 'Maxima'];
+class _SoftBackground extends StatelessWidget {
+  const _SoftBackground();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 148,
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: [
-          for (final store in _stores)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.86),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                store,
-                style: TextStyle(
-                  color: accent,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                ),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFC94B7C).withOpacity(0.09),
+                  const Color(0xFFF4F0EA),
+                  const Color(0xFFF4F0EA),
+                ],
               ),
             ),
-        ],
-      ),
+          ),
+        ),
+        const Positioned(
+          top: -70,
+          left: -80,
+          child: _BlurBlob(
+            color: Color(0x22C94B7C),
+            size: 240,
+          ),
+        ),
+        const Positioned(
+          top: 90,
+          right: -70,
+          child: _BlurBlob(
+            color: Color(0x2268B763),
+            size: 220,
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _BlurredBlob extends StatelessWidget {
-  const _BlurredBlob({
-    required this.size,
+class _BlurBlob extends StatelessWidget {
+  const _BlurBlob({
     required this.color,
+    required this.size,
   });
 
-  final double size;
   final Color color;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -904,22 +1104,232 @@ class _BlurredBlob extends StatelessWidget {
   }
 }
 
-class _OnboardingSlideData {
-  const _OnboardingSlideData({
+class _CircleButton extends StatelessWidget {
+  const _CircleButton({
+    required this.color,
+    required this.icon,
+    required this.size,
+  });
+
+  final Color color;
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.24),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Icon(icon, color: Colors.white, size: size * 0.5),
+    );
+  }
+}
+
+class _ProductBlob extends StatelessWidget {
+  const _ProductBlob({
+    required this.color,
+    required this.size,
+  });
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(size * 0.38),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.24),
+            blurRadius: 12,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Wheel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 17,
+      height: 17,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.black.withOpacity(0.52), width: 3),
+      ),
+    );
+  }
+}
+
+class _Coin extends StatelessWidget {
+  const _Coin({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4B342),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 4),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF4B342).withOpacity(0.24),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Text(
+          '€',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 23,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PathIndicatorPainter extends CustomPainter {
+  const _PathIndicatorPainter({required this.progress});
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    final start = Offset(size.width / 6, y);
+    final middle = Offset(size.width / 2, y);
+    final end = Offset(size.width * 5 / 6, y);
+
+    final trackPaint = Paint()
+      ..color = const Color(0xFFF3EEE8)
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final activePaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFC94B7C), Color(0xFFC94B7C)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(start.dx, start.dy)
+      ..cubicTo(
+        size.width * 0.31,
+        y - 8,
+        size.width * 0.36,
+        y + 8,
+        middle.dx,
+        middle.dy,
+      )
+      ..cubicTo(
+        size.width * 0.64,
+        y - 8,
+        size.width * 0.69,
+        y + 8,
+        end.dx,
+        end.dy,
+      );
+
+    canvas.drawPath(path, trackPaint);
+
+    final metric = path.computeMetrics().first;
+    final activePath = metric.extractPath(0, metric.length * progress);
+    canvas.drawPath(activePath, activePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PathIndicatorPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
+}
+
+class _CardPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final palePink = Paint()..color = const Color(0xFFC94B7C).withOpacity(0.08);
+    final paleGreen = Paint()..color = const Color(0xFF78AE57).withOpacity(0.07);
+
+    canvas.drawCircle(Offset(size.width * 0.86, size.height * 0.16), 24, palePink);
+    canvas.drawCircle(Offset(size.width * 0.13, size.height * 0.73), 38, paleGreen);
+    canvas.drawCircle(Offset(size.width * 0.88, size.height * 0.72), 28, palePink);
+
+    final brush = Paint()
+      ..color = const Color(0xFFB59A89).withOpacity(0.13)
+      ..strokeWidth = 9
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < 4; i++) {
+      final x = 34.0 + (i * 17);
+      canvas.drawLine(
+        Offset(x, size.height * 0.34),
+        Offset(x + 28, size.height * 0.26),
+        brush,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+enum _IllustrationType { cart, compare, savings }
+
+class _SlideData {
+  const _SlideData({
     required this.title,
     required this.body,
-    required this.animationUrl,
-    required this.fallbackIcon,
-    required this.accent,
-    required this.softAccent,
     required this.tag,
+    required this.lottieUrl,
+    required this.icon,
+    required this.accent,
+    required this.type,
   });
 
   final String title;
   final String body;
-  final String animationUrl;
-  final IconData fallbackIcon;
-  final Color accent;
-  final Color softAccent;
   final String tag;
+  final String lottieUrl;
+  final IconData icon;
+  final Color accent;
+  final _IllustrationType type;
+}
+
+class _StoreRow {
+  const _StoreRow(this.name, this.color, this.price, this.progress);
+
+  final String name;
+  final Color color;
+  final String price;
+  final double progress;
 }
