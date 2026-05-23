@@ -16,6 +16,7 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     chains = row.get("available_chains") or []
     size_text = (row.get("size_text") or "").strip()
     is_per_kg = size_text.lower() == "kg"
+    min_price = row.get("min_price")
     return {
         "id": row.get("id"),
         "name": row.get("name"),
@@ -28,6 +29,7 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
         "sub_code": row.get("sub_code"),
         "available_chains": sorted(list(set(chains))) if chains else [],
         "is_per_kg": is_per_kg,
+        "min_price": float(min_price) if min_price is not None else None,
     }
 
 
@@ -97,10 +99,21 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
+        ),
+        min_prices AS (
+            SELECT
+                COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text) AS dedup_key,
+                MIN(pr2.price) AS min_price
+            FROM prices pr2
+            LEFT JOIN product_group_members pgm2 ON pgm2.product_id = pr2.product_id
+            WHERE pr2.collected_at > NOW() - INTERVAL '14 days'
+              AND pr2.price > 0
+            GROUP BY COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text)
         )
-        SELECT b.*, gc.chains AS available_chains
+        SELECT b.*, gc.chains AS available_chains, mp.min_price
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN min_prices mp ON mp.dedup_key = b.dedup_key
     """
 
 
@@ -128,10 +141,21 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
+        ),
+        min_prices AS (
+            SELECT
+                COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text) AS dedup_key,
+                MIN(pr2.price) AS min_price
+            FROM prices pr2
+            LEFT JOIN product_group_members pgm2 ON pgm2.product_id = pr2.product_id
+            WHERE pr2.collected_at > NOW() - INTERVAL '14 days'
+              AND pr2.price > 0
+            GROUP BY COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text)
         )
-        SELECT b.*, gc.chains AS available_chains
+        SELECT b.*, gc.chains AS available_chains, mp.min_price
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN min_prices mp ON mp.dedup_key = b.dedup_key
     """
 
 
@@ -191,8 +215,6 @@ async def list_products(
 
         items = [_row_to_safe_product(dict(r)) for r in rows]
 
-        # Total: kui saime täis lehe, on tõenäoliselt rohkem
-        # COUNT päring eemaldatud — liiga aeglane suure andmemahu juures
         has_more = len(items) == limit
         estimated_total = offset + len(items) + (1 if has_more else 0)
 
