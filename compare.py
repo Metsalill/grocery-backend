@@ -1,7 +1,7 @@
 # compare.py
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, confloat, conint
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 from utils.throttle import throttle
 from services.compare_service import compare_basket_service
 
@@ -17,7 +17,7 @@ class GroceryItem(BaseModel):
     product: str
     quantity: confloat(ge=0.1) = 1.0
     product_id: int | None = None
-    ingredient_name_en: str | None = None  # retsepti koostisosa inglise keeles
+    ingredient_name_en: str | None = None
 
 
 class GroceryList(BaseModel):
@@ -26,8 +26,8 @@ class GroceryList(BaseModel):
 
 class CompareRequest(BaseModel):
     grocery_list: GroceryList
-    lat: float
-    lon: float
+    lat: Optional[float] = None  # None = ei filtreeri kauguse järgi
+    lon: Optional[float] = None
     radius_km: confloat(ge=MIN_RADIUS, le=MAX_RADIUS) = 2.0
     limit_stores: conint(ge=1, le=MAX_STORES) = 50
     offset_stores: conint(ge=0) = 0
@@ -54,7 +54,6 @@ def _normalize_items(gl: GroceryList) -> List[Dict[str, Any]]:
             "quantity": float(it.quantity),
             "product_id": it.product_id,
         }
-        # Retsepti koostisosa — edasta backendile et Claude API saaks otsida
         if it.ingredient_name_en:
             item["ingredient_name_en"] = it.ingredient_name_en
         out.append(item)
@@ -104,8 +103,8 @@ async def compare_basket(body: CompareRequest, request: Request):
 
         payload_in = {
             "items": items_payload,
-            "lat": float(body.lat),
-            "lon": float(body.lon),
+            "lat": body.lat,  # None lubatud
+            "lon": body.lon,  # None lubatud
             "radius_km": radius_km,
             "limit_stores": limit_stores,
             "offset_stores": offset_stores,
