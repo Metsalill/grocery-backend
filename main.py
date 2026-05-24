@@ -6,7 +6,7 @@ import asyncpg
 import traceback
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -173,6 +173,11 @@ async def robots():
 @app.get("/healthz", response_class=PlainTextResponse)
 async def healthz():
     return "ok"
+
+
+@app.get("/privacy")
+async def privacy():
+    return FileResponse(os.path.join(STATIC_DIR, "privacy_policy.html"))
 
 
 if LOG_REQUESTS:
