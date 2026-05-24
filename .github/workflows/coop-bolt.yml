@@ -2,7 +2,7 @@ name: coop-bolt
 
 on:
   schedule:
-    - cron: "0 11 * * **"   
+    - cron: "0 11 * * *"   # daily at 11:00 UTC = 14:00 Eesti aeg
   workflow_dispatch:
 
 jobs:
