@@ -10,7 +10,7 @@ jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +20,7 @@ jobs:
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: "441"   # Barbora ePood
-      SOFT_TIMEOUT_MIN: "170"   # flush & exit before GH kills us
+      SOFT_TIMEOUT_MIN: "340"   # flush & exit before GH kills us
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
