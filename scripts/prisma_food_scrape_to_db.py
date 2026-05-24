@@ -33,6 +33,19 @@ import psycopg2
 # ---------------------------------------------------------------------------
 BASE = "https://prismamarket.ee"
 
+# Kategooriad kus Prisma epoes on mõnel tootel vale "Coop " eesliide
+# nt "Coop Õun Golden Delicious" — tegelikult geneerilne toode, mitte Coop bränd
+COOP_PREFIX_FIX_PATHS = [
+    "puu-ja-koogiviljad",
+    "food-market",
+]
+
+# Legitiimsed "Coop " eesliitega sõnad — need jäävad alles
+# nt "Coop Mahe õun" on päriselt Coop Mahe brändi toode
+COOP_LEGIT_SECOND_WORDS = {
+    "mahe", "öko", "eko", "organic", "bio",
+}
+
 CATEGORIES = [
     # Food market
     "/tooted/food-market/liha",
@@ -226,6 +239,25 @@ def parse_size_from_name(name: str) -> str:
         num, unit = m.groups()
         return f"{num.replace(',', '.')} {unit.lower()}"
     return ""
+
+
+def clean_coop_prefix(name: str, cat_path: str) -> str:
+    """
+    Eemalda vale 'Coop ' eesliide puu- ja köögivilja kategooriates.
+    Prisma epoes on mõnel tootel vale silt — nt 'Coop Õun Golden Delicious'
+    mis pole Coop brändi toode vaid geneerilne toode.
+    Legitiimsed Coop brändi tooted (nt 'Coop Mahe', 'Coop Öko') jäävad alles.
+    """
+    if not name.startswith("Coop "):
+        return name
+    if not any(p in cat_path for p in COOP_PREFIX_FIX_PATHS):
+        return name
+    # Kontrolli kas teine sõna on legitiimne Coop brändi sõna
+    rest = name[5:]  # eemalda "Coop "
+    second_word = rest.split()[0].lower() if rest.split() else ""
+    if second_word in COOP_LEGIT_SECOND_WORDS:
+        return name  # legitiimne bränd, jäta alles
+    return rest  # eemalda "Coop " eesliide
 
 
 def extract_next_data(html: str) -> Optional[dict]:
@@ -430,6 +462,11 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
             break
 
         products = parse_apollo_products(apollo_state)
+
+        # Puhasta vale "Coop " eesliide puu- ja köögivilja kategooriates
+        for p in products:
+            p["name"] = clean_coop_prefix(p["name"], cat_path)
+
         new_products = [p for p in products if p["ean"] not in seen_eans]
         for p in new_products:
             seen_eans.add(p["ean"])
