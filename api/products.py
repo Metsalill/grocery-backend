@@ -99,21 +99,10 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
-        ),
-        min_prices AS (
-            SELECT
-                COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text) AS dedup_key,
-                MIN(pr2.price) AS min_price
-            FROM prices pr2
-            LEFT JOIN product_group_members pgm2 ON pgm2.product_id = pr2.product_id
-            WHERE pr2.collected_at > NOW() - INTERVAL '14 days'
-              AND pr2.price > 0
-            GROUP BY COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text)
         )
-        SELECT b.*, gc.chains AS available_chains, mp.min_price
+        SELECT b.*, gc.chains AS available_chains, gc.min_price
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
-        LEFT JOIN min_prices mp ON mp.dedup_key = b.dedup_key
     """
 
 
@@ -141,21 +130,10 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
-        ),
-        min_prices AS (
-            SELECT
-                COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text) AS dedup_key,
-                MIN(pr2.price) AS min_price
-            FROM prices pr2
-            LEFT JOIN product_group_members pgm2 ON pgm2.product_id = pr2.product_id
-            WHERE pr2.collected_at > NOW() - INTERVAL '14 days'
-              AND pr2.price > 0
-            GROUP BY COALESCE(pgm2.group_id::text, 'u_' || pr2.product_id::text)
         )
-        SELECT b.*, gc.chains AS available_chains, mp.min_price
+        SELECT b.*, gc.chains AS available_chains, gc.min_price
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
-        LEFT JOIN min_prices mp ON mp.dedup_key = b.dedup_key
     """
 
 
