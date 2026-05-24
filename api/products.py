@@ -12,8 +12,12 @@ MAX_LIMIT = 50  # server-side hard cap
 
 PRICE_FRESHNESS_FILTER = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id AND pr.collected_at > NOW() - INTERVAL '14 days')"
 
-# Tuvastab mahu nimes — nt "500ml", "0.5L", "75cl", "1.5 l", "700 ml"
-_SIZE_IN_NAME_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b', re.I)
+# Tuvastab mahu nimes — nt "500ml", "0.5L", "75cl", "1.5 l", "6x568ml", "24x330ml"
+_SIZE_IN_NAME_RE = re.compile(
+    r'\b\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b'
+    r'|\b\d+\s*[x×]\s*\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b',
+    re.I
+)
 
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
