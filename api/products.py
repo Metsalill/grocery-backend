@@ -1,5 +1,6 @@
 # api/products.py
 
+import re
 from fastapi import APIRouter, Request, Query, HTTPException, Header
 from typing import Optional, List, Dict, Any
 
@@ -11,6 +12,9 @@ MAX_LIMIT = 50  # server-side hard cap
 
 PRICE_FRESHNESS_FILTER = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id AND pr.collected_at > NOW() - INTERVAL '14 days')"
 
+# Tuvastab mahu nimes — nt "500ml", "0.5L", "75cl", "1.5 l", "700 ml"
+_SIZE_IN_NAME_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b', re.I)
+
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     chains = row.get("available_chains") or []
@@ -20,6 +24,9 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     # Kasuta canonical_name grupeeritud toodete puhul — lühem ja puhtam nimi
     canonical = (row.get("canonical_name") or "").strip()
     name = canonical if canonical else (row.get("name") or "")
+    # Ära kuva size_text kui maht on juba nimes (v.a kg-tooted)
+    if not is_per_kg and size_text and _SIZE_IN_NAME_RE.search(name):
+        size_text = ""
     return {
         "id": row.get("id"),
         "name": name,
