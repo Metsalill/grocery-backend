@@ -12,7 +12,7 @@ on:
         required: false
         default: "0.3"
   schedule:
-    - cron: "0 6 * * *"   # Every day at 06:00 UTC (after rimi_scrape.yml which runs at 02:00)
+    - cron: "0 9 * * *"  
 
 concurrency:
   group: rimi-prices
