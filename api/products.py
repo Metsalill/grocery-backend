@@ -17,9 +17,12 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     size_text = (row.get("size_text") or "").strip()
     is_per_kg = size_text.lower() == "kg"
     min_price = row.get("min_price")
+    # Kasuta canonical_name grupeeritud toodete puhul — lühem ja puhtam nimi
+    canonical = (row.get("canonical_name") or "").strip()
+    name = canonical if canonical else (row.get("name") or "")
     return {
         "id": row.get("id"),
-        "name": row.get("name"),
+        "name": name,
         "image_url": row.get("image_url"),
         "brand": row.get("brand"),
         "manufacturer": row.get("manufacturer"),
@@ -100,9 +103,10 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price
+        SELECT b.*, gc.chains AS available_chains, gc.min_price, pg.canonical_name
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN product_groups pg ON pg.id = b.group_id
     """
 
 
@@ -131,9 +135,10 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price
+        SELECT b.*, gc.chains AS available_chains, gc.min_price, pg.canonical_name
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
+        LEFT JOIN product_groups pg ON pg.id = b.group_id
     """
 
 
