@@ -8,7 +8,7 @@ on:
         required: false
         default: "0.3"
   schedule:
-    - cron: "19 3 * * *"   # Daily at 03:19 UTC
+    - cron: "0 5 * * *" 
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-api-scrape-{0}', github.run_id) || 'selver-api-scrape' }}
