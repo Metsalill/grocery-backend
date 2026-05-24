@@ -1,0 +1,25 @@
+name: "Refresh Materialized Views"
+on:
+  schedule:
+    - cron: "0 13 * * *"   # daily at 13:00 UTC = 16:00 Eesti aeg (peale kõiki scrapereid)
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    name: Refresh mv_group_chains
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+    steps:
+      - name: Install psql
+        run: sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Refresh mv_group_chains
+        run: |
+          echo "Start: $(date -u)"
+          psql "$DATABASE_URL" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_group_chains;"
+          echo "Done: $(date -u)"
+
+      - name: Verify row count
+        run: |
+          psql "$DATABASE_URL" -c "SELECT COUNT(*) AS mv_group_chains_rows FROM mv_group_chains;"
