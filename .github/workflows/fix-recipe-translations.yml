@@ -1,0 +1,17 @@
+name: Fix Recipe Translations
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install psycopg2-binary
+      - run: python scripts/fix_recipes.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
