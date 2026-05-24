@@ -177,7 +177,7 @@ async def healthz():
 
 @app.get("/privacy")
 async def privacy():
-    return FileResponse(os.path.join(STATIC_DIR, "privacy_policy.html"))
+    return FileResponse(os.path.join(APP_ROOT, "static", "privacy_policy.html"))
 
 
 if LOG_REQUESTS:
