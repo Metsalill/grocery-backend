@@ -1,7 +1,7 @@
 name: Coop eCoop scrape + upsert
 on:
   schedule:
-    - cron: "17 3 * * *"   # daily at 03:17 UTC
+    - cron: "0 6 * * *"  
   workflow_dispatch:
 jobs:
   scrape:
