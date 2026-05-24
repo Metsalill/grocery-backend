@@ -2,7 +2,7 @@ name: coop-bolt
 
 on:
   schedule:
-    - cron: "30 7 * * *"   # 07:30 UTC = 09:30 Estonian (stores open 09:00)
+    - cron: "0 11 * * **"   
   workflow_dispatch:
 
 jobs:
