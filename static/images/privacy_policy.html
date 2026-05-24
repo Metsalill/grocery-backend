@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privaatsuspoliitika / Privacy Policy — Seivy</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F9F6F1;
+      --surface: #FFFFFF;
+      --accent: #C94B7C;
+      --text: #1A1A1A;
+      --muted: #6B6560;
+      --border: #E8E2D9;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .lang-switch {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lang-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 44px;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .card p {
+      color: #3A3530;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .card p:last-child { margin-bottom: 0; }
+
+    .card ul {
+      padding-left: 20px;
+      color: #3A3530;
+      font-size: 15px;
+    }
+
+    .card ul li { margin-bottom: 6px; }
+
+    .highlight {
+      background: #FFF5F9;
+      border: 1px solid #F5C6D8;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .contact-box {
+      background: var(--text);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 32px;
+      color: white;
+    }
+
+    .contact-box h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .contact-box a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .lang-section { display: none; }
+    .lang-section.active { display: block; }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      h1 { font-size: 32px; }
+      .card { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Seivy</div>
+  <div class="lang-switch">
+    <button class="lang-btn active" onclick="setLang('et')">ET</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+
+<!-- EESTI KEELES -->
+<div id="lang-et" class="lang-section active">
+  <div class="container">
+    <div class="section-label">Juriidiline teave</div>
+    <h1>Privaatsus&shy;poliitika</h1>
+    <p class="updated">Viimati uuendatud: mai 2026</p>
+
+    <div class="card">
+      <h2>1. Kes me oleme</h2>
+      <p>Seivy on Elynoy OÜ arendatud mobiilirakendus, mis võimaldab võrrelda toidupoe hindadeid Eesti suurimates toidupoodides (Rimi, Selver, Prisma, Coop, Maxima).</p>
+      <p>Vastutav töötleja: <strong>Elynoy OÜ</strong><br>
+      Kontakt: <a href="mailto:info@seivy.ee">info@seivy.ee</a></p>
+    </div>
+
+    <div class="card">
+      <h2>2. Milliseid andmeid me kogume</h2>
+      <p>Kogume järgmisi andmeid:</p>
+      <ul>
+        <li><strong>Konto andmed:</strong> e-posti aadress, eesnimi, perekonnanimi — registreerimisel e-posti ja parooliga, Google Sign-In või Apple Sign-In kaudu</li>
+        <li><strong>Kasutusandmed:</strong> milliseid tooteid vaatad, milliseid tooteid ostukorvi lisad, millised poed sulle huvi pakuvad</li>
+        <li><strong>Asukohaandmed:</strong> ligikaudne asukoht lähedalasuvate poodide leidmiseks (ainult rakenduse kasutamise ajal)</li>
+        <li><strong>Ostukorvi ajalugu:</strong> eelnevad hinnavõrdlused ja ostukorvi koosseis</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3. Miks me andmeid kogume</h2>
+      <ul>
+        <li>Rakenduse toimimiseks ja personaliseeritud kogemuse pakkumiseks</li>
+        <li>Sagedamini valitud toodete eelistamiseks otsingutulemustes</li>
+        <li>Lähedalasuvate poodide kuvamiseks</li>
+        <li><strong>Agregeeritud kasutusstatistika müümiseks kauplusekettidele</strong> — näiteks milliseid tooteid võrreldakse kõige rohkem, millised tooted on populaarseimad jne. <em>Jagame ainult anonümiseeritud ja agregeeritud andmeid, mitte üksikute kasutajate andmeid.</em></li>
+      </ul>
+      <div class="highlight">
+        ⚠️ Müüme kauplusekettidele ainult anonüümset agregeeritud statistikat. Sinu isikuandmeid ei müüda kunagi kolmandatele osapooltele.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Andmete jagamine</h2>
+      <p>Jagame andmeid järgmiselt:</p>
+      <ul>
+        <li><strong>Google:</strong> kasutame Google Sign-In autentimiseks (Google privaatsuspoliitika kehtib)</li>
+        <li><strong>Apple:</strong> kasutame Apple Sign-In autentimiseks iOS seadmetel (Apple privaatsuspoliitika kehtib)</li>
+        <li><strong>Kauplusekettid:</strong> ainult anonümiseeritud agregeeritud statistika</li>
+        <li><strong>Teenusepakkujad:</strong> Railway (andmebaasihosting) — ainult rakenduse toimimiseks vajalik</li>
+      </ul>
+      <p>Sinu isikuandmeid ei jagata, müüda ega renditata kolmandatele osapooltele.</p>
+    </div>
+
+    <div class="card">
+      <h2>5. Sinu õigused (GDPR)</h2>
+      <ul>
+        <li><strong>Juurdepääs:</strong> saad küsida, milliseid andmeid me sinu kohta hoiame</li>
+        <li><strong>Parandamine:</strong> saad paluda ebaõigete andmete parandamist</li>
+        <li><strong>Kustutamine:</strong> saad paluda oma konto ja andmete kustutamist</li>
+        <li><strong>Vastuväide:</strong> saad esitada vastuväite andmete töötlemisele</li>
+        <li><strong>Kaebuse esitamine:</strong> sul on õigus esitada kaebus Andmekaitse Inspektsioonile (aki.ee)</li>
+      </ul>
+      <p style="margin-top:12px;">Konto kustutamiseks mine rakenduses: <em>Profiil → Kustuta konto</em></p>
+    </div>
+
+    <div class="card">
+      <h2>6. Andmete säilitamine</h2>
+      <p>Hoiame sinu andmeid nii kaua, kui sul on aktiivne konto. Konto kustutamisel eemaldatakse kõik isikuandmed 30 päeva jooksul.</p>
+    </div>
+
+    <div class="card">
+      <h2>7. Küpsised ja jälgimine</h2>
+      <p>Mobiilirakendus ei kasuta küpsiseid. Kasutame seansi tokenit (JWT) autentimiseks, mis salvestatakse turvaliselt sinu seadmes.</p>
+    </div>
+
+    <div class="contact-box">
+      <h2>Küsimused privaatsuse kohta?</h2>
+      <p style="color:#ccc; margin-bottom:8px;">Võta meiega ühendust:</p>
+      <a href="mailto:info@seivy.ee">info@seivy.ee</a>
+    </div>
+  </div>
+</div>
+
+<!-- IN ENGLISH -->
+<div id="lang-en" class="lang-section">
+  <div class="container">
+    <div class="section-label">Legal information</div>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: May 2026</p>
+
+    <div class="card">
+      <h2>1. Who we are</h2>
+      <p>Seivy is a mobile application developed by Elynoy OÜ that allows users to compare grocery prices across Estonia's major supermarket chains (Rimi, Selver, Prisma, Coop, Maxima).</p>
+      <p>Data controller: <strong>Elynoy OÜ</strong><br>
+      Contact: <a href="mailto:info@seivy.ee">info@seivy.ee</a></p>
+    </div>
+
+    <div class="card">
+      <h2>2. Data we collect</h2>
+      <p>We collect the following data:</p>
+      <ul>
+        <li><strong>Account data:</strong> email address, first name, last name — via email/password registration, Google Sign-In, or Apple Sign-In</li>
+        <li><strong>Usage data:</strong> which products you view, add to basket, and which stores interest you</li>
+        <li><strong>Location data:</strong> approximate location to find nearby stores (only while using the app)</li>
+        <li><strong>Basket history:</strong> previous price comparisons and basket contents</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3. Why we collect data</h2>
+      <ul>
+        <li>To operate the app and provide a personalised experience</li>
+        <li>To prioritise frequently selected products in search results</li>
+        <li>To display nearby stores</li>
+        <li><strong>To sell aggregated usage statistics to supermarket chains</strong> — for example, which products are compared most often, which products are most popular, etc. <em>We share only anonymised and aggregated data, never individual user data.</em></li>
+      </ul>
+      <div class="highlight">
+        ⚠️ We sell only anonymous aggregated statistics to supermarket chains. Your personal data is never sold to third parties.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Data sharing</h2>
+      <p>We share data as follows:</p>
+      <ul>
+        <li><strong>Google:</strong> we use Google Sign-In for authentication (Google's privacy policy applies)</li>
+        <li><strong>Apple:</strong> we use Apple Sign-In for authentication on iOS devices (Apple's privacy policy applies)</li>
+        <li><strong>Supermarket chains:</strong> anonymised aggregated statistics only</li>
+        <li><strong>Service providers:</strong> Railway (database hosting) — only what is necessary for the app to function</li>
+      </ul>
+      <p>Your personal data is not shared, sold, or rented to third parties.</p>
+    </div>
+
+    <div class="card">
+      <h2>5. Your rights (GDPR)</h2>
+      <ul>
+        <li><strong>Access:</strong> you may request what data we hold about you</li>
+        <li><strong>Rectification:</strong> you may request correction of inaccurate data</li>
+        <li><strong>Erasure:</strong> you may request deletion of your account and data</li>
+        <li><strong>Objection:</strong> you may object to the processing of your data</li>
+        <li><strong>Complaint:</strong> you have the right to lodge a complaint with the Estonian Data Protection Inspectorate (aki.ee)</li>
+      </ul>
+      <p style="margin-top:12px;">To delete your account, go in the app: <em>Profile → Delete account</em></p>
+    </div>
+
+    <div class="card">
+      <h2>6. Data retention</h2>
+      <p>We retain your data for as long as you have an active account. Upon account deletion, all personal data will be removed within 30 days.</p>
+    </div>
+
+    <div class="card">
+      <h2>7. Cookies and tracking</h2>
+      <p>The mobile app does not use cookies. We use a session token (JWT) for authentication, stored securely on your device.</p>
+    </div>
+
+    <div class="contact-box">
+      <h2>Questions about privacy?</h2>
+      <p style="color:#ccc; margin-bottom:8px;">Contact us:</p>
+      <a href="mailto:info@seivy.ee">info@seivy.ee</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 Elynoy OÜ · Seivy
+</footer>
+
+<script>
+  function setLang(lang) {
+    document.querySelectorAll('.lang-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('lang-' + lang).classList.add('active');
+    event.target.classList.add('active');
+    document.documentElement.lang = lang;
+  }
+</script>
+
+</body>
+</html>
