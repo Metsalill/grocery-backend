@@ -120,8 +120,7 @@ Return ONLY valid JSON:
 
 
 async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
-    """Leiab iga keti odavaima toote retsepti koostisosa jaoks.
-    Tagastab canonical chain key-ga (barbora -> maxima alias)."""
+    """Leiab iga keti odavaima toote retsepti koostisosa jaoks."""
     name_lower = ingredient_en.lower().strip()
     if name_lower in SKIP_INGREDIENTS:
         return {}
@@ -195,7 +194,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
                     "price": price,
                 }
 
-    # Alias barbora -> maxima (stores tabelis on chain='Maxima')
+    # Alias barbora -> maxima
     results_by_chain: Dict[str, Dict] = {}
     for chain_key, product in raw_by_chain.items():
         canonical = CHAIN_ALIASES.get(chain_key, chain_key)
@@ -421,7 +420,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "product_id": _as_int_or_none(it.get("product_id")),
                 })
 
-        # --- Retsepti koostisosad: leia iga keti odavaim per koostisosa ---
+        # --- Retsepti koostisosad ---
         import asyncio
         recipe_by_chain: Dict[str, Dict[str, Dict]] = {}
 
@@ -488,7 +487,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
 
-        # Hinnad tavalistele toodetele
+        # Hinnad
         by_store: Dict[int, Dict[int, float]] = {}
         if all_pids_for_prices:
             price_rows = await _latest_prices(conn, all_pids_for_prices, store_ids)
@@ -537,7 +536,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "line_total": _round2(best_price * qty),
                     })
 
-            # Retsepti koostisosad — chain on juba canonical (barbora->maxima aliasega)
+            # Retsepti koostisosad
             chain_recipe = recipe_by_chain.get(chain, {})
             for item in recipe_items:
                 ing_et = item["product"]
