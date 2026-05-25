@@ -25,17 +25,25 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     size_text = (row.get("size_text") or "").strip()
     is_per_kg = size_text.lower() == "kg"
     min_price = row.get("min_price")
+
     # Kasuta canonical_name grupeeritud toodete puhul — lühem ja puhtam nimi
     canonical = (row.get("canonical_name") or "").strip()
     name = canonical if canonical else (row.get("name") or "")
+
     # Ära kuva size_text kui maht on juba nimes (v.a kg-tooted)
     if not is_per_kg and size_text and _SIZE_IN_NAME_RE.search(name):
         size_text = ""
+
+    # Brand: kasuta group_brand kui see on seatud, muidu toote brand
+    group_brand = (row.get("group_brand") or "").strip()
+    product_brand = (row.get("brand") or "").strip()
+    display_brand = group_brand if group_brand else product_brand
+
     return {
         "id": row.get("id"),
         "name": name,
         "image_url": row.get("image_url"),
-        "brand": row.get("brand"),
+        "brand": display_brand,
         "manufacturer": row.get("manufacturer"),
         "size_text": size_text,
         "amount": row.get("amount"),
@@ -114,7 +122,8 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price, pg.canonical_name
+        SELECT b.*, gc.chains AS available_chains, gc.min_price,
+               pg.canonical_name, pg.brand AS group_brand
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
         LEFT JOIN product_groups pg ON pg.id = b.group_id
@@ -146,7 +155,8 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price, pg.canonical_name
+        SELECT b.*, gc.chains AS available_chains, gc.min_price,
+               pg.canonical_name, pg.brand AS group_brand
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
         LEFT JOIN product_groups pg ON pg.id = b.group_id
