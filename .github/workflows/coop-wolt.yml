@@ -191,7 +191,7 @@ jobs:
                       continue
 
                   params.append((
-                      "wolt",
+                      "coop",  # fix: oli "wolt"
                       ext_id,
                       r.get("name") or "",
                       "",
@@ -212,7 +212,6 @@ jobs:
                   success = False
                   for attempt in range(3):
                       try:
-                          # Fresh connection per batch — avoids Railway timeout
                           with psycopg.connect(db_url) as bconn:
                               with bconn.cursor() as cur:
                                   cur.executemany(SQL, batch)
@@ -222,10 +221,9 @@ jobs:
                           break
                       except Exception as e:
                           print(f"  [warn] batch {batch_num} attempt {attempt+1} failed: {e}")
-                          time.sleep(2 ** attempt)  # backoff: 1s, 2s, 4s
+                          time.sleep(2 ** attempt)
 
                   if not success:
-                      # Last resort: row-by-row
                       for p in batch:
                           for attempt in range(2):
                               try:
