@@ -38,6 +38,7 @@ from recipes import router as recipes_router
 from api.categories import router as categories_router
 from api.products import router as products_router
 from api.selections import router as selections_router
+from api.favourites import router as favourites_router
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -133,6 +134,7 @@ app.include_router(auth_router)
 app.include_router(compare_router)
 app.include_router(products_router)
 app.include_router(selections_router)
+app.include_router(favourites_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
@@ -146,6 +148,7 @@ if stores_router:
 # -------- Duplicate mounts under /api --------
 app.include_router(products_router, prefix="/api")
 app.include_router(selections_router, prefix="/api")
+app.include_router(favourites_router, prefix="/api")
 app.include_router(compare_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
 app.include_router(categories_router, prefix="/api")
