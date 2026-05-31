@@ -81,8 +81,8 @@ async def dashboard(request: Request):
         scraper_rows = await conn.fetch("""
             SELECT
                 chain,
-                MAX(updated_at) AS last_update,
-                COUNT(*) FILTER (WHERE updated_at >= NOW() - INTERVAL '24 hours') AS updated_today
+                MAX(last_seen_utc) AS last_update,
+                COUNT(*) FILTER (WHERE last_seen_utc >= NOW() - INTERVAL '24 hours') AS updated_today
             FROM products
             GROUP BY chain
             ORDER BY last_update DESC NULLS LAST
