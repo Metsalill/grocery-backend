@@ -82,11 +82,31 @@ jobs:
           retention-days: 3
 
   ingest:
-    name: ingest (all stores)
+    name: ingest (${{ matrix.store_host }})
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 90
     needs: crawl
     if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - store_id: "551"
+            store_host: "coop-prnu"
+          - store_id: "552"
+            store_host: "coop-laagri"
+          - store_id: "553"
+            store_host: "konsum-juri"
+          - store_id: "554"
+            store_host: "coop-miiduranna"
+          - store_id: "555"
+            store_host: "coop-akadeemia"
+          - store_id: "556"
+            store_host: "coop-lasname"
+          - store_id: "557"
+            store_host: "coop-mustakivi"
+          - store_id: "558"
+            store_host: "konsum-saku"
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
@@ -106,35 +126,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install psycopg
 
-      - name: Download all crawl artifacts
+      - name: Download crawl artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: wolt-csv-*-${{ github.run_id }}
+          name: wolt-csv-${{ matrix.store_host }}-${{ github.run_id }}
           path: out/
-          merge-multiple: true
 
       - name: Show downloaded CSVs
         run: |
           echo "Downloaded files:"
           ls -lah out/ || echo "(none)"
 
-      - name: Ingest all CSVs into DB
+      - name: Ingest CSV into DB
         run: |
           python3 - <<'PYEOF'
           import os, csv, glob, psycopg, datetime, time
 
           db_url = os.environ["DATABASE_URL"]
-
-          STORE_MAP = {
-              "coop-prnu":       551,
-              "coop-laagri":     552,
-              "konsum-juri":     553,
-              "coop-miiduranna": 554,
-              "coop-akadeemia":  555,
-              "coop-lasname":    556,
-              "coop-mustakivi":  557,
-              "konsum-saku":     558,
-          }
+          store_host = "${{ matrix.store_host }}"
+          store_id = int("${{ matrix.store_id }}")
 
           SQL = """
           SELECT upsert_product_and_price(
@@ -143,11 +153,11 @@ jobs:
           );
           """
 
-          BATCH_SIZE = 50  # smaller batches to avoid connection timeout
+          BATCH_SIZE = 50
 
           csvs = glob.glob("out/coop_wolt_*.csv")
           if not csvs:
-              print("[warn] No CSVs found in out/ — nothing to ingest.")
+              print(f"[warn] No CSVs found for {store_host} — nothing to ingest.")
               raise SystemExit(0)
 
           total_sent = 0
@@ -162,18 +172,6 @@ jobs:
 
               if not rows:
                   print(f"  -> empty, skipping")
-                  continue
-
-              sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
-              if sample_host not in STORE_MAP:
-                  for key in STORE_MAP:
-                      if key in csv_path:
-                          sample_host = key
-                          break
-
-              store_id = STORE_MAP.get(sample_host)
-              if not store_id:
-                  print(f"  -> [warn] unknown store_host '{sample_host}', skipping")
                   continue
 
               params = []
@@ -191,7 +189,7 @@ jobs:
                       continue
 
                   params.append((
-                      "coop",  # fix: oli "wolt"
+                      "coop",
                       ext_id,
                       r.get("name") or "",
                       "",
@@ -239,7 +237,7 @@ jobs:
                                       print(f"  [warn] row failed {p[1]}: {e2}")
                                   time.sleep(1)
 
-              print(f"  -> store_id={store_id} ({sample_host}): {sent} upserted, {errors} errors")
+              print(f"  -> store_id={store_id} ({store_host}): {sent} upserted, {errors} errors")
               total_sent += sent
               total_errors += errors
 
@@ -248,11 +246,9 @@ jobs:
 
       - name: Verify prices in DB
         run: |
-          psql "$DATABASE_URL" <<'SQL'
+          psql "$DATABASE_URL" -c "
           SELECT s.name, COUNT(p.id) AS prices, MAX(p.collected_at) AS last_seen
           FROM public.stores s
           LEFT JOIN public.prices p ON p.store_id = s.id
-          WHERE s.id IN (551, 552, 553, 554, 555, 556, 557, 558)
-          GROUP BY s.name
-          ORDER BY s.name;
-          SQL
+          WHERE s.id = ${{ matrix.store_id }}
+          GROUP BY s.name;"
