@@ -2,7 +2,7 @@ name: Barbora DB Scrape + Ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 18 * * *"
 concurrency:
   group: barbora-scrape
   cancel-in-progress: false
@@ -19,8 +19,8 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
-      STORE_ID: "441"   # Barbora ePood
-      SOFT_TIMEOUT_MIN: "340"   # flush & exit before GH kills us
+      STORE_ID: "441"
+      SOFT_TIMEOUT_MIN: "340"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
