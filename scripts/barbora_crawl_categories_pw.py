@@ -649,9 +649,28 @@ def ensure_category_loaded(page: Page, req_delay: float) -> None:
     page.wait_for_timeout(int(req_delay * 1000))
 
 def go_to_category(page: Page, url: str, req_delay: float) -> None:
-    page.goto(url, timeout=60000, wait_until="domcontentloaded")
-    ensure_ready(page)
-    ensure_category_loaded(page, req_delay)
+    """
+    FIX: retry with longer timeout after browser restarts.
+    Attempts 3 times with 10s/20s delays before raising.
+    """
+    for attempt in range(3):
+        try:
+            page.goto(url, timeout=120000, wait_until="domcontentloaded")
+            ensure_ready(page)
+            ensure_category_loaded(page, req_delay)
+            return
+        except Exception as e:
+            print(f"[warn] category goto failed (attempt {attempt+1}/3): {e}")
+            if attempt < 2:
+                wait_s = 10 * (attempt + 1)
+                print(f"[info] waiting {wait_s}s before retry...")
+                time.sleep(wait_s)
+                try:
+                    page.reload(timeout=60000, wait_until="domcontentloaded")
+                except Exception:
+                    pass
+            else:
+                raise
 
 def _set_query_param(u: str, key: str, value: str) -> str:
     parts = urlsplit(u)
