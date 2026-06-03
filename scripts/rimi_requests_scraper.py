@@ -250,7 +250,9 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
         print("[rimi-req] DATABASE_URL not set, skipping DB ingest.")
         return
 
-    pool = await asyncpg.create_pool(dsn)
+    # FIX: limit pool size to avoid TooManyConnectionsError
+    # 14 shards x 2 = 28 connections max (Railway limit ~30)
+    pool = await asyncpg.create_pool(dsn, min_size=1, max_size=2)
     try:
         upserted = 0
         for r in rows:
