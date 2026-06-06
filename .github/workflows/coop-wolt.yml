@@ -90,7 +90,7 @@ jobs:
   ingest:
     name: ingest (all stores)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 200
     needs: crawl
     if: always()
     env:
@@ -215,8 +215,6 @@ jobs:
                       batch_num = i // BATCH_SIZE + 1
                       for attempt in range(3):
                           try:
-                              # FIX: pipeline mode — send all queries without waiting
-                              # for each response, eliminating USA→Amsterdam latency
                               with conn.pipeline():
                                   with conn.cursor() as cur:
                                       cur.executemany(SQL, batch)
