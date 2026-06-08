@@ -30,7 +30,7 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install -U pip
-          pip install requests beautifulsoup4 lxml asyncpg
+          pip install requests beautifulsoup4 lxml "psycopg[binary]"
       - name: Run eCoop crawler (haapsalu | shard ${{ matrix.cat_index }})
         id: crawl
         run: |
