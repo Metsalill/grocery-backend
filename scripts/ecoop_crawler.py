@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Coop eCoop crawler — fast requests+BeautifulSoup version.
+Coop eCoop crawler - fast requests+BeautifulSoup version.
 
 Scrapes category listing pages only (no PDP visits).
 Handles subcategory containers recursively (up to depth 3).
-No Playwright needed — coophaapsalu.ee is server-side rendered WooCommerce.
+No Playwright needed - coophaapsalu.ee is server-side rendered WooCommerce.
 """
 
 import argparse
@@ -26,11 +26,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
-try:
-    import asyncpg
-except ImportError:
-    asyncpg = None
-
 # ---------------------------------------------------------------------------
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -38,7 +33,7 @@ UA = (
 )
 
 DIGITS_ONLY = re.compile(r"[^0-9]")
-SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
+SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|x)\s?\d*\b)", re.IGNORECASE)
 
 CSV_COLS = [
     "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm",
@@ -77,11 +72,6 @@ def map_store_id(store_host: str) -> int:
     if "vandra" in host:
         return 446
     return 0
-
-
-def _stable_bucket(s: str, buckets: int, salt: str = "") -> int:
-    h = hashlib.sha1((salt + "|" + s).encode("utf-8")).digest()
-    return int.from_bytes(h[:4], "big") % max(1, buckets)
 
 
 def _make_session() -> requests.Session:
@@ -132,7 +122,7 @@ def parse_price_text(text: str) -> Optional[float]:
             return float(m.group(1))
         except Exception:
             pass
-    m2 = re.search(r"(\d+)\s*€", text)
+    m2 = re.search(r"(\d+)\s*EUR", text)
     if m2:
         try:
             return float(m2.group(1))
@@ -142,7 +132,6 @@ def parse_price_text(text: str) -> Optional[float]:
 
 
 def get_subcategory_links(soup: BeautifulSoup, current_url: str, base_host: str) -> List[str]:
-    """Find subcategory links on a page that shows category tiles instead of products."""
     links = []
     seen = set()
 
@@ -169,7 +158,6 @@ def get_subcategory_links(soup: BeautifulSoup, current_url: str, base_host: str)
 
 
 def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) -> List[Dict]:
-    """Extract all product cards from a category listing page."""
     products = []
 
     cards = (
@@ -185,7 +173,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if "product-category" in card_classes:
             continue
 
-        # Name
         name = ""
         name_el = (
             card.select_one(".woocommerce-loop-product__title")
@@ -199,7 +186,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if not name:
             continue
 
-        # URL
         url = ""
         link_el = (
             card.select_one("a.woocommerce-loop-product__link")
@@ -209,7 +195,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if link_el:
             url = urljoin(base_url, link_el.get("href", ""))
 
-        # Price
         price = None
         sale_el = card.select_one(".price ins .amount bdi")
         if sale_el:
@@ -223,7 +208,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
             if amount_el:
                 price = parse_price_text(amount_el.get_text())
 
-        # Image
         image_url = ""
         img_el = card.select_one("img")
         if img_el:
@@ -231,7 +215,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
             if image_url.startswith("//"):
                 image_url = "https:" + image_url
 
-        # EAN/SKU
         ean_raw = None
         sku = None
 
@@ -245,7 +228,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if data_id:
             sku = str(data_id)
 
-        # Try EAN from image filename
         if image_url:
             img_filename = image_url.rstrip("/").split("/")[-1]
             img_stem = re.sub(r"\.[^.]+$", "", img_filename)
@@ -253,7 +235,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
             if len(digits) in (8, 12, 13, 14):
                 ean_raw = digits
 
-        # Fallback: try EAN from URL slug
         if not ean_raw and url:
             slug = url.rstrip("/").split("/")[-1]
             digits_in_slug = re.findall(r"\d{8,14}", slug)
@@ -399,18 +380,15 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# DB ingest — eraldi transaktion iga batchi jaoks + deadlock retry
+# DB ingest - psycopg3 pipeline mode (kiire, ei oota vastust iga rea kohta)
 # ---------------------------------------------------------------------------
 
-async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
+def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
     if store_id <= 0:
         print("[ecoop] STORE_ID not set, skipping DB ingest.")
         return
     if not rows:
         print("[ecoop] No rows to ingest.")
-        return
-    if not asyncpg:
-        print("[ecoop] asyncpg not installed, skipping DB ingest.")
         return
 
     dsn = os.environ.get("DATABASE_URL")
@@ -418,52 +396,47 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
         print("[ecoop] DATABASE_URL not set, skipping DB ingest.")
         return
 
-    sql = """
+    try:
+        import psycopg
+    except ImportError:
+        print("[ecoop] psycopg not installed, skipping DB ingest.")
+        return
+
+    SQL = """
         SELECT upsert_product_and_price(
-            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+            %s::text, %s::text, %s::text, %s::text, %s::text,
+            %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text
         );
     """
 
+    BATCH_SIZE = 500
     print(f"[ecoop] connecting to DB to upsert {len(rows)} rows...")
+
     try:
-        conn = await asyncpg.connect(dsn)
+        with psycopg.connect(dsn) as conn:
+            sent = 0
+            errors = 0
+            for i in range(0, len(rows), BATCH_SIZE):
+                batch = rows[i:i + BATCH_SIZE]
+                batch_num = i // BATCH_SIZE + 1
+                for attempt in range(3):
+                    try:
+                        with conn.pipeline():
+                            with conn.cursor() as cur:
+                                cur.executemany(SQL, batch)
+                        conn.commit()
+                        sent += len(batch)
+                        print(f"[ecoop] batch {batch_num}: upserted {len(batch)} rows (total: {sent})")
+                        break
+                    except Exception as e:
+                        print(f"[ecoop] batch {batch_num} attempt {attempt+1} failed: {e}")
+                        conn.rollback()
+                        time.sleep(2 ** attempt)
+                        if attempt == 2:
+                            errors += len(batch)
+            print(f"[ecoop] done: {sent} upserted, {errors} errors")
     except Exception as e:
-        print(f"[ecoop] DB connect failed: {e}")
-        return
-
-    sent = 0
-    errors = 0
-    BATCH = 50
-    MAX_RETRIES = 3
-
-    try:
-        for i in range(0, len(rows), BATCH):
-            batch = rows[i:i + BATCH]
-            batch_num = i // BATCH + 1
-
-            for attempt in range(MAX_RETRIES):
-                try:
-                    # Eraldi transaktion iga batchi jaoks — ei lukusta teisi sharde pikalt
-                    async with conn.transaction():
-                        await conn.executemany(sql, batch)
-                    sent += len(batch)
-                    print(f"[ecoop] batch {batch_num}: upserted {len(batch)} rows (total: {sent})")
-                    break  # success
-                except asyncpg.DeadlockDetectedError:
-                    wait = 0.5 * (attempt + 1)
-                    print(f"[ecoop] batch {batch_num} deadlock (attempt {attempt+1}/{MAX_RETRIES}), retry in {wait}s...")
-                    await asyncio.sleep(wait)
-                    if attempt == MAX_RETRIES - 1:
-                        errors += len(batch)
-                        print(f"[ecoop] batch {batch_num} failed after {MAX_RETRIES} attempts, skipping")
-                except Exception as e:
-                    errors += len(batch)
-                    print(f"[ecoop] batch {batch_num} failed: {e}")
-                    break  # muu viga, ära korda
-
-        print(f"[ecoop] upserted {sent} rows (errors: {errors})")
-    finally:
-        await conn.close()
+        print(f"[ecoop] DB connection failed: {e}")
 
 
 # ---------------------------------------------------------------------------
@@ -522,7 +495,7 @@ async def main(args):
         print(f"[cat] done: {len(products)} products")
         time.sleep(args.req_delay)
 
-    print(f"[done] total {len(all_rows)} rows → {out_path}")
+    print(f"[done] total {len(all_rows)} rows -> {out_path}")
 
     rows_for_db: List[Tuple] = []
     for r in all_rows:
@@ -548,7 +521,7 @@ async def main(args):
             r.get("url") or "",
         ))
 
-    await _bulk_ingest_to_db(rows_for_db, store_id)
+    _bulk_ingest_to_db(rows_for_db, store_id)
 
 
 def parse_args():
@@ -562,7 +535,6 @@ def parse_args():
     p.add_argument("--out", default="out/coop_ecoop.csv")
     p.add_argument("--req-delay", type=float, default=0.3)
     p.add_argument("--upsert-db", default="main")
-    # legacy flags kept for YML compatibility
     p.add_argument("--page-limit", type=int, default=0)
     p.add_argument("--max-products", type=int, default=0)
     p.add_argument("--headless", default="1")
