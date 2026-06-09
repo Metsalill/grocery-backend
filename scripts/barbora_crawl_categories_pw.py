@@ -21,6 +21,8 @@ Highlights
 - FIX: Age gate cookies set on every new browser context so they persist
   across browser restarts.
 - FIX: Rows with null price are skipped (not sent to DB).
+- FIX: Periodic browser restart every 200 products in MODE B to prevent
+  memory crash on large categories.
 """
 
 from __future__ import annotations
@@ -65,7 +67,7 @@ DEFAULT_HEADLESS = 1
 SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
 
 # Labels for brand/manufacturer in Barbora PDPs
-SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
+SPEC_KEYS_BRAND = {"kaubam\u00e4rk", "br\u00e4nd", "brand"}
 SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian etc.
@@ -121,7 +123,7 @@ def accept_cookies(page: Page) -> None:
     selectors = [
         "[data-testid='cookie-banner-accept-all']",
         "button#onetrust-accept-btn-handler",
-        "button:has-text('Nõustun')",
+        "button:has-text('N\u00f5ustun')",
         "button:has-text('Sain aru')",
         "button:has-text('Accept')",
         "button:has-text('OK')",
@@ -136,7 +138,7 @@ def accept_cookies(page: Page) -> None:
         except Exception:
             pass
     try:
-        page.get_by_role("button", name=re.compile("Nõus|Accept|OK", re.I)).click(timeout=800)
+        page.get_by_role("button", name=re.compile("N\u00f5us|Accept|OK", re.I)).click(timeout=800)
         page.wait_for_timeout(200)
     except Exception:
         pass
@@ -206,7 +208,7 @@ def _first_str(*vals) -> Optional[str]:
 def _clean_decimal(s: str) -> Optional[str]:
     """
     Normalize to a decimal string "X.YY".
-    Handles "3,49", "3.49", "3 49", "3€49", and strips % etc.
+    Handles "3,49", "3.49", "3 49", "3\u20ac49", and strips % etc.
     """
     if not s:
         return None
@@ -215,7 +217,7 @@ def _clean_decimal(s: str) -> Optional[str]:
     if re.fullmatch(r"\d+\s*%+", raw):
         return None
 
-    m = re.search(r"(\d[\d\s]*)\s*€\s*(\d{1,2})", raw)
+    m = re.search(r"(\d[\d\s]*)\s*\u20ac\s*(\d{1,2})", raw)
     if m:
         whole = re.sub(r"\D", "", m.group(1))
         cents = m.group(2)
@@ -272,8 +274,8 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
                 if val:
                     return val, "EUR"
 
-    # 4) scan text for "€"
-    for node in soup.find_all(string=re.compile("€")):
+    # 4) scan text for "\u20ac"
+    for node in soup.find_all(string=re.compile("\u20ac")):
         val = _clean_decimal(str(node))
         if val:
             return val, "EUR"
@@ -694,14 +696,14 @@ def next_page_if_any(page: Page) -> bool:
 
     selectors = [
         "a[rel='next']",
-        "a:has-text('Järgmine')",
+        "a:has-text('J\u00e4rgmine')",
         "a:has-text('Edasi')",
         "a:has-text('Next')",
         "a.pagination__link[aria-label*='Next']",
         "li.pagination-next a",
-        "a[aria-label='›'], a:has-text('›')",
-        "a[aria-label='»'], a:has-text('»')",
-        "button[aria-label='»'], button:has-text('»')",
+        "a[aria-label='\u203a'], a:has-text('\u203a')",
+        "a[aria-label='\u00bb'], a:has-text('\u00bb')",
+        "button[aria-label='\u00bb'], button:has-text('\u00bb')",
     ]
 
     for sel in selectors:
@@ -784,7 +786,7 @@ def collect_category_products(
         seen.add(u)
         uniq.append((u, t))
 
-    print(f"[cat] {cat_url} → {len(uniq)} products across {pages_done} page(s)")
+    print(f"[cat] {cat_url} \u2192 {len(uniq)} products across {pages_done} page(s)")
     return uniq
 
 # ---------------------------------------------------------------------
@@ -1114,11 +1116,14 @@ def crawl(args) -> None:
                         max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120,
                     )
                     if not prods:
-                        print(f"[cat] {cat} → 0 items (maybe geo/login/age gate).")
+                        print(f"[cat] {cat} \u2192 0 items (maybe geo/login/age gate).")
                         restart_browser("post-category")
                         continue
 
                     batch_csv: List[List[str]] = []
+                    # FIX: periodic restart to prevent memory crash on large categories
+                    processed_since_restart = 0
+                    RESTART_EVERY = 200
 
                     for url, listing_title in prods:
                         if budget_low():
@@ -1182,9 +1187,16 @@ def crawl(args) -> None:
                         )
 
                         total += 1
+                        processed_since_restart += 1
 
                         if len(batch_csv) >= 50:
                             append_rows(args.output_csv, batch_csv); batch_csv.clear()
+
+                        # Periodic restart every 200 products to prevent memory crash
+                        if processed_since_restart >= RESTART_EVERY:
+                            append_rows(args.output_csv, batch_csv); batch_csv.clear()
+                            processed_since_restart = 0
+                            restart_browser("periodic")
 
                         if req_delay:
                             time.sleep(req_delay)
@@ -1220,7 +1232,7 @@ def crawl(args) -> None:
 
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Barbora.ee category→PDP crawler (CSV + direct DB ingest)."
+        description="Barbora.ee category\u2192PDP crawler (CSV + direct DB ingest)."
     )
     p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
     p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
