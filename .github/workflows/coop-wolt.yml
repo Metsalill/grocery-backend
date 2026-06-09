@@ -84,7 +84,7 @@ jobs:
   ingest:
     name: ingest (all stores)
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 60
     needs: crawl
     if: always()
     env:
@@ -136,18 +136,84 @@ jobs:
               "konsum-saku":     558,
           }
 
-          # in_skip_product_update=true: ei uuenda olemasolevat products rida
-          # uus toode luuakse ikka INSERT-iga, ainult UPDATE jaatatakse vahele
-          # elimineerib deadlock-id products tabelil
-          SQL = """
-          SELECT upsert_product_and_price(
-              %s::text, %s::text, %s::text, %s::text, %s::text,
-              %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text,
-              true
-          );
-          """
-
           BATCH_SIZE = 500
+
+          # Otse SQL CTE -- ei kutsu PL/pgSQL funktsiooni, pipeline mode toimib
+          # 1. Leia product_id ext_product_map-ist (ext_id jargi)
+          # 2. Kui ei leia, leia products-ist EAN jargi
+          # 3. Kui ei leia, INSERT uus toode
+          # 4. Upsert ext_product_map
+          # 5. Upsert prices
+          SQL = """
+          WITH
+            cleaned_ean AS (
+              SELECT NULLIF(regexp_replace(%s::text, '[^0-9]', '', 'g'), '') AS ean
+            ),
+            existing_by_ext AS (
+              SELECT product_id
+              FROM ext_product_map
+              WHERE source = 'coop' AND ext_id = %s::text
+              LIMIT 1
+            ),
+            existing_by_ean AS (
+              SELECT p.id AS product_id
+              FROM products p, cleaned_ean c
+              WHERE c.ean IS NOT NULL
+                AND regexp_replace(COALESCE(p.ean,''), '[^0-9]', '', 'g') = c.ean
+              LIMIT 1
+            ),
+            resolved AS (
+              SELECT COALESCE(
+                (SELECT product_id FROM existing_by_ext),
+                (SELECT product_id FROM existing_by_ean)
+              ) AS product_id
+            ),
+            inserted AS (
+              INSERT INTO products (name, brand, size_text, ean, source_url, last_seen_utc, food_group, chain)
+              SELECT
+                %s::text, ''::text, %s::text,
+                (SELECT ean FROM cleaned_ean),
+                NULL, %s::timestamptz, NULL, 'coop'::text
+              WHERE (SELECT product_id FROM resolved) IS NULL
+              RETURNING id AS product_id
+            ),
+            final_id AS (
+              SELECT COALESCE(
+                (SELECT product_id FROM resolved),
+                (SELECT product_id FROM inserted)
+              ) AS product_id
+            ),
+            upsert_ext AS (
+              INSERT INTO ext_product_map
+                (source, ext_id, product_id, reason, confidence, last_seen, source_url, ean, updated_at)
+              SELECT
+                'coop', %s::text,
+                (SELECT product_id FROM final_id),
+                CASE WHEN (SELECT ean FROM cleaned_ean) IS NOT NULL THEN 'ean' ELSE 'created/no-ean' END,
+                CASE WHEN (SELECT ean FROM cleaned_ean) IS NOT NULL THEN 1.0 ELSE 0.5 END,
+                %s::timestamptz, NULL,
+                (SELECT ean FROM cleaned_ean),
+                %s::timestamptz
+              ON CONFLICT (source, ext_id) DO UPDATE SET
+                product_id = EXCLUDED.product_id,
+                reason     = EXCLUDED.reason,
+                confidence = EXCLUDED.confidence,
+                last_seen  = EXCLUDED.last_seen,
+                ean        = EXCLUDED.ean,
+                updated_at = EXCLUDED.updated_at
+            )
+          INSERT INTO prices (product_id, store_id, price, seen_at, collected_at, currency, source, source_url)
+          SELECT
+            (SELECT product_id FROM final_id),
+            %s::integer, %s::numeric, %s::timestamptz, %s::timestamptz,
+            'EUR', 'coop', NULL
+          ON CONFLICT (product_id, store_id) DO UPDATE SET
+            price        = EXCLUDED.price,
+            seen_at      = EXCLUDED.seen_at,
+            collected_at = EXCLUDED.collected_at,
+            currency     = EXCLUDED.currency,
+            source       = EXCLUDED.source;
+          """
 
           csvs = sorted(glob.glob("out/coop_wolt_*.csv"))
           if not csvs:
@@ -193,17 +259,18 @@ jobs:
                           continue
 
                       params.append((
-                          "coop",
-                          ext_id,
-                          r.get("name") or "",
-                          "",
-                          r.get("unit_info") or "",
-                          r.get("barcode_gtin") or "",
-                          price_val,
-                          "EUR",
-                          store_id,
-                          ts_now,
-                          "",
+                          r.get("barcode_gtin") or "",  # cleaned_ean
+                          ext_id,                        # existing_by_ext lookup
+                          r.get("name") or "",           # inserted.name
+                          r.get("unit_info") or "",      # inserted.size_text
+                          ts_now,                        # inserted.last_seen_utc
+                          ext_id,                        # upsert_ext.ext_id
+                          ts_now,                        # upsert_ext.last_seen
+                          ts_now,                        # upsert_ext.updated_at
+                          store_id,                      # prices.store_id
+                          price_val,                     # prices.price
+                          ts_now,                        # prices.seen_at
+                          ts_now,                        # prices.collected_at
                       ))
 
                   sent = 0
