@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "0 4 * * *"   # daily at 04:00 UTC
 
-# ---------------------------------------------------------------------------
-# Job 1: crawl — one runner per store, no DB access, 90min timeout
-# Job 2: ingest — ONE job after all crawls, loads all CSVs into DB
-# FIX: pipeline mode eliminates network round-trips (USA→Amsterdam)
-# ---------------------------------------------------------------------------
-
 jobs:
 
   crawl:
@@ -142,10 +136,14 @@ jobs:
               "konsum-saku":     558,
           }
 
+          # in_skip_product_update=true: ei uuenda olemasolevat products rida
+          # uus toode luuakse ikka INSERT-iga, ainult UPDATE jaatatakse vahele
+          # elimineerib deadlock-id products tabelil
           SQL = """
           SELECT upsert_product_and_price(
               %s::text, %s::text, %s::text, %s::text, %s::text,
-              %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text
+              %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text,
+              true
           );
           """
 
@@ -153,7 +151,7 @@ jobs:
 
           csvs = sorted(glob.glob("out/coop_wolt_*.csv"))
           if not csvs:
-              print("[warn] No CSVs found — nothing to ingest.")
+              print("[warn] No CSVs found -- nothing to ingest.")
               raise SystemExit(0)
 
           print(f"[ingest] Found {len(csvs)} CSV files: {csvs}")
