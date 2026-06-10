@@ -414,27 +414,35 @@ def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
 
     try:
         with psycopg.connect(dsn) as conn:
-            sent = 0
-            errors = 0
-            for i in range(0, len(rows), BATCH_SIZE):
-                batch = rows[i:i + BATCH_SIZE]
-                batch_num = i // BATCH_SIZE + 1
-                for attempt in range(3):
-                    try:
-                        with conn.pipeline():
-                            with conn.cursor() as cur:
-                                cur.executemany(SQL, batch)
-                        conn.commit()
-                        sent += len(batch)
-                        print(f"[ecoop] batch {batch_num}: upserted {len(batch)} rows (total: {sent})")
-                        break
-                    except Exception as e:
-                        print(f"[ecoop] batch {batch_num} attempt {attempt+1} failed: {e}")
-                        conn.rollback()
-                        time.sleep(2 ** attempt)
-                        if attempt == 2:
-                            errors += len(batch)
-            print(f"[ecoop] done: {sent} upserted, {errors} errors")
+            conn.execute("ALTER TABLE prices DISABLE TRIGGER trg_prices_mirror_from_online")
+            conn.commit()
+            print("[ecoop] mirror trigger disabled")
+            try:
+                sent = 0
+                errors = 0
+                for i in range(0, len(rows), BATCH_SIZE):
+                    batch = rows[i:i + BATCH_SIZE]
+                    batch_num = i // BATCH_SIZE + 1
+                    for attempt in range(3):
+                        try:
+                            with conn.pipeline():
+                                with conn.cursor() as cur:
+                                    cur.executemany(SQL, batch)
+                            conn.commit()
+                            sent += len(batch)
+                            print(f"[ecoop] batch {batch_num}: upserted {len(batch)} rows (total: {sent})")
+                            break
+                        except Exception as e:
+                            print(f"[ecoop] batch {batch_num} attempt {attempt+1} failed: {e}")
+                            conn.rollback()
+                            time.sleep(2 ** attempt)
+                            if attempt == 2:
+                                errors += len(batch)
+                print(f"[ecoop] done: {sent} upserted, {errors} errors")
+            finally:
+                conn.execute("ALTER TABLE prices ENABLE TRIGGER trg_prices_mirror_from_online")
+                conn.commit()
+                print("[ecoop] mirror trigger re-enabled")
     except Exception as e:
         print(f"[ecoop] DB connection failed: {e}")
 
