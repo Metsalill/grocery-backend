@@ -138,12 +138,6 @@ jobs:
 
           BATCH_SIZE = 500
 
-          # Otse SQL CTE -- ei kutsu PL/pgSQL funktsiooni, pipeline mode toimib
-          # 1. Leia product_id ext_product_map-ist (ext_id jargi)
-          # 2. Kui ei leia, leia products-ist EAN jargi
-          # 3. Kui ei leia, INSERT uus toode
-          # 4. Upsert ext_product_map
-          # 5. Upsert prices
           SQL = """
           WITH
             cleaned_ean AS (
@@ -227,77 +221,88 @@ jobs:
           ts_now = datetime.datetime.now(datetime.timezone.utc)
 
           with psycopg.connect(db_url) as conn:
-              for csv_path in csvs:
-                  print(f"[ingest] processing {csv_path}")
-                  t0 = time.time()
-                  with open(csv_path, newline="", encoding="utf-8") as f:
-                      reader = csv.DictReader(f)
-                      rows = list(reader)
+              # Disable mirror trigger to prevent pipeline mode deadlocks.
+              # Each Wolt store ingested separately so mirroring not needed here.
+              conn.execute("ALTER TABLE prices DISABLE TRIGGER trg_prices_mirror_from_online")
+              conn.commit()
+              print("[ingest] mirror trigger disabled")
+              try:
+                  for csv_path in csvs:
+                      print(f"[ingest] processing {csv_path}")
+                      t0 = time.time()
+                      with open(csv_path, newline="", encoding="utf-8") as f:
+                          reader = csv.DictReader(f)
+                          rows = list(reader)
 
-                  if not rows:
-                      print(f"  -> empty, skipping")
-                      continue
-
-                  sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
-                  store_id = STORE_MAP.get(sample_host)
-                  if not store_id:
-                      print(f"  -> [warn] unknown store_host={sample_host!r}, skipping")
-                      continue
-
-                  params = []
-                  for r in rows:
-                      price_raw = r.get("price") or ""
-                      try:
-                          price_val = float(price_raw)
-                      except (ValueError, TypeError):
-                          continue
-                      if price_val <= 0:
+                      if not rows:
+                          print(f"  -> empty, skipping")
                           continue
 
-                      ext_id = f"wolt:{r.get('item_id') or ''}" if r.get("item_id") else ""
-                      if not ext_id or ext_id == "wolt:":
+                      sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
+                      store_id = STORE_MAP.get(sample_host)
+                      if not store_id:
+                          print(f"  -> [warn] unknown store_host={sample_host!r}, skipping")
                           continue
 
-                      params.append((
-                          r.get("barcode_gtin") or "",  # cleaned_ean
-                          ext_id,                        # existing_by_ext lookup
-                          r.get("name") or "",           # inserted.name
-                          r.get("unit_info") or "",      # inserted.size_text
-                          ts_now,                        # inserted.last_seen_utc
-                          ext_id,                        # upsert_ext.ext_id
-                          ts_now,                        # upsert_ext.last_seen
-                          ts_now,                        # upsert_ext.updated_at
-                          store_id,                      # prices.store_id
-                          price_val,                     # prices.price
-                          ts_now,                        # prices.seen_at
-                          ts_now,                        # prices.collected_at
-                      ))
-
-                  sent = 0
-                  errors = 0
-                  for i in range(0, len(params), BATCH_SIZE):
-                      batch = params[i:i + BATCH_SIZE]
-                      batch_num = i // BATCH_SIZE + 1
-                      for attempt in range(3):
+                      params = []
+                      for r in rows:
+                          price_raw = r.get("price") or ""
                           try:
-                              with conn.pipeline():
-                                  with conn.cursor() as cur:
-                                      cur.executemany(SQL, batch)
-                              conn.commit()
-                              sent += len(batch)
-                              print(f"  [batch {batch_num}] {len(batch)} rows (total: {sent})")
-                              break
-                          except Exception as e:
-                              print(f"  [warn] batch {batch_num} attempt {attempt+1} failed: {e}")
-                              conn.rollback()
-                              time.sleep(2 ** attempt)
-                              if attempt == 2:
-                                  errors += len(batch)
+                              price_val = float(price_raw)
+                          except (ValueError, TypeError):
+                              continue
+                          if price_val <= 0:
+                              continue
 
-                  elapsed = time.time() - t0
-                  print(f"  -> {sample_host} (store_id={store_id}): {sent} upserted, {errors} errors [{elapsed:.1f}s]")
-                  total_sent += sent
-                  total_errors += errors
+                          ext_id = f"wolt:{r.get('item_id') or ''}" if r.get("item_id") else ""
+                          if not ext_id or ext_id == "wolt:":
+                              continue
+
+                          params.append((
+                              r.get("barcode_gtin") or "",  # cleaned_ean
+                              ext_id,                        # existing_by_ext lookup
+                              r.get("name") or "",           # inserted.name
+                              r.get("unit_info") or "",      # inserted.size_text
+                              ts_now,                        # inserted.last_seen_utc
+                              ext_id,                        # upsert_ext.ext_id
+                              ts_now,                        # upsert_ext.last_seen
+                              ts_now,                        # upsert_ext.updated_at
+                              store_id,                      # prices.store_id
+                              price_val,                     # prices.price
+                              ts_now,                        # prices.seen_at
+                              ts_now,                        # prices.collected_at
+                          ))
+
+                      sent = 0
+                      errors = 0
+                      for i in range(0, len(params), BATCH_SIZE):
+                          batch = params[i:i + BATCH_SIZE]
+                          batch_num = i // BATCH_SIZE + 1
+                          for attempt in range(3):
+                              try:
+                                  with conn.pipeline():
+                                      with conn.cursor() as cur:
+                                          cur.executemany(SQL, batch)
+                                  conn.commit()
+                                  sent += len(batch)
+                                  print(f"  [batch {batch_num}] {len(batch)} rows (total: {sent})")
+                                  break
+                              except Exception as e:
+                                  print(f"  [warn] batch {batch_num} attempt {attempt+1} failed: {e}")
+                                  conn.rollback()
+                                  time.sleep(2 ** attempt)
+                                  if attempt == 2:
+                                      errors += len(batch)
+
+                      elapsed = time.time() - t0
+                      print(f"  -> {sample_host} (store_id={store_id}): {sent} upserted, {errors} errors [{elapsed:.1f}s]")
+                      total_sent += sent
+                      total_errors += errors
+
+              finally:
+                  conn.execute("ALTER TABLE prices ENABLE TRIGGER trg_prices_mirror_from_online")
+                  conn.commit()
+                  print("[ingest] mirror trigger re-enabled")
 
           print(f"\n[done] Total: {total_sent} rows upserted, {total_errors} errors")
           PYEOF
