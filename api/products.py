@@ -26,21 +26,19 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     is_per_kg = size_text.lower() == "kg"
     min_price = row.get("min_price")
 
-    # Kasuta canonical_name grupeeritud toodete puhul — lühem ja puhtam nimi
     canonical = (row.get("canonical_name") or "").strip()
     name = canonical if canonical else (row.get("name") or "")
 
-    # Ära kuva size_text kui maht on juba nimes (v.a kg-tooted)
     if not is_per_kg and size_text and _SIZE_IN_NAME_RE.search(name):
         size_text = ""
 
-    # Brand: kasuta group_brand kui see on seatud, muidu toote brand
     group_brand = (row.get("group_brand") or "").strip()
     product_brand = (row.get("brand") or "").strip()
     display_brand = group_brand if group_brand else product_brand
 
     return {
         "id": row.get("id"),
+        "group_id": row.get("group_id"),
         "name": name,
         "image_url": row.get("image_url"),
         "brand": display_brand,
@@ -67,9 +65,12 @@ async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optiona
         return None
     try:
         import os
-        from jose import jwt, JWTError
+        from jose import jwt
         token = authorization.split(" ")[1]
-        SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
+        # Fix 6: ei kasuta vaikimisi saladust produktsioonis
+        SECRET_KEY = os.getenv("JWT_SECRET")
+        if not SECRET_KEY:
+            return None
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         email = (payload.get("sub") or "").lower()
         if not email:
@@ -114,6 +115,7 @@ def _build_dedup_sql(where_sql: str) -> str:
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key
             FROM products p
             LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+            LEFT JOIN product_groups pg ON pg.id = pgm.group_id
             {combined_where}
             ORDER BY
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text),
@@ -130,23 +132,31 @@ def _build_dedup_sql(where_sql: str) -> str:
     """
 
 
-def _build_personalized_sql(where_sql: str, user_id: int) -> str:
+def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
+    # Fix 1: grupi-tasemel personaliseerimine + Fix 7: user_id parameetrina
     if where_sql.strip().upper().startswith("WHERE"):
         combined_where = f"{where_sql} AND {PRICE_FRESHNESS_FILTER}"
     else:
         combined_where = f"WHERE {PRICE_FRESHNESS_FILTER}"
 
     return f"""
-        WITH base AS (
+        WITH selection_totals AS (
+            SELECT
+                COALESCE(pgm.group_id::text, 'u_' || ups.product_id::text) AS dedup_key,
+                SUM(ups.count) AS selection_count
+            FROM user_product_selections ups
+            LEFT JOIN product_group_members pgm ON pgm.product_id = ups.product_id
+            WHERE ups.user_id = ${user_param_index}
+            GROUP BY COALESCE(pgm.group_id::text, 'u_' || ups.product_id::text)
+        ),
+        base AS (
             SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
                 p.*,
                 pgm.group_id,
-                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key,
-                COALESCE(ups.count, 0) AS selection_count
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key
             FROM products p
             LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
-            LEFT JOIN user_product_selections ups
-                ON ups.product_id = p.id AND ups.user_id = {user_id}
+            LEFT JOIN product_groups pg ON pg.id = pgm.group_id
             {combined_where}
             ORDER BY
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text),
@@ -155,9 +165,11 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price,
+        SELECT b.*, COALESCE(st.selection_count, 0) AS selection_count,
+               gc.chains AS available_chains, gc.min_price,
                pg.canonical_name, pg.brand AS group_brand
         FROM base b
+        LEFT JOIN selection_totals st ON st.dedup_key = b.dedup_key
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
         LEFT JOIN product_groups pg ON pg.id = b.group_id
     """
@@ -193,7 +205,11 @@ async def list_products(
 
     if q:
         params.append(f"%{q}%")
-        where.append(f"p.name ILIKE ${len(params)}")
+        # Fix 2: otsing ka canonical_name ja brand järgi
+        where.append(
+            f"(p.name ILIKE ${len(params)} OR pg.canonical_name ILIKE ${len(params)}"
+            f" OR p.brand ILIKE ${len(params)} OR pg.brand ILIKE ${len(params)})"
+        )
 
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
@@ -202,33 +218,41 @@ async def list_products(
             user_id = await _get_user_id_from_token(conn, authorization)
 
             if user_id:
-                dedup_sql = _build_personalized_sql(where_sql, user_id)
-                order_clause = "ORDER BY selection_count DESC, name"
+                user_param_index = len(params) + 1
+                params_for_query = params + [user_id]
+                dedup_sql = _build_personalized_sql(where_sql, user_param_index)
+                order_clause = "ORDER BY selection_count DESC, COALESCE(NULLIF(canonical_name, ''), name), id"
             else:
+                params_for_query = params
                 dedup_sql = _build_dedup_sql(where_sql)
-                order_clause = "ORDER BY name"
+                order_clause = "ORDER BY COALESCE(NULLIF(canonical_name, ''), name), id"
 
-            params_with_paging = params + [limit, offset]
+            # Fix 3: laadi limit+1 rida has_more täpseks arvutuseks
+            fetch_limit = limit + 1
+            params_with_paging = params_for_query + [fetch_limit, offset]
+            limit_param = len(params_for_query) + 1
+            offset_param = len(params_for_query) + 2
+
             data_sql = (
                 f"SELECT * FROM ({dedup_sql}) AS deduped\n"
                 f"{order_clause}\n"
-                f"LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
+                f"LIMIT ${limit_param} OFFSET ${offset_param}"
             )
 
             rows = await conn.fetch(data_sql, *params_with_paging)
 
+        # Fix 3: täpne has_more
+        has_more = len(rows) > limit
+        rows = rows[:limit]
         items = [_row_to_safe_product(dict(r)) for r in rows]
-
-        has_more = len(items) == limit
-        estimated_total = offset + len(items) + (1 if has_more else 0)
 
         return {
             "items": items,
-            "total": estimated_total,
             "offset": offset,
             "limit": limit,
             "count": len(items),
             "has_more": has_more,
+            "next_offset": offset + len(items) if has_more else None,
             "filters": {
                 "q": q or None,
                 "main_code": main_code,
@@ -250,13 +274,23 @@ async def search_products(
     limit = min(limit, 50)
     q = q.strip()
 
+    # Fix 5: tühik otsingus
+    if not q:
+        raise HTTPException(status_code=422, detail="Search query cannot be empty")
+
     pool = await _get_pool(request)
 
-    where_sql = "WHERE p.name ILIKE $1"
+    # Fix 2: otsing ka canonical_name ja brand järgi
+    where_sql = """WHERE (
+        p.name ILIKE $1
+        OR pg.canonical_name ILIKE $1
+        OR p.brand ILIKE $1
+        OR pg.brand ILIKE $1
+    )"""
     dedup_sql = _build_dedup_sql(where_sql)
     sql = f"""
         SELECT * FROM ({dedup_sql}) AS deduped
-        ORDER BY name
+        ORDER BY COALESCE(NULLIF(canonical_name, ''), name), id
         LIMIT $2
     """
 
@@ -265,7 +299,6 @@ async def search_products(
             rows = await conn.fetch(sql, f"%{q}%", limit)
 
         items = [_row_to_safe_product(dict(r)) for r in rows]
-
         return {"items": items, "count": len(items), "q": q}
 
     except Exception as e:
@@ -282,10 +315,23 @@ async def get_product(
 
     try:
         async with pool.acquire() as conn:
-            row = await conn.fetchrow(
-                "SELECT p.* FROM products p WHERE p.id = $1 LIMIT 1",
-                product_id,
-            )
+            # Fix 4: täielik vastus group_id, canonical_name, chains, min_price-ga
+            row = await conn.fetchrow("""
+                SELECT
+                    p.*,
+                    pgm.group_id,
+                    gc.chains AS available_chains,
+                    gc.min_price,
+                    pg.canonical_name,
+                    pg.brand AS group_brand
+                FROM products p
+                LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+                LEFT JOIN mv_group_chains gc
+                    ON gc.dedup_key = COALESCE(pgm.group_id::text, 'u_' || p.id::text)
+                LEFT JOIN product_groups pg ON pg.id = pgm.group_id
+                WHERE p.id = $1
+                LIMIT 1
+            """, product_id)
 
         if not row:
             raise HTTPException(status_code=404, detail="Product not found")
