@@ -319,7 +319,8 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
     # Top tooted tabel
     products_html = ""
     for i, r in enumerate(top_products):
-        products_html += f"<tr><td style='color:#aaa'>{i+1}</td><td>{r['name'] or f'ID {r[\"product_id\"]}'}</td><td><b>{r['adds']}</b></td></tr>"
+        pid_label = r['name'] or f"ID {r['product_id']}"
+        products_html += f"<tr><td style='color:#aaa'>{i+1}</td><td>{pid_label}</td><td><b>{r['adds']}</b></td></tr>"
     if not products_html:
         products_html = "<tr><td colspan='3' style='color:#aaa'>Andmed puuduvad</td></tr>"
 
