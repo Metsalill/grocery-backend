@@ -1,4 +1,3 @@
-# main.py
 import os
 import sys
 import logging
@@ -40,6 +39,7 @@ from api.products import router as products_router
 from api.selections import router as selections_router
 from api.favourites import router as favourites_router
 from api.family import router as family_router
+from api.analytics import router as analytics_router
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -144,6 +144,7 @@ app.include_router(upload_image_router)
 app.include_router(image_admin_router)
 app.include_router(categories_router)
 app.include_router(recipes_router)
+app.include_router(analytics_router)
 if stores_router:
     app.include_router(stores_router)
 
@@ -156,6 +157,7 @@ app.include_router(compare_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
 app.include_router(categories_router, prefix="/api")
 app.include_router(recipes_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 if stores_router:
     app.include_router(stores_router, prefix="/api")
 
