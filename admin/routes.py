@@ -172,7 +172,7 @@ async def dashboard(request: Request):
 </style>
 </head><body>
 <h1>Seivy Admin</h1>
-<a class="analytics-link" href="/admin/analytics">📊 Vaata Analytics Dashboardi</a>
+<a class="analytics-link" href="{_analytics_href}">📊 Vaata Analytics Dashboardi</a>
 
 <h2>Kasutajad</h2>
 <div class="grid">
