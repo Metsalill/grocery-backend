@@ -221,7 +221,7 @@ async def dashboard(request: Request):
 
 
 @router.get("/admin/analytics", response_class=HTMLResponse)
-async def analytics_dashboard(request: Request, token: str = None, days: int = 30):
+async def analytics_dashboard(request: Request, token: str = None, days: int = 30, chain: str = None):
     import json, os
     from html import escape
     from urllib.parse import urlencode
@@ -243,9 +243,9 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         return HTMLResponse("<h2>Ligipääs keelatud. Token puudub.</h2>", status_code=403)
 
     if admin_token and token == admin_token:
-        chain = None  # admin näeb kõiki
+        pass  # admin — chain tuleb URL-ist (võib olla None = kõik ketid)
     elif token in TOKEN_MAP:
-        chain = TOKEN_MAP[token]
+        chain = TOKEN_MAP[token]  # keti token lukustab chain
     else:
         return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
 
