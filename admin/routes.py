@@ -217,11 +217,34 @@ async def dashboard(request: Request):
     return HTMLResponse(html)
 
 
-@router.get("/admin/analytics", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
-async def analytics_dashboard(request: Request, chain: str = None, days: int = 30):
-    import json
+@router.get("/admin/analytics", response_class=HTMLResponse)
+async def analytics_dashboard(request: Request, token: str = None, days: int = 30):
+    import json, os
     from html import escape
     from urllib.parse import urlencode
+
+    # Token -> chain mapping
+    TOKEN_MAP = {
+        os.environ.get("ANALYTICS_TOKEN_SELVER", ""): "selver",
+        os.environ.get("ANALYTICS_TOKEN_RIMI", ""): "rimi",
+        os.environ.get("ANALYTICS_TOKEN_PRISMA", ""): "prisma",
+        os.environ.get("ANALYTICS_TOKEN_COOP", ""): "coop",
+        os.environ.get("ANALYTICS_TOKEN_MAXIMA", ""): "maxima",
+    }
+    TOKEN_MAP.pop("", None)  # eemalda tühi võti kui env puudub
+
+    # Admin token annab kõigi kettide vaate
+    admin_token = os.environ.get("ANALYTICS_TOKEN_ADMIN", "")
+
+    if not token:
+        return HTMLResponse("<h2>Ligipääs keelatud. Token puudub.</h2>", status_code=403)
+
+    if admin_token and token == admin_token:
+        chain = None  # admin näeb kõiki
+    elif token in TOKEN_MAP:
+        chain = TOKEN_MAP[token]
+    else:
+        return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
 
     if getattr(request.app.state, "db", None) is None:
         return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
@@ -232,7 +255,7 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
             FROM analytics_events
             WHERE event_type = 'basket_win'
               AND created_at >= NOW() - ($1 || ' days')::INTERVAL
-              AND ($2::text IS NULL OR chain = $2)
+              AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
             GROUP BY chain
             ORDER BY wins DESC
         """, str(days), chain)
@@ -247,7 +270,7 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
             WHERE a.event_type = 'basket_add'
               AND a.product_id IS NOT NULL
               AND a.created_at >= NOW() - ($1 || ' days')::INTERVAL
-              AND ($2::text IS NULL OR a.chain = $2)
+              AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
             GROUP BY a.product_id, p.name
             ORDER BY adds DESC
             LIMIT 10
@@ -260,7 +283,7 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
                 COUNT(*) AS cnt
             FROM analytics_events
             WHERE created_at >= NOW() - INTERVAL '14 days'
-              AND ($1::text IS NULL OR chain = $1)
+              AND ($1::text IS NULL OR LOWER(chain) = LOWER($1))
             GROUP BY DATE(created_at), event_type
             ORDER BY day ASC
         """, chain)
@@ -273,20 +296,16 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
                 COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS unique_users
             FROM analytics_events
             WHERE created_at >= NOW() - ($1 || ' days')::INTERVAL
-              AND ($2::text IS NULL OR chain = $2)
+              AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
         """, str(days), chain)
 
-    # Chain filter pills
-    CHAINS = [("all", "Kõik"), ("selver", "Selver"), ("rimi", "Rimi"), ("prisma", "Prisma"), ("coop", "Coop"), ("maxima", "Maxima")]
-    chain_filter = chain or "all"
-    chain_btns = "".join(
-        f'<a class="filter-pill{"  active" if (value == "all" and not chain) or value == chain else ""}" href="/admin/analytics?{urlencode({"chain": value, "days": days}) if value != "all" else urlencode({"days": days})}">{escape(label)}</a>'
-        for value, label in CHAINS
-    )
+    # Chain filter — ketil ainult oma chain, adminil kõik
+    chain_filter_name = chain.capitalize() if chain else "Kõik ketid"
+    chain_btns = ""  # ketil pole chain filtrit
 
-    # Days filter pills
+    # Days filter pills — token säilib URL-is
     days_btns = "".join(
-        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?{urlencode({"days": period, "chain": chain}) if chain else urlencode({"days": period})}">{period}p</a>'
+        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?token={escape(token)}&days={period}">{period}p</a>'
         for period in [7, 14, 30, 90]
     )
 
