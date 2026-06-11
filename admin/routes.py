@@ -299,13 +299,24 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
               AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
         """, str(days), chain)
 
-    # Chain filter — ketil ainult oma chain, adminil kõik
+    # Kas admin token?
+    is_admin = admin_token and token == admin_token
     chain_filter_name = chain.capitalize() if chain else "Kõik ketid"
-    chain_btns = ""  # ketil pole chain filtrit
+
+    # Chain filter — ainult adminile
+    CHAINS = [("", "Kõik"), ("selver", "Selver"), ("rimi", "Rimi"), ("prisma", "Prisma"), ("coop", "Coop"), ("maxima", "Maxima")]
+    if is_admin:
+        chain_btns = "".join(
+            f'<a class="filter-pill{"  active" if (not chain and not value) or value == chain else ""}" href="/admin/analytics?token={escape(token)}&days={days}{"&chain=" + value if value else ""}">{escape(label)}</a>'
+            for value, label in CHAINS
+        )
+    else:
+        chain_btns = ""  # ketil pole chain filtrit
 
     # Days filter pills — token säilib URL-is
+    chain_param = f"&chain={chain}" if chain else ""
     days_btns = "".join(
-        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?token={escape(token)}&days={period}">{period}p</a>'
+        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?token={escape(token)}&days={period}{chain_param}">{period}p</a>'
         for period in [7, 14, 30, 90]
     )
 
