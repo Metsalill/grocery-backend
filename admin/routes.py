@@ -383,8 +383,9 @@ button, a {{ font: inherit; }}
 .eyebrow::before {{ width: 18px; height: 2px; border-radius: 999px; background: var(--accent); content: ""; }}
 h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spacing: -.045em; line-height: 1.08; }}
 .heading-description {{ max-width: 690px; margin: 12px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.65; }}
-.period-summary {{ flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 650; }}
-.period-summary strong {{ color: var(--text); }}
+.period-summary {{ flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); font-size: 13px; font-weight: 650; }}
+.period-summary span {{ display: block; margin-bottom: 3px; color: var(--text-secondary); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }}
+.period-summary strong {{ display: block; color: var(--text); font-size: 14px; }}
 .filters-panel {{ display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); gap: 24px; }}
 .filter-groups {{ display: flex; flex-wrap: wrap; gap: 26px; }}
 .filter-group {{ display: flex; flex-direction: column; gap: 9px; }}
@@ -468,10 +469,11 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
   <section class="page-heading">
     <div>
       <div class="eyebrow">Jaeketi ülevaade</div>
-      <h1>{title}</h1>
-      <p class="heading-description">Ülevaade sellest, kuidas kasutajad teie tooteid vaatavad, ostukorvi lisavad ja millistes hinnavõrdlustes saavutab kett soodsaima ostukorvi tulemuse.</p>
+      <h1>Jaekettide tulemuslikkus</h1>
+  <p style="margin:6px 0 0;color:var(--text-secondary);font-size:16px;font-weight:500">{title}</p>
+      <p class="heading-description">{'Ülevaade sellest, kuidas kasutajad ' + chain.capitalize() + ' tooteid vaatavad, ostukorvi lisavad ja millistes hinnavõrdlustes saavutab kett soodsaima ostukorvi tulemuse.' if chain else 'Ülevaade sellest, kuidas kasutajad tooteid vaatavad, ostukorvi lisavad ja millised jaeketid saavutavad hinnavõrdlustes soodsaima ostukorvi tulemuse.'}</p>
     </div>
-    <div class="period-summary">Analüüsiperiood<strong>viimased {days} päeva</strong></div>
+    <div class="period-summary"><span>Analüüsiperiood</span><strong>Viimased {days} päeva</strong></div>
   </section>
 
   <section class="filters-panel">
@@ -555,7 +557,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <div class="panel-header">
           <div>
             <h2 class="panel-title">Soodsaima korvi positsioon</h2>
-            <p class="panel-description">Kui sageli saavutas kett kogu ostukorvi madalaima hinna.</p>
+            <p class="panel-description">Kui sageli saavutas kett võrreldud ostukorvide seas madalaima koguhinna.</p>
           </div>
         </div>
         <div class="ranking-list">{wins_html}</div>
@@ -565,7 +567,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <div class="panel-header">
           <div>
             <h2 class="panel-title">Aktiivsuse trend</h2>
-            <p class="panel-description">Korvi lisamised ja võidud samal ajaskaalal.</p>
+            <p class="panel-description">Korvi lisamised ja võidud samal ajaskaalal (kuvab vähemalt 2 päeva andmetega).</p>
           </div>
         </div>
         <div class="chart-wrapper compact">
@@ -626,7 +628,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
   }}
 
   const lineCanvas = document.getElementById("activityOverviewChart");
-  if (lineCanvas) {{
+  if (lineCanvas && labels.length >= 2) {{
     new Chart(lineCanvas, {{
       type: "line",
       data: {{
@@ -646,6 +648,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         scales: sharedScales
       }}
     }});
+  }} else if (lineCanvas) {{
+    lineCanvas.parentElement.innerHTML = '<div class="empty-state">Trendi kuvamiseks on vaja vähemalt kahe päeva andmeid.</div>';
   }}
 }})();
 </script>
