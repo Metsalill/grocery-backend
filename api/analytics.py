@@ -22,10 +22,28 @@ async def log_event(event: AnalyticsEvent, request: Request):
     if event.event_type not in valid_event_types:
         raise HTTPException(status_code=400, detail=f"Invalid event_type. Must be one of: {valid_event_types}")
 
-    # Normaliseeri chain väiketähtedeks
+    db = request.app.state.db
+
+    # Normaliseeri chain väiketähtedeks (basket_win jms)
     chain_normalized = event.chain.lower() if event.chain else None
 
-    db = request.app.state.db
+    # basket_add: leia odavaim kett automaatselt product_id järgi
+    if event.event_type == 'basket_add' and event.product_id and not chain_normalized:
+        try:
+            cheapest_chain = await db.fetchval("""
+                SELECT s.chain
+                FROM prices pr
+                JOIN stores s ON s.id = pr.store_id
+                WHERE pr.product_id = $1
+                  AND pr.price IS NOT NULL
+                ORDER BY pr.price ASC
+                LIMIT 1
+            """, event.product_id)
+            if cheapest_chain:
+                chain_normalized = cheapest_chain.lower()
+        except Exception as e:
+            logger.warning(f"Could not resolve chain for product {event.product_id}: {e}")
+
     try:
         await db.execute(
             """
