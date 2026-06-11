@@ -219,12 +219,15 @@ async def dashboard(request: Request):
 
 @router.get("/admin/analytics", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
 async def analytics_dashboard(request: Request, chain: str = None, days: int = 30):
+    import json
+    from html import escape
+    from urllib.parse import urlencode
+
     if getattr(request.app.state, "db", None) is None:
         return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
 
     async with request.app.state.db.acquire() as conn:
-        # Korvi võitjad ketiti
-        basket_wins = await conn.fetch("""
+        basket_wins_rows = await conn.fetch("""
             SELECT chain, COUNT(*) AS wins
             FROM analytics_events
             WHERE event_type = 'basket_win'
@@ -234,21 +237,7 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
             ORDER BY wins DESC
         """, str(days), chain)
 
-        # Korvi lisamised ketiti
-        basket_adds = await conn.fetch("""
-            SELECT
-                a.chain,
-                COUNT(*) AS adds
-            FROM analytics_events a
-            WHERE a.event_type = 'basket_add'
-              AND a.created_at >= NOW() - ($1 || ' days')::INTERVAL
-              AND ($2::text IS NULL OR a.chain = $2)
-            GROUP BY a.chain
-            ORDER BY adds DESC
-        """, str(days), chain)
-
-        # Populaarseimad tooted korvi lisamisel
-        top_products = await conn.fetch("""
+        top_products_rows = await conn.fetch("""
             SELECT
                 a.product_id,
                 p.name,
@@ -264,8 +253,7 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
             LIMIT 10
         """, str(days), chain)
 
-        # Päevane aktiivsus viimased 14 päeva
-        daily = await conn.fetch("""
+        daily_rows = await conn.fetch("""
             SELECT
                 DATE(created_at) AS day,
                 event_type,
@@ -274,10 +262,9 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
             WHERE created_at >= NOW() - INTERVAL '14 days'
               AND ($1::text IS NULL OR chain = $1)
             GROUP BY DATE(created_at), event_type
-            ORDER BY day DESC
+            ORDER BY day ASC
         """, chain)
 
-        # Kokku statistika
         totals = await conn.fetchrow("""
             SELECT
                 COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
@@ -289,120 +276,379 @@ async def analytics_dashboard(request: Request, chain: str = None, days: int = 3
               AND ($2::text IS NULL OR chain = $2)
         """, str(days), chain)
 
-    # Chain filter nupud
-    all_chains = ['selver', 'rimi', 'prisma', 'coop', 'maxima']
-    chain_btns = '<a href="/admin/analytics" style="margin:4px;padding:6px 14px;background:{}; color:white;border-radius:20px;text-decoration:none;font-size:0.85rem">Kõik</a>'.format(
-        '#FF9100' if not chain else '#ccc'
+    # Chain filter pills
+    CHAINS = [("all", "Kõik"), ("selver", "Selver"), ("rimi", "Rimi"), ("prisma", "Prisma"), ("coop", "Coop"), ("maxima", "Maxima")]
+    chain_filter = chain or "all"
+    chain_btns = "".join(
+        f'<a class="filter-pill{"  active" if (value == "all" and not chain) or value == chain else ""}" href="/admin/analytics?{urlencode({"chain": value, "days": days}) if value != "all" else urlencode({"days": days})}">{escape(label)}</a>'
+        for value, label in CHAINS
     )
-    for c in all_chains:
-        active = chain and chain.lower() == c.lower()
-        chain_btns += f'<a href="/admin/analytics?chain={c}&days={days}" style="margin:4px;padding:6px 14px;background:{"#FF9100" if active else "#ccc"};color:white;border-radius:20px;text-decoration:none;font-size:0.85rem">{c.capitalize()}</a>'
 
-    # Days filter nupud
-    days_btns = ''
-    for d in [7, 14, 30, 90]:
-        active = days == d
-        chain_param = f'&chain={chain}' if chain else ''
-        days_btns += f'<a href="/admin/analytics?days={d}{chain_param}" style="margin:4px;padding:6px 14px;background:{"#FF9100" if active else "#ccc"};color:white;border-radius:20px;text-decoration:none;font-size:0.85rem">{d}p</a>'
+    # Days filter pills
+    days_btns = "".join(
+        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?{urlencode({"days": period, "chain": chain}) if chain else urlencode({"days": period})}">{period}p</a>'
+        for period in [7, 14, 30, 90]
+    )
 
-    # Basket wins tabel
-    wins_html = ""
-    total_wins = sum(r['wins'] for r in basket_wins) or 1
-    for r in basket_wins:
-        pct = round(r['wins'] / total_wins * 100, 1)
-        bar = f'<div style="height:8px;background:#FF9100;border-radius:4px;width:{pct}%"></div>'
-        wins_html += f"<tr><td><b>{r['chain'] or '—'}</b></td><td>{r['wins']}</td><td style='width:40%'>{bar} {pct}%</td></tr>"
+    # Wins HTML
+    max_wins = max((r['wins'] for r in basket_wins_rows), default=0)
+    wins_html = "".join(
+        f"""<div class="ranking-item">
+            <div class="ranking-row">
+                <div class="ranking-name"><span class="ranking-position">{i}</span><span>{escape(r['chain'] or '—')}</span></div>
+                <span class="ranking-count">{r['wins']:,}<small> võitu</small></span>
+            </div>
+            <div class="progress-track"><span class="progress-fill" style="--bar-width:{round(r['wins']/max_wins*100,1) if max_wins else 0}%"></span></div>
+        </div>"""
+        for i, r in enumerate(basket_wins_rows, 1)
+    ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel korvi võitude andmeid.</div>'
 
-    if not wins_html:
-        wins_html = "<tr><td colspan='3' style='color:#aaa'>Andmed puuduvad</td></tr>"
+    # Products HTML
+    max_adds = max((r['adds'] for r in top_products_rows), default=0)
+    products_html = "".join(
+        f"""<div class="product-row">
+            <span class="product-rank">{i}</span>
+            <div class="product-content">
+                <div class="product-name" title="{escape(r['name'] or '')}">{escape(r['name'] or f'ID {r["product_id"]}')}</div>
+                <div class="product-bar-track"><span class="product-bar-fill" style="--bar-width:{round(r['adds']/max_adds*100,1) if max_adds else 0}%"></span></div>
+            </div>
+            <div class="product-count">{r['adds']:,}<small>lisamist</small></div>
+        </div>"""
+        for i, r in enumerate(top_products_rows, 1)
+    ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel toodete lisamise andmeid.</div>'
 
-    # Top tooted tabel
-    products_html = ""
-    for i, r in enumerate(top_products):
-        pid_label = r['name'] or f"ID {r['product_id']}"
-        products_html += f"<tr><td style='color:#aaa'>{i+1}</td><td>{pid_label}</td><td><b>{r['adds']}</b></td></tr>"
-    if not products_html:
-        products_html = "<tr><td colspan='3' style='color:#aaa'>Andmed puuduvad</td></tr>"
-
-    # Päevane aktiivsus tabel
+    # Daily chart data
     daily_dict = {}
-    for r in daily:
+    for r in daily_rows:
         d = str(r['day'])
         if d not in daily_dict:
             daily_dict[d] = {}
         daily_dict[d][r['event_type']] = r['cnt']
 
-    daily_html = ""
-    for day in sorted(daily_dict.keys(), reverse=True):
-        data = daily_dict[day]
-        daily_html += f"""<tr>
-            <td>{day}</td>
-            <td>{data.get('basket_add', 0)}</td>
-            <td>{data.get('basket_win', 0)}</td>
-            <td>{data.get('product_view', 0)}</td>
-        </tr>"""
-    if not daily_html:
-        daily_html = "<tr><td colspan='4' style='color:#aaa'>Andmed puuduvad</td></tr>"
+    sorted_days = sorted(daily_dict.keys())
+    daily_labels_json = json.dumps([d[5:] for d in sorted_days], ensure_ascii=False)
+    daily_adds_json = json.dumps([daily_dict[d].get('basket_add', 0) for d in sorted_days])
+    daily_wins_json = json.dumps([daily_dict[d].get('basket_win', 0) for d in sorted_days])
 
-    title = f"Analytics — {chain.capitalize() if chain else 'Kõik ketid'} ({days}p)"
+    title = f"{chain.capitalize() if chain else 'Kõik ketid'} — viimased {days} päeva"
+    total_adds = totals['total_adds'] or 0
+    total_wins = totals['total_wins'] or 0
+    total_views = totals['total_views'] or 0
+    unique_users = totals['unique_users'] or 0
+    chain_filter_label = chain.capitalize() if chain else "Kõik ketid"
 
     html = f"""<!DOCTYPE html>
-<html><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Seivy Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-         background: #f5f5f5; margin: 0; padding: 16px; color: #222; }}
-  h1 {{ color: #FF9100; margin-bottom: 4px; }}
-  h2 {{ font-size: 1rem; color: #555; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }}
-  .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }}
-  .card {{ background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }}
-  .card .num {{ font-size: 2rem; font-weight: 700; color: #FF9100; }}
-  .card .label {{ font-size: 0.8rem; color: #888; margin-top: 2px; }}
-  table {{ width: 100%; background: white; border-radius: 10px;
-           box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-collapse: collapse; margin-bottom: 16px; }}
-  th {{ background: #f0f0f0; padding: 8px 12px; text-align: left; font-size: 0.8rem; color: #555; }}
-  td {{ padding: 8px 12px; border-top: 1px solid #f0f0f0; font-size: 0.9rem; }}
-  .back {{ color: #FF9100; text-decoration: none; font-size: 0.9rem; }}
-  .filters {{ margin-bottom: 16px; }}
+:root {{
+    --accent: #FF9100;
+    --accent-dark: #E97800;
+    --accent-soft: #FFF4E5;
+    --accent-softer: #FFF9F2;
+    --background: #F5F6F8;
+    --surface: #FFFFFF;
+    --surface-muted: #F8F9FB;
+    --text: #171A1F;
+    --text-secondary: #68707D;
+    --text-muted: #9198A3;
+    --border: #E6E9EE;
+    --border-strong: #D9DDE4;
+    --success: #1B9A59;
+    --success-soft: #EAF8F0;
+    --shadow: 0 1px 2px rgba(20,24,32,.04), 0 8px 24px rgba(20,24,32,.055);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+}}
+* {{ box-sizing: border-box; }}
+body {{ margin: 0; background: var(--background); color: var(--text); font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing: antialiased; }}
+button, a {{ font: inherit; }}
+.topbar {{ position: sticky; top: 0; z-index: 50; border-bottom: 1px solid rgba(230,233,238,.92); background: rgba(255,255,255,.92); backdrop-filter: blur(16px); }}
+.topbar-inner {{ display: flex; align-items: center; justify-content: space-between; width: min(1440px, calc(100% - 48px)); min-height: 72px; margin: 0 auto; gap: 24px; }}
+.brand {{ display: flex; align-items: center; gap: 12px; }}
+.brand-mark {{ display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--accent); color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.03em; }}
+.brand-name {{ margin: 0; font-size: 18px; font-weight: 750; letter-spacing: -.03em; }}
+.brand-section {{ margin: 2px 0 0; color: var(--text-secondary); font-size: 12px; font-weight: 550; }}
+.live-dot {{ width: 8px; height: 8px; border-radius: 999px; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); }}
+.topbar-context {{ display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }}
+.content {{ width: min(1440px, calc(100% - 48px)); margin: 0 auto; padding: 38px 0 56px; }}
+.page-heading {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 24px; }}
+.eyebrow {{ display: inline-flex; align-items: center; margin-bottom: 10px; gap: 8px; color: var(--accent-dark); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }}
+.eyebrow::before {{ width: 18px; height: 2px; border-radius: 999px; background: var(--accent); content: ""; }}
+h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spacing: -.045em; line-height: 1.08; }}
+.heading-description {{ max-width: 690px; margin: 12px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.65; }}
+.period-summary {{ flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 650; }}
+.period-summary strong {{ color: var(--text); }}
+.filters-panel {{ display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); gap: 24px; }}
+.filter-groups {{ display: flex; flex-wrap: wrap; gap: 26px; }}
+.filter-group {{ display: flex; flex-direction: column; gap: 9px; }}
+.filter-label {{ color: var(--text-muted); font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }}
+.filter-pills {{ display: flex; flex-wrap: wrap; gap: 7px; }}
+.filter-pill {{ display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 650; text-decoration: none; transition: border-color 160ms,background 160ms,color 160ms; }}
+.filter-pill:hover {{ border-color: #FFC06C; background: var(--accent-softer); color: var(--accent-dark); }}
+.filter-pill.active {{ border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 5px 12px rgba(255,145,0,.18); }}
+.filter-context {{ flex: 0 0 auto; color: var(--text-secondary); font-size: 13px; text-align: right; }}
+.filter-context strong {{ display: block; margin-top: 3px; color: var(--text); font-size: 14px; }}
+.metrics-grid {{ display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); margin-bottom: 22px; gap: 16px; }}
+.metric-card {{ position: relative; overflow: hidden; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }}
+.metric-card::after {{ position: absolute; top: -48px; right: -48px; width: 116px; height: 116px; border-radius: 999px; background: var(--accent-soft); content: ""; opacity: .65; }}
+.metric-top {{ position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 19px; gap: 16px; }}
+.metric-label {{ color: var(--text-secondary); font-size: 13px; font-weight: 650; }}
+.metric-icon {{ display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--accent-soft); color: var(--accent-dark); }}
+.metric-icon svg {{ width: 19px; height: 19px; stroke: currentColor; }}
+.metric-value {{ position: relative; z-index: 1; margin: 0; font-size: clamp(27px,2.4vw,38px); font-weight: 770; letter-spacing: -.045em; line-height: 1; }}
+.metric-note {{ position: relative; z-index: 1; margin: 10px 0 0; color: var(--text-muted); font-size: 12px; font-weight: 550; }}
+.dashboard-grid {{ display: grid; grid-template-columns: minmax(0,1.6fr) minmax(330px,.8fr); gap: 22px; }}
+.dashboard-column {{ display: flex; flex-direction: column; gap: 22px; }}
+.panel {{ padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }}
+.panel-header {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 23px; gap: 18px; }}
+.panel-title {{ margin: 0; color: var(--text); font-size: 17px; font-weight: 730; letter-spacing: -.025em; }}
+.panel-description {{ margin: 6px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }}
+.panel-badge {{ padding: 7px 10px; border-radius: 999px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 700; }}
+.chart-wrapper {{ position: relative; width: 100%; height: 355px; }}
+.chart-wrapper.compact {{ height: 320px; }}
+.ranking-list {{ display: flex; flex-direction: column; gap: 11px; }}
+.ranking-item {{ padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-muted); }}
+.ranking-row {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 12px; }}
+.ranking-name {{ display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 13px; font-weight: 680; }}
+.ranking-position {{ display: grid; width: 26px; height: 26px; place-items: center; border-radius: 8px; background: #fff; color: var(--text-secondary); font-size: 11px; font-weight: 800; box-shadow: 0 1px 3px rgba(20,24,32,.07); }}
+.ranking-item:first-child .ranking-position {{ background: var(--accent); color: #fff; }}
+.ranking-count {{ color: var(--text); font-size: 13px; font-weight: 750; }}
+.ranking-count small {{ color: var(--text-muted); font-size: 10px; font-weight: 600; }}
+.progress-track {{ width: 100%; height: 7px; overflow: hidden; border-radius: 999px; background: #E8EBF0; }}
+.progress-fill {{ display: block; width: var(--bar-width,0%); height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--accent),#FFB343); }}
+.product-list {{ display: flex; flex-direction: column; gap: 2px; }}
+.product-row {{ display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; padding: 13px 4px; border-bottom: 1px solid var(--border); gap: 12px; }}
+.product-row:last-child {{ border-bottom: 0; }}
+.product-rank {{ display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 750; }}
+.product-row:first-child .product-rank {{ background: var(--accent-soft); color: var(--accent-dark); }}
+.product-name {{ margin-bottom: 8px; overflow: hidden; color: var(--text); font-size: 13px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }}
+.product-bar-track {{ width: 100%; height: 5px; overflow: hidden; border-radius: 999px; background: #ECEFF3; }}
+.product-bar-fill {{ display: block; width: var(--bar-width,0%); height: 100%; border-radius: inherit; background: var(--accent); }}
+.product-count {{ min-width: 58px; color: var(--text); font-size: 13px; font-weight: 750; text-align: right; }}
+.product-count small {{ display: block; margin-top: 2px; color: var(--text-muted); font-size: 9px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }}
+.empty-state {{ display: grid; min-height: 180px; place-items: center; padding: 24px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface-muted); color: var(--text-secondary); font-size: 13px; text-align: center; }}
+.footer {{ display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding: 0 4px; gap: 20px; color: var(--text-muted); font-size: 11px; }}
+.footer-brand {{ color: var(--text-secondary); font-weight: 700; }}
+@media (max-width: 1100px) {{
+    .metrics-grid {{ grid-template-columns: repeat(2,minmax(0,1fr)); }}
+    .dashboard-grid {{ grid-template-columns: 1fr; }}
+}}
+@media (max-width: 760px) {{
+    .topbar-inner, .content {{ width: min(100% - 28px, 1440px); }}
+    .metrics-grid {{ grid-template-columns: 1fr; }}
+    .filters-panel {{ flex-direction: column; }}
+}}
 </style>
-</head><body>
-<a class="back" href="/">← Admin</a>
-<h1>📊 {title}</h1>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div>
+        <p class="brand-name">Seivy</p>
+        <p class="brand-section">Partneranalüütika</p>
+      </div>
+    </div>
+    <div class="topbar-context">
+      <span class="live-dot"></span>
+      Andmed on aktiivsed
+    </div>
+  </div>
+</header>
 
-<div class="filters">
-  <div style="margin-bottom:8px"><b>Kett:</b><br>{chain_btns}</div>
-  <div><b>Periood:</b><br>{days_btns}</div>
-</div>
+<main class="content">
+  <section class="page-heading">
+    <div>
+      <div class="eyebrow">Jaeketi ülevaade</div>
+      <h1>{title}</h1>
+      <p class="heading-description">Ülevaade sellest, kuidas kasutajad teie tooteid vaatavad, ostukorvi lisavad ja millistes hinnavõrdlustes saavutab kett soodsaima ostukorvi tulemuse.</p>
+    </div>
+    <div class="period-summary">Analüüsiperiood<strong>viimased {days} päeva</strong></div>
+  </section>
 
-<h2>Kokkuvõte — viimased {days} päeva</h2>
-<div class="grid">
-  <div class="card"><div class="num">{totals['total_adds'] or 0}</div><div class="label">Korvi lisamised</div></div>
-  <div class="card"><div class="num">{totals['total_wins'] or 0}</div><div class="label">Korvi võidud</div></div>
-  <div class="card"><div class="num">{totals['total_views'] or 0}</div><div class="label">Toote vaatamised</div></div>
-  <div class="card"><div class="num">{totals['unique_users'] or 0}</div><div class="label">Unikaalsed kasutajad</div></div>
-</div>
+  <section class="filters-panel">
+    <div class="filter-groups">
+      <div class="filter-group">
+        <div class="filter-label">Jaekett</div>
+        <nav class="filter-pills">{chain_btns}</nav>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Periood</div>
+        <nav class="filter-pills">{days_btns}</nav>
+      </div>
+    </div>
+    <div class="filter-context">Hetkel kuvatakse<strong>{chain_filter_label}</strong></div>
+  </section>
 
-<h2>Kes võidab korvi?</h2>
-<table>
-  <tr><th>Kett</th><th>Võidud</th><th>Osakaal</th></tr>
-  {wins_html}
-</table>
+  <section class="metrics-grid">
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Korvi lisamised</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H7"></path><path d="M12 6v6"></path><path d="M9 9h6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg></span>
+      </div>
+      <p class="metric-value">{total_adds:,}</p>
+      <p class="metric-note">Toodete lisamised kasutajate korvidesse</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Korvi võidud</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4a4 4 0 0 1-8 0V3Z"></path><path d="M6 5H3v1a5 5 0 0 0 5 5"></path><path d="M18 5h3v1a5 5 0 0 1-5 5"></path><path d="M12 11v5"></path><path d="M8 21h8"></path><path d="M10 16h4v5h-4z"></path></svg></span>
+      </div>
+      <p class="metric-value">{total_wins:,}</p>
+      <p class="metric-note">Soodsaima ostukorvi tulemused</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Toote vaatamised</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></span>
+      </div>
+      <p class="metric-value">{total_views:,}</p>
+      <p class="metric-note">Tootekaartide ja detailvaadete avamised</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Unikaalsed kasutajad</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
+      </div>
+      <p class="metric-value">{unique_users:,}</p>
+      <p class="metric-note">Aktiivsed kasutajad valitud perioodil</p>
+    </article>
+  </section>
 
-<h2>Populaarseimad tooted korvis</h2>
-<table>
-  <tr><th>#</th><th>Toode</th><th>Korvi lisamisi</th></tr>
-  {products_html}
-</table>
+  <section class="dashboard-grid">
+    <div class="dashboard-column">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Igapäevane aktiivsus</h2>
+            <p class="panel-description">Korvi lisamiste ja soodsaima korvi tulemuste muutus päevade lõikes.</p>
+          </div>
+          <span class="panel-badge">{days} päeva</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="dailyActivityChart" aria-label="Igapäevase aktiivsuse tulpdiagramm"></canvas>
+        </div>
+      </article>
 
-<h2>Päevane aktiivsus (viimased 14 päeva)</h2>
-<table>
-  <tr><th>Kuupäev</th><th>Korvi lisamised</th><th>Korvi võidud</th><th>Toote vaatamised</th></tr>
-  {daily_html}
-</table>
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Enim korvi lisatud tooted</h2>
+            <p class="panel-description">Tooted, mille vastu on kasutajad kõige suuremat ostuhuvi näidanud.</p>
+          </div>
+          <span class="panel-badge">Top 10</span>
+        </div>
+        <div class="product-list">{products_html}</div>
+      </article>
+    </div>
 
-<p style="color:#aaa;font-size:0.75rem;text-align:center">Seivy Analytics · {datetime.datetime.now().strftime('%d.%m.%Y %H:%M')}</p>
+    <div class="dashboard-column">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Soodsaima korvi positsioon</h2>
+            <p class="panel-description">Kui sageli saavutas kett kogu ostukorvi madalaima hinna.</p>
+          </div>
+        </div>
+        <div class="ranking-list">{wins_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Aktiivsuse trend</h2>
+            <p class="panel-description">Korvi lisamised ja võidud samal ajaskaalal.</p>
+          </div>
+        </div>
+        <div class="chart-wrapper compact">
+          <canvas id="activityOverviewChart" aria-label="Aktiivsuse trendijoonis"></canvas>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Näitajad põhinevad Seivy rakenduses anonüümselt kogutud kasutussündmustel.</span>
+    <span class="footer-brand">Seivy partneranalüütika · <a href="/" style="color:inherit">← Admin</a></span>
+  </footer>
+</main>
+
+<script>
+(function() {{
+  "use strict";
+  const labels = {daily_labels_json};
+  const dailyAdds = {daily_adds_json};
+  const dailyWins = {daily_wins_json};
+
+  Chart.defaults.font.family = 'Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+  Chart.defaults.color = "#68707D";
+  Chart.defaults.borderColor = "#E9ECF1";
+
+  const sharedScales = {{
+    x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ color: "#7A828E", font: {{ size: 11, weight: "600" }}, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }} }},
+    y: {{ beginAtZero: true, grid: {{ color: "#EEF0F4", drawTicks: false }}, border: {{ display: false }}, ticks: {{ color: "#8B929D", padding: 10, precision: 0, font: {{ size: 10, weight: "600" }} }} }}
+  }};
+
+  const tooltipOpts = {{
+    backgroundColor: "#171A1F", titleColor: "#fff", bodyColor: "#fff",
+    padding: 12, cornerRadius: 10, displayColors: true, boxPadding: 5
+  }};
+
+  const barCanvas = document.getElementById("dailyActivityChart");
+  if (barCanvas) {{
+    new Chart(barCanvas, {{
+      type: "bar",
+      data: {{
+        labels,
+        datasets: [
+          {{ label: "Korvi lisamised", data: dailyAdds, backgroundColor: "#FF9100", borderRadius: 6, maxBarThickness: 26 }},
+          {{ label: "Korvi võidud", data: dailyWins, backgroundColor: "#FFD7A3", borderRadius: 6, maxBarThickness: 26 }}
+        ]
+      }},
+      options: {{
+        responsive: true, maintainAspectRatio: false,
+        interaction: {{ mode: "index", intersect: false }},
+        plugins: {{
+          legend: {{ position: "top", align: "end", labels: {{ usePointStyle: true, pointStyle: "rectRounded", boxWidth: 8, boxHeight: 8, padding: 18, font: {{ size: 11, weight: "650" }} }} }},
+          tooltip: tooltipOpts
+        }},
+        scales: sharedScales
+      }}
+    }});
+  }}
+
+  const lineCanvas = document.getElementById("activityOverviewChart");
+  if (lineCanvas) {{
+    new Chart(lineCanvas, {{
+      type: "line",
+      data: {{
+        labels,
+        datasets: [
+          {{ label: "Korvi lisamised", data: dailyAdds, borderColor: "#FF9100", backgroundColor: "rgba(255,145,0,.15)", fill: true, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35 }},
+          {{ label: "Korvi võidud", data: dailyWins, borderColor: "#3977F6", backgroundColor: "transparent", fill: false, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.35 }}
+        ]
+      }},
+      options: {{
+        responsive: true, maintainAspectRatio: false,
+        interaction: {{ mode: "index", intersect: false }},
+        plugins: {{
+          legend: {{ position: "top", align: "start", labels: {{ usePointStyle: true, pointStyle: "circle", boxWidth: 7, boxHeight: 7, padding: 16, font: {{ size: 11, weight: "650" }} }} }},
+          tooltip: tooltipOpts
+        }},
+        scales: sharedScales
+      }}
+    }});
+  }}
+}})();
+</script>
 </body></html>"""
     return HTMLResponse(html)
 
