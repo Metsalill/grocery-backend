@@ -1,6 +1,6 @@
 # admin/routes.py
 import os, shutil, datetime
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from settings import IMAGES_DIR, MAX_UPLOAD_MB, CDN_BASE_URL
 from .security import basic_guard
@@ -224,7 +224,7 @@ async def dashboard(request: Request):
 async def analytics_dashboard(request: Request, token: str = None, days: int = 30, chain: str = None):
     import json, os
     from html import escape
-    from urllib.parse import urlencode
+    from fastapi.responses import RedirectResponse
 
     # Token -> chain mapping
     TOKEN_MAP = {
@@ -234,62 +234,118 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         os.environ.get("ANALYTICS_TOKEN_COOP", ""): "coop",
         os.environ.get("ANALYTICS_TOKEN_MAXIMA", ""): "maxima",
     }
-    TOKEN_MAP.pop("", None)  # eemalda tühi võti kui env puudub
+    TOKEN_MAP.pop("", None)
 
-    # Admin token annab kõigi kettide vaate
     admin_token = os.environ.get("ANALYTICS_TOKEN_ADMIN", "")
 
-    if not token:
+    # --- Token auth + cookie ---
+    COOKIE_NAME = "seivy_analytics_token"
+    cookie_token = request.cookies.get(COOKIE_NAME)
+    resolved_token = token or cookie_token
+
+    if not resolved_token:
         return HTMLResponse("<h2>Ligipääs keelatud. Token puudub.</h2>", status_code=403)
 
-    if admin_token and token == admin_token:
-        pass  # admin — chain tuleb URL-ist (võib olla None = kõik ketid)
-    elif token in TOKEN_MAP:
-        chain = TOKEN_MAP[token]  # keti token lukustab chain
+    ALLOWED_DAYS = {7, 14, 30, 90}
+    if days not in ALLOWED_DAYS:
+        days = 30
+
+    is_admin = admin_token and resolved_token == admin_token
+    if is_admin:
+        locked_chain = None
+    elif resolved_token in TOKEN_MAP:
+        locked_chain = TOKEN_MAP[resolved_token]
     else:
         return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
+
+    # Fix 1: chain filter normalization
+    allowed_chains = {"selver", "rimi", "prisma", "coop", "maxima"}
+    if chain:
+        chain = chain.lower().strip()
+        if chain not in allowed_chains:
+            chain = None
+
+    # Ketil ei saa chain'i muuta
+    if not is_admin and locked_chain:
+        chain = locked_chain
+
+    # Fix 2: kui token URL-is, suuna puhtale URL-ile ja sea küpsis
+    if token:
+        chain_part = f"&chain={chain}" if chain else ""
+        redirect_url = f"/admin/analytics?days={days}{chain_part}"
+        response = RedirectResponse(url=redirect_url, status_code=302)
+        response.set_cookie(
+            key=COOKIE_NAME,
+            value=resolved_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=60 * 60 * 24 * 30,
+            path="/admin/analytics"
+        )
+        return response
 
     if getattr(request.app.state, "db", None) is None:
         return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
 
     async with request.app.state.db.acquire() as conn:
-        basket_wins_rows = await conn.fetch("""
-            SELECT chain, COUNT(*) AS wins
-            FROM analytics_events
+        # Kõik päringud kasutavad kalendripäevi (CURRENT_DATE), mitte jooksvaid tunde
+
+        # Korvivõitude koguarv ainult 5 teadaolevalt ketilt
+        all_wins_total = await conn.fetchval("""
+            SELECT COUNT(*) FROM analytics_events
             WHERE event_type = 'basket_win'
-              AND created_at >= NOW() - ($1 || ' days')::INTERVAL
-              AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
-            GROUP BY chain
-            ORDER BY wins DESC
-        """, str(days), chain)
+              AND LOWER(chain) IN ('selver', 'rimi', 'prisma', 'coop', 'maxima')
+              AND created_at >= CURRENT_DATE - ($1::int - 1)
+              AND created_at < CURRENT_DATE + INTERVAL '1 day'
+        """, days)
+
+        # Ranking - kõik 5 ketti, RANK() viikide käsitlemiseks
+        basket_wins_rows = await conn.fetch("""
+            WITH chains(chain) AS (
+                VALUES ('selver'), ('rimi'), ('prisma'), ('coop'), ('maxima')
+            ),
+            wins AS (
+                SELECT LOWER(chain) AS chain, COUNT(*) AS wins
+                FROM analytics_events
+                WHERE event_type = 'basket_win'
+                  AND created_at >= CURRENT_DATE - ($1::int - 1)
+                  AND created_at < CURRENT_DATE + INTERVAL '1 day'
+                GROUP BY LOWER(chain)
+            ),
+            results AS (
+                SELECT c.chain, COALESCE(w.wins, 0) AS wins
+                FROM chains c
+                LEFT JOIN wins w ON w.chain = c.chain
+            )
+            SELECT chain, wins, RANK() OVER (ORDER BY wins DESC) AS position
+            FROM results
+            ORDER BY wins DESC, chain ASC
+        """, days)
 
         top_products_rows = await conn.fetch("""
-            SELECT
-                a.product_id,
-                p.name,
-                COUNT(*) AS adds
+            SELECT a.product_id, p.name, a.chain, COUNT(*) AS adds
             FROM analytics_events a
             LEFT JOIN products p ON p.id = a.product_id
             WHERE a.event_type = 'basket_add'
               AND a.product_id IS NOT NULL
-              AND a.created_at >= NOW() - ($1 || ' days')::INTERVAL
+              AND a.created_at >= CURRENT_DATE - ($1::int - 1)
+              AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
               AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
-            GROUP BY a.product_id, p.name
+            GROUP BY a.product_id, p.name, a.chain
             ORDER BY adds DESC
             LIMIT 10
-        """, str(days), chain)
+        """, days, chain)
 
         daily_rows = await conn.fetch("""
-            SELECT
-                DATE(created_at) AS day,
-                event_type,
-                COUNT(*) AS cnt
+            SELECT DATE(created_at) AS day, event_type, COUNT(*) AS cnt
             FROM analytics_events
-            WHERE created_at >= NOW() - INTERVAL '14 days'
-              AND ($1::text IS NULL OR LOWER(chain) = LOWER($1))
+            WHERE created_at >= CURRENT_DATE - ($1::int - 1)
+              AND created_at < CURRENT_DATE + INTERVAL '1 day'
+              AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
             GROUP BY DATE(created_at), event_type
             ORDER BY day ASC
-        """, chain)
+        """, days, chain)
 
         totals = await conn.fetchrow("""
             SELECT
@@ -298,51 +354,158 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
                 COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS unique_users
             FROM analytics_events
-            WHERE created_at >= NOW() - ($1 || ' days')::INTERVAL
+            WHERE created_at >= CURRENT_DATE - ($1::int - 1)
+              AND created_at < CURRENT_DATE + INTERVAL '1 day'
               AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
-        """, str(days), chain)
+        """, days, chain)
 
-    # Kas admin token?
-    is_admin = admin_token and token == admin_token
-    chain_filter_name = chain.capitalize() if chain else "Kõik ketid"
+        prev_totals = await conn.fetchrow("""
+            SELECT
+                COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
+                COUNT(*) FILTER (WHERE event_type = 'basket_win') AS total_wins,
+                COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
+                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS unique_users
+            FROM analytics_events
+            WHERE created_at >= CURRENT_DATE - (($1::int * 2) - 1)
+              AND created_at < CURRENT_DATE - ($1::int - 1)
+              AND ($2::text IS NULL OR LOWER(chain) = LOWER($2))
+        """, days, chain)
 
-    # Chain filter — ainult adminile
+        last_event = await conn.fetchval("""
+            SELECT MAX(created_at) FROM analytics_events
+            WHERE ($1::text IS NULL OR LOWER(chain) = LOWER($1))
+        """, chain)
+
+    # Delta arvutus
+    def delta_html(current, previous):
+        if previous == 0:
+            if current > 0:
+                return '<span style="color:#1B9A59;font-size:12px;font-weight:600">Uus aktiivsus</span>'
+            return ''
+        pct = round((current - previous) / previous * 100, 1)
+        pct_text = str(abs(pct)).replace('.', ',')
+        if pct > 0:
+            return f'<span style="color:#1B9A59;font-size:12px;font-weight:600">↑ {pct_text}%</span>'
+        elif pct < 0:
+            return f'<span style="color:#e74c3c;font-size:12px;font-weight:600">↓ {pct_text}%</span>'
+        return '<span style="color:#9198A3;font-size:12px">Muutuseta</span>'
+
+    total_adds = totals['total_adds'] or 0
+    total_wins = totals['total_wins'] or 0
+    total_views = totals['total_views'] or 0
+    unique_users = totals['unique_users'] or 0
+
+    delta_adds = delta_html(total_adds, prev_totals['total_adds'] or 0)
+    delta_wins = delta_html(total_wins, prev_totals['total_wins'] or 0)
+    delta_views = delta_html(total_views, prev_totals['total_views'] or 0)
+    delta_users = delta_html(unique_users, prev_totals['unique_users'] or 0)
+
+    # Fix 3: suhtarvud
+    basket_add_rate = round(total_adds / total_views * 100, 1) if total_views > 0 else None
+    win_rate = round(total_wins / (all_wins_total or 1) * 100, 1) if chain and all_wins_total else None
+
+    # Fix 4: viimane uuendus
+    if last_event:
+        diff = datetime.datetime.now(datetime.timezone.utc) - last_event
+        mins = int(diff.total_seconds() / 60)
+        if mins < 60:
+            last_event_str = f"{mins} min tagasi"
+        elif mins < 1440:
+            last_event_str = f"{mins // 60} tundi tagasi"
+        else:
+            last_event_str = last_event.strftime("%d.%m kell %H:%M")
+    else:
+        last_event_str = "Andmed puuduvad"
+
+    is_admin = admin_token and resolved_token == admin_token
+    chain_filter_label = chain.capitalize() if chain else "Kõik ketid"
+
+    # Fix 1: chain filter nupud korrektsed väärtused
     CHAINS = [("", "Kõik"), ("selver", "Selver"), ("rimi", "Rimi"), ("prisma", "Prisma"), ("coop", "Coop"), ("maxima", "Maxima")]
     if is_admin:
         chain_btns = "".join(
-            f'<a class="filter-pill{"  active" if (not chain and not value) or value == chain else ""}" href="/admin/analytics?token={escape(token)}&days={days}{"&chain=" + value if value else ""}">{escape(label)}</a>'
+            f'<a class="filter-pill{"  active" if (not chain and not value) or value == chain else ""}" href="/admin/analytics?days={days}{"&chain=" + value if value else ""}">{escape(label)}</a>'
             for value, label in CHAINS
         )
     else:
-        chain_btns = ""  # ketil pole chain filtrit
+        chain_btns = ""
 
-    # Days filter pills — token säilib URL-is
     chain_param = f"&chain={chain}" if chain else ""
     days_btns = "".join(
-        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?token={escape(token)}&days={period}{chain_param}">{period}p</a>'
+        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?days={period}{chain_param}">{period}p</a>'
         for period in [7, 14, 30, 90]
     )
 
-    # Wins HTML
+    # Wins HTML - admin näeb nimesid, partner anonüümset vaadet
     max_wins = max((r['wins'] for r in basket_wins_rows), default=0)
-    wins_html = "".join(
-        f"""<div class="ranking-item">
-            <div class="ranking-row">
-                <div class="ranking-name"><span class="ranking-position">{i}</span><span>{escape(r['chain'] or '—')}</span></div>
-                <span class="ranking-count">{r['wins']:,}<small> võitu</small></span>
-            </div>
-            <div class="progress-track"><span class="progress-fill" style="--bar-width:{round(r['wins']/max_wins*100,1) if max_wins else 0}%"></span></div>
-        </div>"""
-        for i, r in enumerate(basket_wins_rows, 1)
-    ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel korvi võitude andmeid.</div>'
+    total_chains = len(basket_wins_rows)
 
-    # Products HTML
+    # Leia partneri positsioon RANK()-ist
+    partner_position = None
+    partner_wins = 0
+    if not is_admin and locked_chain:
+        for r in basket_wins_rows:
+            if r['chain'] and r['chain'].lower() == locked_chain.lower():
+                partner_position = r['position']
+                partner_wins = r['wins']
+                break
+
+    # Positsiooni kokkuvõte partnerivaates
+    position_summary = ""
+    if not is_admin and locked_chain:
+        pos = partner_position or total_chains
+        pos_wins = partner_wins or 0
+        # Viigi tekst
+        ties = [r for r in basket_wins_rows if r['position'] == pos]
+        if len(ties) > 1:
+            pos_text = f"jagab {pos}. kohta {total_chains} jaeketi seas"
+        else:
+            pos_text = f"on {pos}. kohal {total_chains} jaeketi seas"
+        position_summary = f'''<div style="padding:16px;background:var(--accent-soft);border-radius:var(--radius-md);margin-bottom:16px;border:1px solid #FFD7A3">
+            <div style="font-size:13px;color:var(--accent-dark);font-weight:700;margin-bottom:4px">Teie positsioon</div>
+            <div style="font-size:20px;font-weight:800;color:var(--text)">{locked_chain.capitalize()} {pos_text}</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Valitud perioodil {pos_wins:,} korvivõitu</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Konkurendid on anonüümitud ning tähised põhinevad valitud perioodi järjestusel.</div>
+        </div>'''
+
+    def wins_row(actual_position, row, display_name, is_partner):
+        pct = round(row['wins']/max_wins*100,1) if max_wins else 0
+        highlight = 'border:1px solid var(--accent);' if is_partner else ''
+        name_style = 'font-weight:800;color:var(--accent-dark)' if is_partner else ''
+        position_class = " ranking-position-first" if actual_position == 1 else ""
+        return f"""<div class="ranking-item" style="{highlight}">
+            <div class="ranking-row">
+                <div class="ranking-name"><span class="ranking-position{position_class}">{actual_position}</span><span style="{name_style}">{escape(display_name)}</span></div>
+                <span class="ranking-count">{row['wins']:,}<small> võitu</small></span>
+            </div>
+            <div class="progress-track"><span class="progress-fill" style="--bar-width:{pct}%"></span></div>
+        </div>"""
+
+    wins_rows = []
+    anonymous_index = 0
+    for r in basket_wins_rows:
+        actual_position = r['position']
+        row_chain = (r['chain'] or '').lower()
+        is_partner_row = bool(not is_admin and locked_chain and row_chain == locked_chain.lower())
+        if is_admin:
+            display_name = r['chain'].capitalize() if r['chain'] else '—'
+        elif is_partner_row:
+            display_name = locked_chain.capitalize()
+        else:
+            anonymous_index += 1
+            display_name = f"Konkurent {chr(64 + anonymous_index)}"
+        wins_rows.append(wins_row(actual_position, r, display_name, is_partner_row))
+
+    wins_html = position_summary + ("".join(wins_rows) or '<div class="empty-state">Valitud perioodi kohta ei ole veel korvi võitude andmeid.</div>')
+
+    # Fix 6: tooted koos ketiga
     max_adds = max((r['adds'] for r in top_products_rows), default=0)
     products_html = "".join(
         f"""<div class="product-row">
             <span class="product-rank">{i}</span>
             <div class="product-content">
                 <div class="product-name" title="{escape(r['name'] or '')}">{escape(r['name'] or f'ID {r["product_id"]}')}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">{escape((r['chain'] or '').capitalize())}</div>
                 <div class="product-bar-track"><span class="product-bar-fill" style="--bar-width:{round(r['adds']/max_adds*100,1) if max_adds else 0}%"></span></div>
             </div>
             <div class="product-count">{r['adds']:,}<small>lisamist</small></div>
@@ -350,7 +513,7 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         for i, r in enumerate(top_products_rows, 1)
     ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel toodete lisamise andmeid.</div>'
 
-    # Daily chart data
+    # Fix 5: dünaamiline graafiku kõrgus
     daily_dict = {}
     for r in daily_rows:
         d = str(r['day'])
@@ -358,17 +521,35 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             daily_dict[d] = {}
         daily_dict[d][r['event_type']] = r['cnt']
 
-    sorted_days = sorted(daily_dict.keys())
-    daily_labels_json = json.dumps([d[5:] for d in sorted_days], ensure_ascii=False)
-    daily_adds_json = json.dumps([daily_dict[d].get('basket_add', 0) for d in sorted_days])
-    daily_wins_json = json.dumps([daily_dict[d].get('basket_win', 0) for d in sorted_days])
+    # Täida kõik perioodi päevad (k.a. tühjad nulliga)
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+    all_days = [today - datetime.timedelta(days=offset) for offset in range(days - 1, -1, -1)]
+    daily_labels_json = json.dumps([d.strftime("%m-%d") for d in all_days], ensure_ascii=False)
+    daily_adds_json = json.dumps([daily_dict.get(str(d), {}).get('basket_add', 0) for d in all_days])
+    daily_wins_json = json.dumps([daily_dict.get(str(d), {}).get('basket_win', 0) for d in all_days])
+    sorted_days = [str(d) for d in all_days]
+
+    chart_height = 250 if len(sorted_days) <= 3 else 355
+
+    active_days = sum(
+        1 for day in all_days
+        if daily_dict.get(str(day), {}).get("basket_add", 0) > 0
+        or daily_dict.get(str(day), {}).get("basket_win", 0) > 0
+    )
+    chart_summary = (
+        '<p style="color:var(--text-secondary);font-size:13px;margin-top:8px">'
+        'Valitud perioodil toimus aktiivsus ühel päeval.'
+        '</p>'
+    ) if active_days == 1 else ""
+
+    # Fix 3: suhtarvude HTML
+    rates_html = ""
+    if basket_add_rate is not None:
+        rates_html += f'<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">Korvi lisamise määr: <b style="color:var(--text)">{basket_add_rate}%</b> vaatamistest</div>'
+    if win_rate is not None:
+        rates_html += f'<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Osakaal kõigist korvivõitudest: <b style="color:var(--text)">{win_rate}%</b></div>'
 
     title = f"{chain.capitalize() if chain else 'Kõik ketid'} — viimased {days} päeva"
-    total_adds = totals['total_adds'] or 0
-    total_wins = totals['total_wins'] or 0
-    total_views = totals['total_views'] or 0
-    unique_users = totals['unique_users'] or 0
-    chain_filter_label = chain.capitalize() if chain else "Kõik ketid"
 
     html = f"""<!DOCTYPE html>
 <html lang="et">
@@ -408,8 +589,8 @@ button, a {{ font: inherit; }}
 .brand-mark {{ display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--accent); color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.03em; }}
 .brand-name {{ margin: 0; font-size: 18px; font-weight: 750; letter-spacing: -.03em; }}
 .brand-section {{ margin: 2px 0 0; color: var(--text-secondary); font-size: 12px; font-weight: 550; }}
-.live-dot {{ width: 8px; height: 8px; border-radius: 999px; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); }}
 .topbar-context {{ display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }}
+.live-dot {{ width: 8px; height: 8px; border-radius: 999px; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); }}
 .content {{ width: min(1440px, calc(100% - 48px)); margin: 0 auto; padding: 38px 0 56px; }}
 .page-heading {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 24px; }}
 .eyebrow {{ display: inline-flex; align-items: center; margin-bottom: 10px; gap: 8px; color: var(--accent-dark); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }}
@@ -445,14 +626,14 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .panel-title {{ margin: 0; color: var(--text); font-size: 17px; font-weight: 730; letter-spacing: -.025em; }}
 .panel-description {{ margin: 6px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }}
 .panel-badge {{ padding: 7px 10px; border-radius: 999px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 700; }}
-.chart-wrapper {{ position: relative; width: 100%; height: 355px; }}
+.chart-wrapper {{ position: relative; width: 100%; height: {chart_height}px; }}
 .chart-wrapper.compact {{ height: 320px; }}
 .ranking-list {{ display: flex; flex-direction: column; gap: 11px; }}
 .ranking-item {{ padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-muted); }}
 .ranking-row {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 12px; }}
 .ranking-name {{ display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 13px; font-weight: 680; }}
 .ranking-position {{ display: grid; width: 26px; height: 26px; place-items: center; border-radius: 8px; background: #fff; color: var(--text-secondary); font-size: 11px; font-weight: 800; box-shadow: 0 1px 3px rgba(20,24,32,.07); }}
-.ranking-item:first-child .ranking-position {{ background: var(--accent); color: #fff; }}
+.ranking-position-first {{ background: var(--accent); color: #fff; }}
 .ranking-count {{ color: var(--text); font-size: 13px; font-weight: 750; }}
 .ranking-count small {{ color: var(--text-muted); font-size: 10px; font-weight: 600; }}
 .progress-track {{ width: 100%; height: 7px; overflow: hidden; border-radius: 999px; background: #E8EBF0; }}
@@ -462,7 +643,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .product-row:last-child {{ border-bottom: 0; }}
 .product-rank {{ display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 750; }}
 .product-row:first-child .product-rank {{ background: var(--accent-soft); color: var(--accent-dark); }}
-.product-name {{ margin-bottom: 8px; overflow: hidden; color: var(--text); font-size: 13px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }}
+.product-name {{ margin-bottom: 4px; overflow: hidden; color: var(--text); font-size: 13px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }}
 .product-bar-track {{ width: 100%; height: 5px; overflow: hidden; border-radius: 999px; background: #ECEFF3; }}
 .product-bar-fill {{ display: block; width: var(--bar-width,0%); height: 100%; border-radius: inherit; background: var(--accent); }}
 .product-count {{ min-width: 58px; color: var(--text); font-size: 13px; font-weight: 750; text-align: right; }}
@@ -470,6 +651,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .empty-state {{ display: grid; min-height: 180px; place-items: center; padding: 24px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface-muted); color: var(--text-secondary); font-size: 13px; text-align: center; }}
 .footer {{ display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding: 0 4px; gap: 20px; color: var(--text-muted); font-size: 11px; }}
 .footer-brand {{ color: var(--text-secondary); font-weight: 700; }}
+.export-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 650; text-decoration: none; transition: border-color 160ms,background 160ms; }}
+.export-btn:hover {{ border-color: var(--accent); color: var(--accent-dark); background: var(--accent-softer); }}
 @media (max-width: 1100px) {{
     .metrics-grid {{ grid-template-columns: repeat(2,minmax(0,1fr)); }}
     .dashboard-grid {{ grid-template-columns: 1fr; }}
@@ -493,7 +676,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
     </div>
     <div class="topbar-context">
       <span class="live-dot"></span>
-      Andmed on aktiivsed
+      Viimane sündmus: {last_event_str}
+      {"&nbsp;·&nbsp;<a href='/admin/analytics/logout' style='color:var(--text-secondary);font-size:12px;text-decoration:none'>Logi välja</a>" if not is_admin else ""}
     </div>
   </div>
 </header>
@@ -503,10 +687,14 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
     <div>
       <div class="eyebrow">Jaeketi ülevaade</div>
       <h1>Jaekettide tulemuslikkus</h1>
-  <p style="margin:6px 0 0;color:var(--text-secondary);font-size:16px;font-weight:500">{title}</p>
+      <p style="margin:6px 0 0;color:var(--text-secondary);font-size:16px;font-weight:500">{title}</p>
       <p class="heading-description">{'Ülevaade sellest, kuidas kasutajad ' + chain.capitalize() + ' tooteid vaatavad, ostukorvi lisavad ja millistes hinnavõrdlustes saavutab kett soodsaima ostukorvi tulemuse.' if chain else 'Ülevaade sellest, kuidas kasutajad tooteid vaatavad, ostukorvi lisavad ja millised jaeketid saavutavad hinnavõrdlustes soodsaima ostukorvi tulemuse.'}</p>
+      {rates_html}
     </div>
-    <div class="period-summary"><span>Analüüsiperiood</span><strong>Viimased {days} päeva</strong></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+      <div class="period-summary"><span>Analüüsiperiood</span><strong>Viimased {days} päeva</strong></div>
+      <a class="export-btn" href="/admin/analytics/export?days={days}{chain_param}">⬇ Ekspordi CSV</a>
+    </div>
   </section>
 
   <section class="filters-panel">
@@ -530,7 +718,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H7"></path><path d="M12 6v6"></path><path d="M9 9h6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg></span>
       </div>
       <p class="metric-value">{total_adds:,}</p>
-      <p class="metric-note">Toodete lisamised kasutajate korvidesse</p>
+      <p class="metric-note">Toodete lisamised korvidesse {delta_adds}</p>
     </article>
     <article class="metric-card">
       <div class="metric-top">
@@ -538,7 +726,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4a4 4 0 0 1-8 0V3Z"></path><path d="M6 5H3v1a5 5 0 0 0 5 5"></path><path d="M18 5h3v1a5 5 0 0 1-5 5"></path><path d="M12 11v5"></path><path d="M8 21h8"></path><path d="M10 16h4v5h-4z"></path></svg></span>
       </div>
       <p class="metric-value">{total_wins:,}</p>
-      <p class="metric-note">Soodsaima ostukorvi tulemused</p>
+      <p class="metric-note">Soodsaima korvi tulemused {delta_wins}</p>
     </article>
     <article class="metric-card">
       <div class="metric-top">
@@ -546,7 +734,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></span>
       </div>
       <p class="metric-value">{total_views:,}</p>
-      <p class="metric-note">Tootekaartide ja detailvaadete avamised</p>
+      <p class="metric-note">Tootekaartide avamised {delta_views}</p>
     </article>
     <article class="metric-card">
       <div class="metric-top">
@@ -554,7 +742,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
       </div>
       <p class="metric-value">{unique_users:,}</p>
-      <p class="metric-note">Aktiivsed kasutajad valitud perioodil</p>
+      <p class="metric-note">Aktiivsed kasutajad {delta_users}</p>
     </article>
   </section>
 
@@ -569,15 +757,16 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
           <span class="panel-badge">{days} päeva</span>
         </div>
         <div class="chart-wrapper">
-          <canvas id="dailyActivityChart" aria-label="Igapäevase aktiivsuse tulpdiagramm"></canvas>
+          <canvas id="dailyActivityChart"></canvas>
         </div>
+        {chart_summary}
       </article>
 
       <article class="panel">
         <div class="panel-header">
           <div>
             <h2 class="panel-title">Enim korvi lisatud tooted</h2>
-            <p class="panel-description">Tooted, mille vastu on kasutajad kõige suuremat ostuhuvi näidanud.</p>
+            <p class="panel-description">Tooted, mille vastu kasutajad on kõige suuremat ostuhuvi näidanud.</p>
           </div>
           <span class="panel-badge">Top 10</span>
         </div>
@@ -600,11 +789,11 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         <div class="panel-header">
           <div>
             <h2 class="panel-title">Aktiivsuse trend</h2>
-            <p class="panel-description">Korvi lisamised ja võidud samal ajaskaalal (kuvab vähemalt 2 päeva andmetega).</p>
+            <p class="panel-description">Korvi lisamised ja võidud samal ajaskaalal.</p>
           </div>
         </div>
         <div class="chart-wrapper compact">
-          <canvas id="activityOverviewChart" aria-label="Aktiivsuse trendijoonis"></canvas>
+          <canvas id="activityOverviewChart"></canvas>
         </div>
       </article>
     </div>
@@ -612,7 +801,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 
   <footer class="footer">
     <span>Näitajad põhinevad Seivy rakenduses anonüümselt kogutud kasutussündmustel.</span>
-    <span class="footer-brand">Seivy partneranalüütika · <a href="/" style="color:inherit">← Admin</a></span>
+    <span class="footer-brand">Seivy partneranalüütika{"&nbsp;·&nbsp;<a href='/' style='color:inherit'>← Admin</a>" if is_admin else ""}</span>
   </footer>
 </main>
 
@@ -687,8 +876,104 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 }})();
 </script>
 </body></html>"""
-    return HTMLResponse(html)
+    resp = HTMLResponse(html)
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Referrer-Policy"] = "no-referrer"
+    resp.headers["Cache-Control"] = "private, no-store"
+    return resp
 
+
+@router.get("/admin/analytics/logout")
+async def analytics_logout():
+    response = HTMLResponse("""<!DOCTYPE html>
+<html lang="et">
+<head><meta charset="UTF-8"><title>Välja logitud</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:60px 20px;text-align:center;background:#F5F6F8;color:#171A1F}
+h2{font-size:24px;font-weight:700;margin-bottom:12px}p{color:#68707D;font-size:15px}</style></head>
+<body>
+<div style="max-width:480px;margin:0 auto;background:#fff;padding:40px;border-radius:20px;box-shadow:0 1px 2px rgba(20,24,32,.04),0 8px 24px rgba(20,24,32,.055)">
+  <div style="font-size:48px;margin-bottom:16px">👋</div>
+  <h2>Olete välja logitud</h2>
+  <p>Uuesti sisenemiseks avage teile saadetud turvaline ligipääsulink.</p>
+</div>
+</body></html>""")
+    response.delete_cookie("seivy_analytics_token", path="/admin/analytics")
+    return response
+
+
+@router.get("/admin/analytics/export")
+async def analytics_export(request: Request, days: int = 30, chain: str = None):
+    """Fix 7: CSV eksport"""
+    import csv, io, os
+    from fastapi.responses import StreamingResponse
+
+    # Days valideerimine
+    ALLOWED_DAYS = {7, 14, 30, 90}
+    if days not in ALLOWED_DAYS:
+        days = 30
+
+    # Token auth küpsisest
+    COOKIE_NAME = "seivy_analytics_token"
+    cookie_token = request.cookies.get(COOKIE_NAME)
+    if not cookie_token:
+        return HTMLResponse("<h2>Ligipääs keelatud.</h2>", status_code=403)
+
+    TOKEN_MAP = {
+        os.environ.get("ANALYTICS_TOKEN_SELVER", ""): "selver",
+        os.environ.get("ANALYTICS_TOKEN_RIMI", ""): "rimi",
+        os.environ.get("ANALYTICS_TOKEN_PRISMA", ""): "prisma",
+        os.environ.get("ANALYTICS_TOKEN_COOP", ""): "coop",
+        os.environ.get("ANALYTICS_TOKEN_MAXIMA", ""): "maxima",
+    }
+    TOKEN_MAP.pop("", None)
+    admin_token = os.environ.get("ANALYTICS_TOKEN_ADMIN", "")
+
+    is_admin = admin_token and cookie_token == admin_token
+    if not is_admin and cookie_token in TOKEN_MAP:
+        chain = TOKEN_MAP[cookie_token]
+    elif not is_admin:
+        return HTMLResponse("<h2>Ligipääs keelatud.</h2>", status_code=403)
+
+    allowed_chains_csv = {"selver", "rimi", "prisma", "coop", "maxima"}
+    if chain:
+        chain = chain.lower().strip()
+        if chain not in allowed_chains_csv:
+            chain = None
+
+    db = getattr(request.app.state, "db", None)
+    if db is None:
+        return HTMLResponse("<h2>Andmebaas ei ole veel valmis.</h2>", status_code=503)
+    async with db.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT
+                DATE(a.created_at) AS day,
+                a.event_type,
+                a.chain,
+                p.name AS product_name,
+                COUNT(*) AS count
+            FROM analytics_events a
+            LEFT JOIN products p ON p.id = a.product_id
+            WHERE a.created_at >= CURRENT_DATE - ($1::int - 1)
+              AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+              AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
+            GROUP BY DATE(a.created_at), a.event_type, a.chain, p.name
+            ORDER BY day DESC, count DESC
+        """, days, chain)
+
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=";")
+    writer.writerow(["Kuupäev", "Sündmus", "Kett", "Toode", "Arv"])
+    for r in rows:
+        writer.writerow([r["day"], r["event_type"], r["chain"] or "", r["product_name"] or "", r["count"]])
+
+    csv_content = "\ufeff" + output.getvalue()
+    filename = f"seivy_analytics_{chain or 'koik'}_{days}p.csv"
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @router.post("/upload", dependencies=[Depends(basic_guard)])
 async def upload_image(
@@ -707,8 +992,15 @@ async def upload_image(
         if cl and int(cl) > MAX_UPLOAD_MB * 1024 * 1024:
             raise HTTPException(413, f"Image too large (>{MAX_UPLOAD_MB}MB)")
 
-        safe_base = (product.replace("/", "_").replace("\\", "_").replace(" ", "_").strip())
-        ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
+        import re as _re
+        safe_base = _re.sub(r"[^a-zA-Z0-9_-]+", "_", product).strip("._-")[:120] or "product_image"
+        allowed_extensions = {".jpg", ".jpeg", ".png", ".webp"}
+        allowed_content_types = {"image/jpeg", "image/png", "image/webp"}
+        ext = os.path.splitext(image.filename or "")[1].lower()
+        if ext not in allowed_extensions:
+            raise HTTPException(400, "Unsupported image format. Use jpg, png or webp.")
+        if image.content_type and image.content_type not in allowed_content_types:
+            raise HTTPException(400, "Unsupported image content type.")
         filename = f"{safe_base}{ext}"
 
         file_path = os.path.join(IMAGES_DIR, filename)
@@ -716,12 +1008,9 @@ async def upload_image(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
-        try:
-            if os.path.getsize(file_path) > MAX_UPLOAD_MB * 1024 * 1024:
-                os.remove(file_path)
-                raise HTTPException(413, f"Image too large (>{MAX_UPLOAD_MB}MB)")
-        except Exception:
-            pass
+        if os.path.getsize(file_path) > MAX_UPLOAD_MB * 1024 * 1024:
+            os.remove(file_path)
+            raise HTTPException(status_code=413, detail=f"Image too large (>{MAX_UPLOAD_MB}MB)")
 
         image_path = f"/static/images/{filename}"
         image_url = f"{CDN_BASE_URL.rstrip('/')}{image_path}" if CDN_BASE_URL else image_path
@@ -754,11 +1043,14 @@ async def upload_image(
             pass
 
         if wants_html(request):
+            from html import escape as _esc
+            safe_product_html = _esc(product)
+            safe_image_url_html = _esc(image_url, quote=True)
             return HTMLResponse(f"""
                 <h2>✅ Image uploaded</h2>
-                <p><b>Product:</b> {product}</p>
+                <p><b>Product:</b> {safe_product_html}</p>
                 <p><b>Rows updated:</b> {updated_rows}</p>
-                <p><img src="{image_url}" alt="{product}" style="max-width:520px;height:auto;border:1px solid #eee"/></p>
+                <p><img src="{safe_image_url_html}" alt="{safe_product_html}" style="max-width:520px;height:auto;border:1px solid #eee"/></p>
                 <p><a href="/">← Back to Missing Product Images</a></p>
             """)
 
@@ -768,5 +1060,6 @@ async def upload_image(
         raise
     except Exception as e:
         if wants_html(request):
-            return HTMLResponse(f"<h2>❌ Upload failed</h2><pre>{str(e)}</pre><p><a href='/'>← Back</a></p>", status_code=500)
+            from html import escape as _esc
+            return HTMLResponse(f"<h2>❌ Upload failed</h2><pre>{_esc(str(e))}</pre><p><a href='/'>← Back</a></p>", status_code=500)
         raise
