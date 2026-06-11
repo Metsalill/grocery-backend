@@ -143,8 +143,7 @@ async def dashboard(request: Request):
     integrity_color = "#2ecc71" if integrity_count == 0 else "#e74c3c"
     integrity_text = "OK ✅" if integrity_count == 0 else f"⚠️ {integrity_count} toodet"
 
-    import os as _os
-    _admin_tok = _os.environ.get('ANALYTICS_TOKEN_ADMIN', '')
+    _admin_tok = os.environ.get('ANALYTICS_TOKEN_ADMIN', '')
     _analytics_href = f'/admin/analytics?token={_admin_tok}' if _admin_tok else '#'
 
     html = f"""<!DOCTYPE html>
