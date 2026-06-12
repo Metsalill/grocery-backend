@@ -112,10 +112,6 @@ def fetch_categories_from_api(
     delivery_lat: str = DELIVERY_LAT,
     delivery_lng: str = DELIVERY_LNG,
 ) -> List[Tuple[str, str]]:
-    """
-    Call getMenuCategories to get current SMC IDs for this venue.
-    Returns list of (category_name, smc_id) pairs.
-    """
     params = {
         "provider_id": venue_id,
         "delivery_lat": delivery_lat,
@@ -145,8 +141,6 @@ def fetch_categories_from_api(
 
     categories: List[Tuple[str, str]] = []
 
-    # Response shape:
-    # {"code": 0, "data": {"child_ids": [id1, id2, ...], "items": {"id1": {"name": {"locale":..,"value":..}, "type": "category"|"item", "child_ids": [...]}}}}
     top = data.get("data", {})
     items_map = top.get("items", {})
 
@@ -176,7 +170,6 @@ def fetch_categories_from_api(
     if root_child_ids:
         _walk(root_child_ids)
     else:
-        # No root child_ids — iterate items map directly
         print(f"[categories] no root child_ids, scanning {len(items_map)} items directly")
         for smc, obj in items_map.items():
             if not isinstance(obj, dict):
@@ -186,7 +179,6 @@ def fetch_categories_from_api(
             if typ == "category" and name:
                 categories.append((name, str(smc)))
 
-    # Deduplicate preserving order
     seen = set()
     unique = []
     for name, smc in categories:
@@ -200,19 +192,12 @@ def fetch_categories_from_api(
 
 # ---------------------- file parsing (kept as fallback) ---------------------- #
 def parse_categories_file(path: str) -> List[Tuple[str, str]]:
-    """
-    Returns list of (category_name, smc_id) pairs from a .txt file.
-    Accepts lines like:
-      https://food.bolt.eu/.../smc/1234567/?categoryName=Foo
-    and extracts the smc number.
-    """
     out: List[Tuple[str, str]] = []
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
             line = raw.strip()
             if not line or line.startswith("#"):
                 continue
-            # Support "name -> url" format
             if "->" in line:
                 name, href = [x.strip() for x in line.split("->", 1)]
             else:
@@ -241,7 +226,6 @@ def fetch_dish_ids_for_category(
     delivery_lat: str = DELIVERY_LAT,
     delivery_lng: str = DELIVERY_LNG,
 ) -> List[int]:
-    """Call getMenuDishes to get the list of dish IDs for a category."""
     params = {
         "provider_id": venue_id,
         "category_id": category_id,
@@ -271,7 +255,6 @@ def fetch_dish_ids_for_category(
     top = data.get("data", {})
     items_map = top.get("items", {})
 
-    # Collect all dish IDs (type == "dish") from the items map
     dish_ids = []
     for key, obj in items_map.items():
         if isinstance(obj, dict) and obj.get("type") == "dish":
@@ -289,7 +272,6 @@ def fetch_dishes_by_ids(
     delivery_lat: str = DELIVERY_LAT,
     delivery_lng: str = DELIVERY_LNG,
 ) -> dict:
-    """POST to getDishesByIds to get full product details."""
     params = {
         "version": API_VERSION,
         "language": "et-EE",
@@ -325,7 +307,6 @@ def fetch_dishes_by_ids(
 
 
 def parse_dishes_by_ids_response(data: dict, cat_name: str, venue_id: str) -> List[Dict]:
-    """Parse getDishesByIds response into flat product list."""
     if not data or not isinstance(data, dict):
         return []
 
@@ -338,19 +319,16 @@ def parse_dishes_by_ids_response(data: dict, cat_name: str, venue_id: str) -> Li
         if not isinstance(obj, dict) or obj.get("type") != "dish":
             continue
 
-        # Name
         name_obj = obj.get("name") or {}
         name = norm_space(name_obj.get("value") or name_obj.get("et") or "") if isinstance(name_obj, dict) else norm_space(str(name_obj))
         if not name:
             continue
 
-        # Price — already in EUR as float
         price_obj = obj.get("price") or {}
         price_eur = float(price_obj.get("value", 0)) if isinstance(price_obj, dict) else None
         if not price_eur or price_eur <= 0:
             continue
 
-        # Image — images.menu_item_list_v1.aspect_ratio_map.original.3x
         image = ""
         try:
             image = obj["images"]["menu_item_list_v1"]["aspect_ratio_map"]["original"].get("3x") or \
@@ -359,10 +337,8 @@ def parse_dishes_by_ids_response(data: dict, cat_name: str, venue_id: str) -> Li
         except (KeyError, TypeError):
             pass
 
-        # EAN — product_id field (e.g. "4740125220117")
         ean = obj.get("product_id") or ""
 
-        # Unit text from description (contains "Suurus, maht: Xml")
         unit_text = ""
         desc_obj = obj.get("description") or {}
         desc = desc_obj.get("value", "") if isinstance(desc_obj, dict) else str(desc_obj)
@@ -439,7 +415,7 @@ async def _ingest_to_db(products: List[Dict]) -> None:
                     SELECT upsert_product_and_price(
                         $1::text, $2::text, $3::text, $4::text, $5::text,
                         $6::text, $7::numeric, $8::text, $9::integer,
-                        $10::timestamptz, $11::text
+                        $10::timestamptz, $11::text, false, $12::text
                     );
                     """,
                     "coop",
@@ -452,7 +428,8 @@ async def _ingest_to_db(products: List[Dict]) -> None:
                     "EUR",
                     store_id,
                     datetime.datetime.now(datetime.timezone.utc),
-                    "",
+                    "",                        # source_url
+                    p.get("image") or "",      # ← image_url (uus)
                 )
                 total += 1
             except Exception as e:
@@ -476,10 +453,9 @@ def crawl(
 ) -> List[Dict]:
 
     session_id = str(uuid.uuid4())
-    device_id = str(uuid.uuid4())   # full UUID with dashes, matching browser format
+    device_id = str(uuid.uuid4())
     session = _make_session()
 
-    # Fetch categories dynamically if not provided via file
     if not categories:
         print(f"[info] fetching categories dynamically for venue_id={venue_id}")
         categories = fetch_categories_from_api(
@@ -495,7 +471,6 @@ def crawl(
     all_products: List[Dict] = []
     all_dish_ids: List[int] = []
 
-    # Step 1: collect all dish IDs across all categories
     for idx, (cat_name, category_id) in enumerate(categories, 1):
         print(f"[cat] {idx}/{len(categories)} '{cat_name}' (smc={category_id})")
         dish_ids = fetch_dish_ids_for_category(
@@ -507,11 +482,9 @@ def crawl(
         all_dish_ids.extend(dish_ids)
         time.sleep(req_delay)
 
-    # Deduplicate dish IDs
     unique_dish_ids = list(dict.fromkeys(all_dish_ids))
     print(f"[info] {len(unique_dish_ids)} unique dish IDs to fetch")
 
-    # Step 2: fetch full product details in batches via getDishesByIds POST
     BATCH_SIZE = 50
     for i in range(0, len(unique_dish_ids), BATCH_SIZE):
         batch = unique_dish_ids[i:i + BATCH_SIZE]
@@ -526,7 +499,6 @@ def crawl(
         all_products.extend(products)
         time.sleep(req_delay)
 
-    # Deduplicate across categories
     seen = set()
     unique_all: List[Dict] = []
     for p in all_products:
@@ -566,7 +538,6 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--req-delay", type=float, default=0.5)
     ap.add_argument("--upsert-db", default="1")
-    # Legacy / compat flags (ignored but kept so old YML doesn't break)
     ap.add_argument("--categories-file", default="")
     ap.add_argument("--categories-dir", default="")
     ap.add_argument("--city", default="")
@@ -576,7 +547,6 @@ def main():
     ap.add_argument("--ingest-mode", default="main")
     args = ap.parse_args()
 
-    # Optional: still support categories file as override for testing
     categories = None
     if args.categories_file and os.path.isfile(args.categories_file):
         print(f"[info] using categories file override: {args.categories_file}")
