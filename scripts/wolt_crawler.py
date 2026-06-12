@@ -564,7 +564,7 @@ def _bulk_ingest_to_db(rows: List[Dict[str, Any]], store_id: int) -> None:
                         SELECT upsert_product_and_price(
                             %s::text, %s::text, %s::text, %s::text, %s::text,
                             %s::text, %s::numeric, %s::text, %s::integer,
-                            NOW(), %s::text
+                            NOW(), %s::text, false, %s::text
                         );
                         """,
                         (
@@ -572,6 +572,7 @@ def _bulk_ingest_to_db(rows: List[Dict[str, Any]], store_id: int) -> None:
                             r.get("brand") or "", r.get("size_text") or "",
                             r.get("ean_raw") or "", float(price_val), r.get("currency") or "EUR",
                             int(store_id), r.get("url") or "",
+                            r.get("image_url") or "",
                         ),
                     )
                     sent += 1
