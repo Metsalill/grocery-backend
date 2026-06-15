@@ -4,6 +4,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
+import httpx
 
 # Google token verify
 from google.oauth2 import id_token as google_id_token
@@ -40,6 +41,11 @@ class ResetPasswordRequest(BaseModel):
 class GoogleLoginIn(BaseModel):
     id_token: str
 
+class AppleLoginIn(BaseModel):
+    identity_token: str
+    first_name: str | None = None
+    last_name: str | None = None
+
 # ===== Helpers =====
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
@@ -51,7 +57,6 @@ def create_reset_token(email: str) -> str:
     expire = datetime.utcnow() + timedelta(minutes=15)
     return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
-# Null-safe password verify (SSO users have NULL password_hash)
 def verify_password(plain_password, hashed_password) -> bool:
     if not hashed_password:
         return False
@@ -69,6 +74,47 @@ def _db_pool_or_503(request: Request):
         raise HTTPException(status_code=503, detail="Database not ready")
     return pool
 
+# ===== Apple token verify =====
+async def verify_apple_identity_token(identity_token: str) -> dict:
+    """Verify Apple identity token using Apple's public keys."""
+    try:
+        # Fetch Apple's public keys
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("https://appleid.apple.com/auth/keys")
+            apple_keys = resp.json()
+
+        # Decode header to get kid
+        import base64, json as _json
+        header_segment = identity_token.split(".")[0]
+        # Add padding
+        header_segment += "=" * (4 - len(header_segment) % 4)
+        header = _json.loads(base64.urlsafe_b64decode(header_segment))
+        kid = header.get("kid")
+
+        # Find matching key
+        from jose import jwk
+        matching_key = None
+        for key_data in apple_keys.get("keys", []):
+            if key_data.get("kid") == kid:
+                matching_key = jwk.construct(key_data)
+                break
+
+        if not matching_key:
+            raise ValueError("No matching Apple public key found")
+
+        # Verify and decode
+        claims = jwt.decode(
+            identity_token,
+            matching_key,
+            algorithms=["RS256"],
+            audience=os.getenv("APPLE_BUNDLE_ID", "ee.elynoy.seivy"),
+            issuer="https://appleid.apple.com",
+        )
+        return claims
+
+    except Exception as e:
+        raise ValueError(f"Apple token verification failed: {e}")
+
 # ===== Auth dependency =====
 async def get_current_user(request: Request, authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -82,7 +128,6 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
         if not email:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # God mode
         if email == "marko@minetech.ee":
             return {
                 "email": email,
@@ -129,7 +174,6 @@ async def register(user: UserIn, request: Request):
                 raise HTTPException(status_code=400, detail="Email already registered")
 
             hashed_pw = get_password_hash(user.password)
-            # Local (password) account
             await conn.execute(
                 """
                 INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
@@ -162,7 +206,6 @@ async def login(user: LoginUser, request: Request):
         if not db_user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        # Block SSO-only accounts from password login
         if db_user.get("auth_provider") != "local":
             raise HTTPException(
                 status_code=401,
@@ -178,7 +221,6 @@ async def login(user: LoginUser, request: Request):
     )
     return {"access_token": access_token}
 
-# Google login/registration (verifies ID token)
 @router.post("/auth/login/google", response_model=TokenOut)
 async def login_with_google(payload: GoogleLoginIn, request: Request):
     audience = os.getenv("GOOGLE_AUDIENCE")
@@ -206,7 +248,6 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
 
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            # Upsert Google user. Never set a password_hash.
             await conn.execute(
                 """
                 INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
@@ -232,6 +273,50 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
     except Exception as e:
         print("❌ GOOGLE LOGIN ERROR:", str(e))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+
+@router.post("/auth/login/apple", response_model=TokenOut)
+async def login_with_apple(payload: AppleLoginIn, request: Request):
+    try:
+        claims = await verify_apple_identity_token(payload.identity_token)
+
+        email = (claims.get("email") or "").lower()
+
+        # Apple võib peita emaili — kasuta sub-i varuna
+        apple_sub = claims.get("sub", "")
+        if not email:
+            # Privaatne relay email puudub — kasuta apple_sub unikaalse ID-na
+            email = f"apple_{apple_sub}@privaterelay.appleid.com"
+
+        first_name = payload.first_name or ""
+        last_name = payload.last_name or ""
+
+        pool = _db_pool_or_503(request)
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
+                VALUES ($1, NULL, $2, $3, '', 'regular', 'apple', true)
+                ON CONFLICT (email)
+                DO UPDATE SET
+                    auth_provider  = 'apple',
+                    email_verified = true,
+                    first_name = CASE WHEN EXCLUDED.first_name != '' THEN EXCLUDED.first_name ELSE users.first_name END,
+                    last_name  = CASE WHEN EXCLUDED.last_name  != '' THEN EXCLUDED.last_name  ELSE users.last_name  END
+                """,
+                email, first_name, last_name,
+            )
+
+        access_token = create_access_token(
+            data={"sub": email},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+        return {"access_token": access_token}
+
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except Exception as e:
+        print("❌ APPLE LOGIN ERROR:", str(e))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Apple token")
 
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
