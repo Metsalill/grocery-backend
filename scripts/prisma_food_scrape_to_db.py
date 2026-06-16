@@ -2,16 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Prisma scraper v3 — requests + __NEXT_DATA__ Apollo cache, no Playwright.
-
-Prisma uses Next.js. The page HTML contains a <script id="__NEXT_DATA__">
-JSON blob with an Apollo GraphQL cache. Products are stored as:
-  apolloState['Product:{"id":"EAN","storeId":"..."}'] = {ean, name, price, ...}
-
-Price comes from ProductStoreEdge entries linked to each product.
-FIX: kg-toodetel (isApproximatePrice=true, comparisonUnit=KG) kasuta
-     comparisonPrice (€/kg) mitte price (tükihind).
-
-Run: python prisma_food_scrape_to_db.py [--store-id 14] [--delay 0.5] [--shard N] [--shards M]
 """
 
 from __future__ import annotations
@@ -30,34 +20,26 @@ import requests
 from bs4 import BeautifulSoup
 import psycopg2
 
-# ---------------------------------------------------------------------------
 BASE = "https://prismamarket.ee"
 
-# Kategooriad kus Prisma epoes on mõnel tootel vale "Coop " eesliide
-# nt "Coop Õun Golden Delicious" — tegelikult geneerilne toode, mitte Coop bränd
 COOP_PREFIX_FIX_PATHS = [
     "puu-ja-koogiviljad",
     "food-market",
 ]
 
-# Legitiimsed "Coop " eesliitega sõnad — need jäävad alles
-# nt "Coop Mahe õun" on päriselt Coop Mahe brändi toode
 COOP_LEGIT_SECOND_WORDS = {
     "mahe", "öko", "eko", "organic", "bio",
 }
 
 CATEGORIES = [
-    # Food market
     "/tooted/food-market/liha",
     "/tooted/food-market/valmistoit",
     "/tooted/food-market/kalalett",
-    # Puu- ja koogiviljad
     "/tooted/puu-ja-koogiviljad/puuviljad",
     "/tooted/puu-ja-koogiviljad/juurviljad",
     "/tooted/puu-ja-koogiviljad/koogiviljad",
     "/tooted/puu-ja-koogiviljad/marjad",
     "/tooted/puu-ja-koogiviljad/seened",
-    # Leivad
     "/tooted/leivad-kupsised-ja-kupsetised/gluteenivaba",
     "/tooted/leivad-kupsised-ja-kupsetised/leivad",
     "/tooted/leivad-kupsised-ja-kupsetised/kupsetusleti-tooted",
@@ -65,7 +47,6 @@ CATEGORIES = [
     "/tooted/leivad-kupsised-ja-kupsetised/kuivikud-ja-kringlid",
     "/tooted/leivad-kupsised-ja-kupsetised/kuivikud-ja-nakileivad",
     "/tooted/leivad-kupsised-ja-kupsetised/kupsised",
-    # Liha
     "/tooted/liha-ja-taimsed-valgud/hakkliha",
     "/tooted/liha-ja-taimsed-valgud/veiseliha",
     "/tooted/liha-ja-taimsed-valgud/sealiha",
@@ -76,11 +57,9 @@ CATEGORIES = [
     "/tooted/liha-ja-taimsed-valgud/taimsed-valgud-ja-juustuvalgud",
     "/tooted/liha-ja-taimsed-valgud/broiler-ja-kalkun",
     "/tooted/liha-ja-taimsed-valgud/lambaliha-ja-ulukid",
-    # Kala
     "/tooted/kala-ja-mereannid/mereannid",
     "/tooted/kala-ja-mereannid/muud-kalatooted",
     "/tooted/kala-ja-mereannid/kala",
-    # Piim
     "/tooted/piim-munad-ja-rasvad/piim-ja-hapupiim",
     "/tooted/piim-munad-ja-rasvad/toiduvalmistustooted",
     "/tooted/piim-munad-ja-rasvad/jogurtid",
@@ -91,18 +70,15 @@ CATEGORIES = [
     "/tooted/piim-munad-ja-rasvad/rasvad",
     "/tooted/piim-munad-ja-rasvad/munad",
     "/tooted/piim-munad-ja-rasvad/kohupiim",
-    # Juustud
     "/tooted/juustud/taimsed-juustud",
     "/tooted/juustud/toidu-ja-gurmeejuustud",
     "/tooted/juustud/tuki-ja-viilujuustud",
-    # Valmistoit
     "/tooted/valmistoit/salatid-supid-ja-leivad",
     "/tooted/valmistoit/einesalatid-ja-varske-pasta",
     "/tooted/valmistoit/pallid-pihvid-ja-pannkoogid",
     "/tooted/valmistoit/vormiroad-pasta-ja-lasanje",
     "/tooted/valmistoit/valmistoidud-ja-supid",
     "/tooted/valmistoit/puder-ja-kissellid",
-    # Olid, vurtsid
     "/tooted/olid-vurtsid-maitseained/maitsekastmed-ja-pastad",
     "/tooted/olid-vurtsid-maitseained/texmex",
     "/tooted/olid-vurtsid-maitseained/ketsupid-ja-sinepid",
@@ -113,7 +89,6 @@ CATEGORIES = [
     "/tooted/olid-vurtsid-maitseained/olid",
     "/tooted/olid-vurtsid-maitseained/salatikastmed",
     "/tooted/olid-vurtsid-maitseained/majonees",
-    # Kuivtooted
     "/tooted/kuivtooted-ja-kupsetamine/kliid-idud-tangud",
     "/tooted/kuivtooted-ja-kupsetamine/konservid",
     "/tooted/kuivtooted-ja-kupsetamine/jahud-ja-kupsetussegud",
@@ -125,7 +100,6 @@ CATEGORIES = [
     "/tooted/kuivtooted-ja-kupsetamine/magustoidud",
     "/tooted/kuivtooted-ja-kupsetamine/kupsetusvahendid",
     "/tooted/kuivtooted-ja-kupsetamine/moosid-ja-marmelaadid",
-    # Joogid
     "/tooted/joogid/energia-ja-spordijoogid",
     "/tooted/joogid/long-dringid",
     "/tooted/joogid/alkoholisegud",
@@ -141,7 +115,6 @@ CATEGORIES = [
     "/tooted/joogid/joogikontsentraadid",
     "/tooted/joogid/mahlad",
     "/tooted/joogid/kohv-ja-kohvifiltrid",
-    # Kulmutatud
     "/tooted/kulmutatud-toidud/kulmutatud-liha-ja-kala",
     "/tooted/kulmutatud-toidud/kulmutatud-eined",
     "/tooted/kulmutatud-toidud/kulmutatud-kupsetised-ja-leivad",
@@ -151,7 +124,6 @@ CATEGORIES = [
     "/tooted/kulmutatud-toidud/kulmutatud-puuviljad-ja-marjad",
     "/tooted/kulmutatud-toidud/muud-kulmutatud-tooted",
     "/tooted/kulmutatud-toidud/jaatised",
-    # Maiustused
     "/tooted/maiustused-ja-suupisted/kropsud-ja-muud-naksid",
     "/tooted/maiustused-ja-suupisted/hooajalised-ja-kinkemaiustused",
     "/tooted/maiustused-ja-suupisted/narimiskummid",
@@ -159,7 +131,6 @@ CATEGORIES = [
     "/tooted/maiustused-ja-suupisted/sokolaadid",
     "/tooted/maiustused-ja-suupisted/muud-maiustused",
     "/tooted/maiustused-ja-suupisted/kommikotid",
-    # Kosmeetika
     "/tooted/kosmeetika-ja-hugieen/juuksed-ja-juuksehooldus",
     "/tooted/kosmeetika-ja-hugieen/naohooldus",
     "/tooted/kosmeetika-ja-hugieen/nahahooldus",
@@ -167,7 +138,6 @@ CATEGORIES = [
     "/tooted/kosmeetika-ja-hugieen/suuhooldus",
     "/tooted/kosmeetika-ja-hugieen/seebid-ja-pesuvahendid",
     "/tooted/loodustooted-ja-toidulisandid",
-    # Lapsed
     "/tooted/lapsed/emapiimaasendajad",
     "/tooted/lapsed/pudrud-ja-pureesupid",
     "/tooted/lapsed/lastetoidud",
@@ -176,12 +146,10 @@ CATEGORIES = [
     "/tooted/lapsed/puhastamine-ja-hugieen",
     "/tooted/lapsed/laste-vahepalad",
     "/tooted/lapsed/beebi-ja-lapsehooldusvahendid",
-    # Lemmikloomad
     "/tooted/lemmikloomad/koeratoit",
     "/tooted/lemmikloomad/kassitoit",
     "/tooted/lemmikloomad/muud-lemmikloomade-tarvikud",
     "/tooted/lemmikloomad/kassiliiv",
-    # Kodu
     "/tooted/kodu-ja-majapidamistarbed",
     "/tooted/kodu-ja-vaba-aeg/pesupesemine",
     "/tooted/kodu-ja-vaba-aeg/tualettpaber",
@@ -205,7 +173,6 @@ SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
 
 
-# ---------------------------------------------------------------------------
 def get_db_url() -> str:
     url = os.getenv("DATABASE_URL")
     if not url:
@@ -242,26 +209,18 @@ def parse_size_from_name(name: str) -> str:
 
 
 def clean_coop_prefix(name: str, cat_path: str) -> str:
-    """
-    Eemalda vale 'Coop ' eesliide puu- ja köögivilja kategooriates.
-    Prisma epoes on mõnel tootel vale silt — nt 'Coop Õun Golden Delicious'
-    mis pole Coop brändi toode vaid geneerilne toode.
-    Legitiimsed Coop brändi tooted (nt 'Coop Mahe', 'Coop Öko') jäävad alles.
-    """
     if not name.startswith("Coop "):
         return name
     if not any(p in cat_path for p in COOP_PREFIX_FIX_PATHS):
         return name
-    # Kontrolli kas teine sõna on legitiimne Coop brändi sõna
-    rest = name[5:]  # eemalda "Coop "
+    rest = name[5:]
     second_word = rest.split()[0].lower() if rest.split() else ""
     if second_word in COOP_LEGIT_SECOND_WORDS:
-        return name  # legitiimne bränd, jäta alles
-    return rest  # eemalda "Coop " eesliide
+        return name
+    return rest
 
 
 def extract_next_data(html: str) -> Optional[dict]:
-    """Extract __NEXT_DATA__ JSON from page HTML."""
     m = re.search(
         r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
         html, re.S
@@ -276,18 +235,10 @@ def extract_next_data(html: str) -> Optional[dict]:
 
 
 def get_build_id(next_data: dict) -> Optional[str]:
-    """Extract Next.js build ID from __NEXT_DATA__."""
     return next_data.get("buildId")
 
 
 def parse_apollo_products(apollo_state: dict) -> list[dict]:
-    """
-    Extract products from Apollo GraphQL cache.
-
-    FIX: kg-toodetel (isApproximatePrice=true, comparisonUnit=KG) kasuta
-    comparisonPrice (€/kg) mitte price (tükihind).
-    """
-    # First collect prices from ProductStoreEdge
     prices_by_product_ref: dict[str, float] = {}
     for key, val in apollo_state.items():
         if not key.startswith("ProductStoreEdge:"):
@@ -327,7 +278,6 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
         if not name:
             continue
 
-        # Price: try direct, then from ProductStoreEdge
         price = None
         for price_key in ["price", "regularPrice", "campaignPrice", "lowestPrice"]:
             p = val.get(price_key)
@@ -343,7 +293,6 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
         if not price or price <= 0:
             continue
 
-        # FIX: kg-toodetel kasuta comparisonPrice (€/kg) mitte tükihinda
         is_approx = val.get("approxPrice") or val.get("isApproximatePrice") or False
         pricing = val.get("pricing", {})
         if isinstance(pricing, dict):
@@ -370,7 +319,6 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
         source_url = f"{BASE}/toode/{slug}/{ean}" if slug else f"{BASE}/toode/{ean}"
         ext_id = ean
 
-        # size_text: kg-toodetel märgi 'kg'
         size_text = parse_size_from_name(name)
         if is_approx and comparison_unit == "KG" and not size_text:
             size_text = "kg"
@@ -388,7 +336,6 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
 
 
 def find_total_pages(html: str) -> int:
-    """Find total pages from Prisma pagination links in SSR HTML."""
     soup = BeautifulSoup(html, "lxml")
     max_page = 1
     for a in soup.find_all("a", attrs={"data-test-id": "pagination-link"}):
@@ -463,7 +410,6 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
 
         products = parse_apollo_products(apollo_state)
 
-        # Puhasta vale "Coop " eesliide puu- ja köögivilja kategooriates
         for p in products:
             p["name"] = clean_coop_prefix(p["name"], cat_path)
 
@@ -494,7 +440,9 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
     ts_now = datetime.datetime.now(datetime.timezone.utc)
     sql = """
         SELECT upsert_product_and_price(
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s::text, %s::text, %s::text, %s::text, %s::text,
+            %s::text, %s::numeric, %s::text, %s::integer,
+            %s::timestamptz, %s::text
         );
     """
     payload = [
