@@ -400,7 +400,9 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
     # Step 1: upsert product + price via existing function
     sql_upsert = """
         SELECT upsert_product_and_price(
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s::text, %s::text, %s::text, %s::text, %s::text,
+            %s::text, %s::numeric, %s::text, %s::integer,
+            %s::timestamptz, %s::text
         );
     """
     payload = [
