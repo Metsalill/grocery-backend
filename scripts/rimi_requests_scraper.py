@@ -12,7 +12,7 @@ Speed: ~125 HTTP requests for 10,000 products vs ~10,000 Playwright PDP loads.
 """
 
 from __future__ import annotations
-import argparse, os, re, csv, json, sys, time, asyncio
+import argparse, os, re, csv, json, sys, time, asyncio, datetime
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
@@ -255,6 +255,7 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
     pool = await asyncpg.create_pool(dsn, min_size=1, max_size=2)
     try:
         upserted = 0
+        now = datetime.datetime.now(datetime.timezone.utc)
         for r in rows:
             price_val = to_float_price(r.get("price", ""))
             if price_val is None:
@@ -263,7 +264,9 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
                 await pool.fetchval(
                     """
                     SELECT upsert_product_and_price(
-                        $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10
+                        $1::text, $2::text, $3::text, $4::text, $5::text,
+                        $6::text, $7::numeric, $8::text, $9::integer,
+                        $10::timestamptz, $11::text
                     );
                     """,
                     "rimi",
@@ -275,6 +278,7 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
                     price_val,
                     (r.get("currency") or "EUR"),
                     store_id,
+                    now,
                     r.get("source_url") or "",
                 )
                 upserted += 1
