@@ -9,7 +9,7 @@ jobs:
   crawl:
     name: crawl (${{ matrix.store_host }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -84,7 +84,7 @@ jobs:
   ingest:
     name: ingest (all stores)
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     needs: crawl
     if: always()
     env:
