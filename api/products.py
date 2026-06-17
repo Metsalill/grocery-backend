@@ -67,7 +67,6 @@ async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optiona
         import os
         from jose import jwt
         token = authorization.split(" ")[1]
-        # Fix 6: ei kasuta vaikimisi saladust produktsioonis
         SECRET_KEY = os.getenv("JWT_SECRET")
         if not SECRET_KEY:
             return None
@@ -133,7 +132,6 @@ def _build_dedup_sql(where_sql: str) -> str:
 
 
 def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
-    # Fix 1: grupi-tasemel personaliseerimine + Fix 7: user_id parameetrina
     if where_sql.strip().upper().startswith("WHERE"):
         combined_where = f"{where_sql} AND {PRICE_FRESHNESS_FILTER}"
     else:
@@ -205,7 +203,6 @@ async def list_products(
 
     if q:
         params.append(f"%{q}%")
-        # Fix 2: otsing ka canonical_name ja brand järgi
         where.append(
             f"(p.name ILIKE ${len(params)} OR pg.canonical_name ILIKE ${len(params)}"
             f" OR p.brand ILIKE ${len(params)} OR pg.brand ILIKE ${len(params)})"
@@ -227,7 +224,6 @@ async def list_products(
                 dedup_sql = _build_dedup_sql(where_sql)
                 order_clause = "ORDER BY COALESCE(NULLIF(canonical_name, ''), name), id"
 
-            # Fix 3: laadi limit+1 rida has_more täpseks arvutuseks
             fetch_limit = limit + 1
             params_with_paging = params_for_query + [fetch_limit, offset]
             limit_param = len(params_for_query) + 1
@@ -241,7 +237,6 @@ async def list_products(
 
             rows = await conn.fetch(data_sql, *params_with_paging)
 
-        # Fix 3: täpne has_more
         has_more = len(rows) > limit
         rows = rows[:limit]
         items = [_row_to_safe_product(dict(r)) for r in rows]
@@ -270,33 +265,43 @@ async def search_products(
     request: Request,
     q: str = Query(..., min_length=1),
     limit: int = Query(10, ge=1, le=50),
+    sub_code: Optional[str] = Query(None),
 ) -> Dict[str, Any]:
     limit = min(limit, 50)
     q = q.strip()
 
-    # Fix 5: tühik otsingus
     if not q:
         raise HTTPException(status_code=422, detail="Search query cannot be empty")
 
     pool = await _get_pool(request)
 
-    # Fix 2: otsing ka canonical_name ja brand järgi
-    where_sql = """WHERE (
+    params: List[Any] = [f"%{q}%"]
+    where_parts = ["""(
         p.name ILIKE $1
         OR pg.canonical_name ILIKE $1
         OR p.brand ILIKE $1
         OR pg.brand ILIKE $1
-    )"""
+    )"""]
+
+    if sub_code:
+        params.append(sub_code.strip())
+        where_parts.append(f"p.sub_code = ${len(params)}")
+
+    where_sql = "WHERE " + " AND ".join(where_parts)
     dedup_sql = _build_dedup_sql(where_sql)
+
+    params.append(limit)
+    limit_param = len(params)
+
     sql = f"""
         SELECT * FROM ({dedup_sql}) AS deduped
         ORDER BY COALESCE(NULLIF(canonical_name, ''), name), id
-        LIMIT $2
+        LIMIT ${limit_param}
     """
 
     try:
         async with pool.acquire() as conn:
-            rows = await conn.fetch(sql, f"%{q}%", limit)
+            rows = await conn.fetch(sql, *params)
 
         items = [_row_to_safe_product(dict(r)) for r in rows]
         return {"items": items, "count": len(items), "q": q}
@@ -315,7 +320,6 @@ async def get_product(
 
     try:
         async with pool.acquire() as conn:
-            # Fix 4: täielik vastus group_id, canonical_name, chains, min_price-ga
             row = await conn.fetchrow("""
                 SELECT
                     p.*,
