@@ -186,13 +186,13 @@ async def dashboard(request: Request):
   Coop tooted ainult Rimi poodides: <b style="color:{integrity_color}">{integrity_text}</b>
 </div>
 
-<h2>Scraperите aktiivsus</h2>
+<h2>Scraperitе aktiivsus</h2>
 <table>
   <tr><th>Kett</th><th>Viimane update</th><th>Täna uuendatud</th></tr>
   {scraper_html}
 </table>
 
-<h2>Ketide coverage</h2>
+<h2>Kettide coverage</h2>
 <table>
   <tr><th>Kett</th><th>Tooted</th><th>Hinnaga</th><th>Pildiga</th></tr>
   {chains_html}
