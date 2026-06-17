@@ -2,7 +2,7 @@ name: Barbora DB Scrape + Ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 20 * * *"
 concurrency:
   group: barbora-scrape
   cancel-in-progress: false
