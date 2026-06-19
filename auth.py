@@ -54,7 +54,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def create_reset_token(email: str) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + timedelta(minutes=30)
     return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
 def verify_password(plain_password, hashed_password) -> bool:
@@ -73,6 +73,52 @@ def _db_pool_or_503(request: Request):
     if pool is None:
         raise HTTPException(status_code=503, detail="Database not ready")
     return pool
+
+async def send_reset_email(email: str, reset_token: str):
+    """Send password reset email via Resend."""
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    if not resend_api_key:
+        raise HTTPException(status_code=500, detail="Email service not configured")
+
+    reset_link = f"https://seivy.ee/reset-password?token={reset_token}"
+
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #FF9100;">Seivy paroolivahetus</h2>
+        <p>Tere!</p>
+        <p>Parooli vahetamiseks vajuta allolevale nupule. Link kehtib <strong>30 minutit</strong>.</p>
+        <a href="{reset_link}"
+           style="display:inline-block; background:#FF9100; color:#fff; padding:12px 24px;
+                  border-radius:8px; text-decoration:none; font-weight:bold; margin:16px 0;">
+            Vaheta parool
+        </a>
+        <p style="color:#888; font-size:13px;">
+            Kui sa ei taotlenud parooli vahetust, ignoreeri seda kirja.
+        </p>
+        <p style="color:#888; font-size:12px;">
+            Kui nupp ei tööta, kopeeri see link brauserisse:<br>
+            <a href="{reset_link}" style="color:#FF9100;">{reset_link}</a>
+        </p>
+    </div>
+    """
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "Seivy <noreply@seivy.ee>",
+                "to": [email],
+                "subject": "Seivy paroolivahetus",
+                "html": html_content,
+            },
+        )
+        if resp.status_code not in (200, 201):
+            print(f"❌ RESEND ERROR: {resp.status_code} {resp.text}")
+            raise HTTPException(status_code=500, detail="Failed to send email")
 
 # ===== Apple token verify =====
 async def verify_apple_identity_token(identity_token: str) -> dict:
@@ -371,10 +417,12 @@ async def request_password_reset(email: EmailStr, request: Request):
             email.lower()
         )
         if not user:
-            raise HTTPException(status_code=404, detail="Email not found")
+            # Ära paljasta kas email eksisteerib
+            return {"status": "success", "message": "If this email exists, a reset link has been sent"}
 
     reset_token = create_reset_token(email.lower())
-    return {"reset_token": reset_token}
+    await send_reset_email(email.lower(), reset_token)
+    return {"status": "success", "message": "Password reset email sent"}
 
 @router.post("/reset-password")
 async def reset_password(data: ResetPasswordRequest, request: Request):
