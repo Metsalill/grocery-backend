@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Selver scraper v3 - Vue Storefront Elasticsearch API, no Playwright.
-v3 changes vs v2:
-  - EAN: reads product_main_ean / ean_data instead of barcode (which API doesn't return)
-  - image_url: built from image/small_image/thumbnail path returned by API
-  - image_url written to DB after upsert (separate UPDATE, doesn't overwrite existing)
+Selver scraper v4 - Vue Storefront Elasticsearch API, no Playwright.
+v4 changes vs v3:
+  - extract_price: returns (price, promo_price) tuple
+  - promo_price: customer_group_id=1 final_price when is_discount=True (partner card)
+  - promo_price always overwritten (NULL when no campaign active)
+  - upsert_batch: Step 2 updates promo_price in prices table
 """
 
 from __future__ import annotations
@@ -305,23 +306,44 @@ def fetch_products_for_category(category_ids: list[int], from_: int = 0) -> Opti
     return None
 
 
-def extract_price(src: dict) -> Optional[float]:
+def extract_price(src: dict) -> tuple[Optional[float], Optional[float]]:
+    """Returns (regular_price, promo_price).
+    regular_price = customer_group_id 0 (no card)
+    promo_price   = customer_group_id 1 with is_discount=True (partner card)
+    promo_price is None when no campaign is active.
+    """
+    regular = None
+    promo = None
     prices = src.get("prices") or []
     for p in prices:
-        if isinstance(p, dict) and p.get("customer_group_id") == 0:
-            fp = p.get("final_price") or p.get("price")
-            if fp and float(fp) > 0:
-                return float(fp)
-    for field in ["final_price", "special_price", "price"]:
-        val = src.get(field)
-        if val is not None:
-            try:
-                f = float(val)
-                if f > 0:
-                    return f
-            except Exception:
-                pass
-    return None
+        if not isinstance(p, dict):
+            continue
+        fp = p.get("final_price") or p.get("price")
+        if not fp:
+            continue
+        try:
+            val = float(fp)
+        except Exception:
+            continue
+        if val <= 0:
+            continue
+        gid = p.get("customer_group_id")
+        if gid == 0:
+            regular = val
+        elif gid == 1 and p.get("is_discount"):
+            promo = val
+    if regular is None:
+        for field in ["final_price", "special_price", "price"]:
+            val = src.get(field)
+            if val is not None:
+                try:
+                    f = float(val)
+                    if f > 0:
+                        regular = f
+                        break
+                except Exception:
+                    pass
+    return regular, promo
 
 
 def scrape_category(slug: str, category_ids: list[int], delay: float = 0.3) -> list[dict]:
@@ -359,7 +381,7 @@ def scrape_category(slug: str, category_ids: list[int], delay: float = 0.3) -> l
             if not name:
                 continue
 
-            price = extract_price(src)
+            price, promo_price = extract_price(src)
             if not price or price <= 0:
                 continue
 
@@ -376,6 +398,7 @@ def scrape_category(slug: str, category_ids: list[int], delay: float = 0.3) -> l
                 "ean_raw": ean_raw,
                 "size_text": parse_size(name),
                 "price": price,
+                "promo_price": promo_price,
                 "source_url": source_url,
                 "image_url": image_url,
             })
@@ -431,7 +454,26 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
         print(f"[warn] batch upsert failed: {e}", file=sys.stderr)
         return 0, len(rows)
 
-    # Step 2: update EAN where missing
+    # Step 2: update promo_price (always overwrite — NULL kui kampaaniat pole)
+    sql_promo = """
+        UPDATE prices SET promo_price = %s
+        WHERE product_id = (
+            SELECT product_id FROM ext_product_map
+            WHERE source = 'selver' AND ext_id = %s
+            LIMIT 1
+        )
+        AND store_id = %s
+    """
+    promo_payload = [(row["promo_price"], row["ext_id"], store_id) for row in rows]
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(sql_promo, promo_payload)
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(f"[warn] promo_price update failed: {e}", file=sys.stderr)
+
+    # Step 3: update EAN where missing
     rows_with_ean = [r for r in rows if r["ean_raw"]]
     if rows_with_ean:
         sql_ean = """
@@ -452,7 +494,7 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
             conn.rollback()
             print(f"[warn] ean update failed: {e}", file=sys.stderr)
 
-    # Step 3: update image_url where missing
+    # Step 4: update image_url where missing
     rows_with_image = [r for r in rows if r["image_url"]]
     if rows_with_image:
         sql_image = """
