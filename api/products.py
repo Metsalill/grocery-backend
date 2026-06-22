@@ -25,6 +25,7 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     size_text = (row.get("size_text") or "").strip()
     is_per_kg = size_text.lower() == "kg"
     min_price = row.get("min_price")
+    min_promo_price = row.get("min_promo_price")
 
     canonical = (row.get("canonical_name") or "").strip()
     name = canonical if canonical else (row.get("name") or "")
@@ -50,6 +51,7 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
         "available_chains": sorted(list(set(chains))) if chains else [],
         "is_per_kg": is_per_kg,
         "min_price": float(min_price) if min_price is not None else None,
+        "min_promo_price": float(min_promo_price) if min_promo_price is not None else None,
     }
 
 
@@ -123,7 +125,7 @@ def _build_dedup_sql(where_sql: str) -> str:
                 CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
                 p.id
         )
-        SELECT b.*, gc.chains AS available_chains, gc.min_price,
+        SELECT b.*, gc.chains AS available_chains, gc.min_price, gc.min_promo_price,
                pg.canonical_name, pg.brand AS group_brand
         FROM base b
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
@@ -164,7 +166,7 @@ def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
                 p.id
         )
         SELECT b.*, COALESCE(st.selection_count, 0) AS selection_count,
-               gc.chains AS available_chains, gc.min_price,
+               gc.chains AS available_chains, gc.min_price, gc.min_promo_price,
                pg.canonical_name, pg.brand AS group_brand
         FROM base b
         LEFT JOIN selection_totals st ON st.dedup_key = b.dedup_key
@@ -419,6 +421,7 @@ async def get_product(
                     pgm.group_id,
                     gc.chains AS available_chains,
                     gc.min_price,
+                    gc.min_promo_price,
                     pg.canonical_name,
                     pg.brand AS group_brand
                 FROM products p
