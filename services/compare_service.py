@@ -511,6 +511,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             lines = []
             total = 0.0
             lines_found = 0
+            not_found = []
 
             # Tavalised tooted
             for pid, qty in qty_by_pid.items():
@@ -523,17 +524,22 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         best_price = p
                         best_pid = mid
                 if best_price is None:
+                    # Lisa puuduva toote nimi not_found listi
+                    meta = metadata.get(pid)
+                    not_found.append(_rv(meta, "name") if meta else f"#{pid}")
                     continue
                 lines_found += 1
                 total += best_price * qty
                 if include_lines:
                     meta = metadata.get(best_pid) if best_pid else metadata.get(pid)
+                    is_per_kg = (_rv(meta, "size_text") or "").lower() == "kg" if meta else False
                     lines.append({
                         "product_id": best_pid,
                         "product_name": _rv(meta, "name") if meta else f"#{best_pid}",
                         "qty": qty,
                         "unit_price": _round2(best_price),
                         "line_total": _round2(best_price * qty),
+                        "is_per_kg": is_per_kg,
                     })
 
             # Retsepti koostisosad
@@ -542,6 +548,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 ing_et = item["product"]
                 product = chain_recipe.get(ing_et)
                 if product is None:
+                    not_found.append(ing_et)
                     continue
                 lines_found += 1
                 total += product["price"] * item["quantity"]
@@ -553,6 +560,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "unit_price": _round2(product["price"]),
                         "line_total": _round2(product["price"] * item["quantity"]),
                         "ingredient": ing_et,
+                        "is_per_kg": False,
                     })
 
             normal_found = sum(1 for pid in qty_by_pid if any(
@@ -575,6 +583,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 "lines_found": lines_found,
                 "required_lines": required_total,
                 "total_price": total_price,
+                "not_found": not_found,
             }
             if include_lines:
                 result["lines"] = lines
