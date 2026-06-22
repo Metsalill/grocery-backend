@@ -7,25 +7,39 @@ import psycopg2
 import os
 
 REPLACEMENTS = [
-    # oun -> ooun (juba tehtud aga kontroll)
+    # oun -> õun (juba tehtud aga kontroll)
     ('oun', '\u00f5un'),
     ('Oun', '\u00d5un'),
-    # rost -> rost
+    # rost -> röst
     ('rost', 'r\u00f6st'),
     ('Rost', 'R\u00f6st'),
-    # maaare -> maare
+    # maaare -> määre
     ('maaare', 'm\u00e4\u00e4re'),
-    # taistera -> taistera
+    # taistera -> täistera
     ('taistera', 't\u00e4istera'),
     ('Taistera', 'T\u00e4istera'),
-    # lohna -> lohna
+    # lohna -> lõhna
     ('lohna', 'l\u00f5hna'),
     ('Lohna', 'L\u00f5hna'),
-    # lohnaline -> lohnaline
+    # lohnaline -> lõhnaline
     ('lohnaline', 'l\u00f5hnaline'),
-    # louna -> louna
+    # louna -> lõuna
     ('louna', 'l\u00f5una'),
     ('Louna', 'L\u00f5una'),
+    # saslokk -> šašlõkk (pikemad enne lühemaid!)
+    ('saslokk', '\u0161a\u0161l\u00f5kk'),
+    ('Saslokk', '\u0160a\u0161l\u00f5kk'),
+    ('saslik', '\u0161a\u0161l\u00f5kk'),
+    ('Saslik', '\u0160a\u0161l\u00f5kk'),
+    # aadika -> äädika
+    ('aadika', '\u00e4\u00e4dika'),
+    ('Aadika', '\u00c4\u00e4dika'),
+    # olu -> õlu (ainult eraldi sõnana — "olu " ja " olu")
+    (' olu ', ' \u00f5lu '),
+    (' olu\n', ' \u00f5lu\n'),
+    ('Olu ', '\u00d5lu '),
+    # olut -> EI MUUDA — Absolut, koolutaja, Coconut sisaldavad olut
+    # olle -> EI MUUDA — Danerolles, Stollen, Holle, Collection sisaldavad olle
 ]
 
 # Sonad mida EI tohi muuta (inglise/prantsuse brandid)
