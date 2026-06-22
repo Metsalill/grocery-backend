@@ -174,7 +174,7 @@ def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
 
 
 @router.get("/products/alternatives")
-@throttle(limit=60, window=60)
+@throttle(limit=300, window=60)
 async def get_alternatives(
     request: Request,
     product_name: str = Query(..., min_length=1),
