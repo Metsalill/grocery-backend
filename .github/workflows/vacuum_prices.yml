@@ -6,5 +6,9 @@ jobs:
   vacuum:
     runs-on: ubuntu-latest
     steps:
+      - name: Install psql
+        run: sudo apt-get install -y postgresql-client
       - name: Vacuum prices table
-        run: psql ${{ secrets.DATABASE_URL }} -c "VACUUM ANALYZE prices;"
+        env:
+          PGSSLMODE: require
+        run: psql ${{ secrets.DATABASE_URL_PUBLIC }} -c "VACUUM ANALYZE prices;"
