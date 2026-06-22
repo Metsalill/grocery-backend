@@ -1,0 +1,10 @@
+name: Vacuum Prices
+on:
+  schedule:
+    - cron: '30 16 * * *'
+jobs:
+  vacuum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vacuum prices table
+        run: psql ${{ secrets.DATABASE_URL }} -c "VACUUM ANALYZE prices;"
