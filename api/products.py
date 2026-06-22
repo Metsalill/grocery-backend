@@ -12,10 +12,10 @@ MAX_LIMIT = 50  # server-side hard cap
 
 PRICE_FRESHNESS_FILTER = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id AND pr.collected_at > NOW() - INTERVAL '14 days')"
 
-# Tuvastab mahu nimes — nt "500ml", "0.5L", "75cl", "1.5 l", "6x568ml", "24x330ml"
+# Tuvastab mahu nimes -- nt "500ml", "0.5L", "75cl", "1.5 l", "6x568ml", "24x330ml"
 _SIZE_IN_NAME_RE = re.compile(
     r'\b\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b'
-    r'|\b\d+\s*[x×]\s*\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b',
+    r'|\b\d+\s*[x*]\s*\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|g|kg)\b',
     re.I
 )
 
@@ -171,6 +171,99 @@ def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
         LEFT JOIN mv_group_chains gc ON gc.dedup_key = b.dedup_key
         LEFT JOIN product_groups pg ON pg.id = b.group_id
     """
+
+
+@router.get("/products/alternatives")
+@throttle(limit=60, window=60)
+async def get_alternatives(
+    request: Request,
+    product_name: str = Query(..., min_length=1),
+    store_id: int = Query(...),
+    limit: int = Query(6, ge=1, le=20),
+) -> Dict[str, Any]:
+    """
+    Leiab sama poe sarnased tooted puuduva toote asendamiseks.
+    Otsib sub_code jargi samast poest, sorteerib hinna jargi.
+    """
+    pool = await _get_pool(request)
+    product_name = product_name.strip()
+
+    try:
+        async with pool.acquire() as conn:
+            # 1. Leia puuduva toote sub_code nime jargi
+            sub_code_row = await conn.fetchrow("""
+                SELECT p.sub_code
+                FROM products p
+                WHERE p.name ILIKE $1
+                  AND p.sub_code IS NOT NULL
+                  AND p.sub_code != ''
+                ORDER BY p.id
+                LIMIT 1
+            """, f"%{product_name}%")
+
+            if not sub_code_row:
+                return {"items": [], "sub_code": None, "store_id": store_id}
+
+            sub_code = sub_code_row["sub_code"]
+
+            # 2. Leia selle poe tooted samast sub_code-st
+            rows = await conn.fetch("""
+                SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
+                    p.id,
+                    p.name,
+                    p.brand,
+                    p.size_text,
+                    p.image_url,
+                    p.sub_code,
+                    pgm.group_id,
+                    pg.canonical_name,
+                    pg.brand AS group_brand,
+                    pr.price
+                FROM products p
+                JOIN prices pr ON pr.product_id = p.id
+                LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+                LEFT JOIN product_groups pg ON pg.id = pgm.group_id
+                WHERE p.sub_code = $1
+                  AND pr.store_id = $2
+                  AND pr.price > 0
+                  AND pr.collected_at > NOW() - INTERVAL '14 days'
+                ORDER BY
+                    COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+                    pr.price ASC
+                LIMIT $3
+            """, sub_code, store_id, limit)
+
+        items = []
+        for r in rows:
+            size_text = (r["size_text"] or "").strip()
+            is_per_kg = size_text.lower() == "kg"
+            canonical = (r["canonical_name"] or "").strip()
+            name = canonical if canonical else (r["name"] or "")
+            group_brand = (r["group_brand"] or "").strip()
+            product_brand = (r["brand"] or "").strip()
+            display_brand = group_brand if group_brand else product_brand
+
+            items.append({
+                "id": r["id"],
+                "group_id": r["group_id"],
+                "name": name,
+                "brand": display_brand,
+                "size_text": size_text,
+                "image_url": r["image_url"],
+                "price": float(r["price"]),
+                "is_per_kg": is_per_kg,
+                "sub_code": r["sub_code"],
+            })
+
+        return {
+            "items": items,
+            "sub_code": sub_code,
+            "store_id": store_id,
+            "product_name": product_name,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Alternatives error: {e}")
 
 
 @router.get("/products")
