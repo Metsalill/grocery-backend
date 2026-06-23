@@ -333,23 +333,33 @@ async def share_basket_to_family(
         added = 0
         skipped = 0
 
+        # Filtreeri välja juba olemasolevad
+        new_items = []
         for item in body.items:
             norm_name = item.product_name.strip().lower()
             if norm_name in existing_names:
                 skipped += 1
-                continue
+            else:
+                new_items.append(item)
+                existing_names.add(norm_name)
 
-            await conn.execute(
+        # Batch INSERT kõik uued tooted ühe käsuga
+        if new_items:
+            await conn.executemany(
                 "INSERT INTO family_basket_items "
                 "(family_id, user_id, product_id, product_name, quantity, is_per_kg, "
                 "kg_quantity, image_url, brand, size_text) "
                 "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-                family_id, user_id, item.product_id, item.product_name.strip(),
-                item.quantity, item.is_per_kg, item.kg_quantity,
-                item.image_url, item.brand, item.size_text,
+                [
+                    (
+                        family_id, user_id, item.product_id, item.product_name.strip(),
+                        item.quantity, item.is_per_kg, item.kg_quantity,
+                        item.image_url, item.brand, item.size_text,
+                    )
+                    for item in new_items
+                ]
             )
-            existing_names.add(norm_name)
-            added += 1
+            added = len(new_items)
 
     return {"success": True, "added": added, "skipped": skipped}
 
