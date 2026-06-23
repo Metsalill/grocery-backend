@@ -148,7 +148,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
         if sub_codes:
             rows = await conn.fetch("""
                 SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
-                    MIN(pr.price) as min_price
+                    MIN(COALESCE(pr.promo_price, pr.price)) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
                 WHERE p.name ILIKE $1
@@ -164,7 +164,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
         else:
             rows = await conn.fetch("""
                 SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
-                    MIN(pr.price) as min_price
+                    MIN(COALESCE(pr.promo_price, pr.price)) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
                 WHERE p.name ILIKE $1
@@ -344,7 +344,9 @@ async def _latest_prices(conn, product_ids, store_ids):
     ),
     latest AS (
       SELECT DISTINCT ON (p.product_id, p.store_id)
-             p.product_id, p.store_id, p.price, p.collected_at
+             p.product_id, p.store_id,
+             COALESCE(p.promo_price, p.price) AS price,
+             p.collected_at
       FROM prices p
       WHERE p.product_id = ANY($1::int[])
         AND p.store_id IN (SELECT source_store_id FROM effective_source)
@@ -359,7 +361,9 @@ async def _latest_prices(conn, product_ids, store_ids):
     except Exception:
         return await conn.fetch(
             """SELECT DISTINCT ON (p.product_id, p.store_id)
-               p.product_id, p.store_id, p.price, p.collected_at
+               p.product_id, p.store_id,
+               COALESCE(p.promo_price, p.price) AS price,
+               p.collected_at
                FROM prices p
                WHERE p.product_id = ANY($1::int[]) AND p.store_id = ANY($2::int[])
                ORDER BY p.product_id, p.store_id, p.collected_at DESC""",
@@ -524,7 +528,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         best_price = p
                         best_pid = mid
                 if best_price is None:
-                    # Lisa puuduva toote nimi not_found listi
                     meta = metadata.get(pid)
                     not_found.append(_rv(meta, "name") if meta else f"#{pid}")
                     continue
