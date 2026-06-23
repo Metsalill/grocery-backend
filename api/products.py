@@ -275,12 +275,14 @@ async def list_products(
     limit: int = Query(20, ge=1, le=200),
     main_code: Optional[str] = Query(None),
     sub_code: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None, description="Sort order: price_asc | price_desc"),
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
     limit = min(limit, MAX_LIMIT)
     q = (q or "").strip()
     main_code = (main_code or "").strip() or None
     sub_code = (sub_code or "").strip() or None
+    sort = (sort or "").strip().lower() or None
 
     pool = await _get_pool(request)
 
@@ -303,15 +305,28 @@ async def list_products(
 
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
+    # Sorteerimise ORDER BY klausel
+    if sort == "price_asc":
+        price_order_clause = "ORDER BY min_price ASC NULLS LAST, COALESCE(NULLIF(canonical_name, ''), name), id"
+    elif sort == "price_desc":
+        price_order_clause = "ORDER BY min_price DESC NULLS LAST, COALESCE(NULLIF(canonical_name, ''), name), id"
+    else:
+        price_order_clause = None  # kasutame allpool vaikimisi järjestust
+
     try:
         async with pool.acquire() as conn:
             user_id = await _get_user_id_from_token(conn, authorization)
 
-            if user_id:
+            if user_id and not sort:
+                # Personaliseeritud järjestus ainult siis kui sort pole määratud
                 user_param_index = len(params) + 1
                 params_for_query = params + [user_id]
                 dedup_sql = _build_personalized_sql(where_sql, user_param_index)
                 order_clause = "ORDER BY selection_count DESC, COALESCE(NULLIF(canonical_name, ''), name), id"
+            elif price_order_clause:
+                params_for_query = params
+                dedup_sql = _build_dedup_sql(where_sql)
+                order_clause = price_order_clause
             else:
                 params_for_query = params
                 dedup_sql = _build_dedup_sql(where_sql)
@@ -345,6 +360,7 @@ async def list_products(
                 "q": q or None,
                 "main_code": main_code,
                 "sub_code": sub_code,
+                "sort": sort,
             },
         }
 
