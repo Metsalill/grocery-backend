@@ -60,6 +60,19 @@ class AddItemRequest(BaseModel):
     brand: Optional[str] = None
     size_text: Optional[str] = None
 
+class ShareBasketItem(BaseModel):
+    product_id: Optional[int] = None
+    product_name: str
+    quantity: float = 1.0
+    is_per_kg: bool = False
+    kg_quantity: Optional[float] = None
+    image_url: Optional[str] = None
+    brand: Optional[str] = None
+    size_text: Optional[str] = None
+
+class ShareBasketRequest(BaseModel):
+    items: List[ShareBasketItem]
+
 class UpdateItemRequest(BaseModel):
     quantity: Optional[float] = None
     kg_quantity: Optional[float] = None
@@ -73,12 +86,10 @@ async def create_family(
     body: CreateFamilyRequest,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Loo uus pere."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
 
-        # Kontrolli kas kasutajal on juba pere
         existing = await conn.fetchrow(
             "SELECT f.id, f.name, f.invite_code FROM families f "
             "JOIN family_members fm ON fm.family_id = f.id "
@@ -88,7 +99,6 @@ async def create_family(
         if existing:
             raise HTTPException(status_code=400, detail="Oled juba pere liige. Lahku kõigepealt perest.")
 
-        # Genereeri unikaalne invite kood
         for _ in range(10):
             code = _random_code()
             exists = await conn.fetchval("SELECT 1 FROM families WHERE invite_code = $1", code)
@@ -120,12 +130,10 @@ async def join_family(
     invite_code: str,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Liitu perega invite koodiga."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
 
-        # Kontrolli kas kasutajal on juba pere
         existing = await conn.fetchrow(
             "SELECT f.id FROM families f "
             "JOIN family_members fm ON fm.family_id = f.id "
@@ -147,7 +155,6 @@ async def join_family(
             family["id"], user_id
         )
 
-        # Loe liikmete arv
         count = await conn.fetchval(
             "SELECT COUNT(*) FROM family_members WHERE family_id = $1", family["id"]
         )
@@ -165,7 +172,6 @@ async def get_my_family(
     request: Request,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Tagasta kasutaja pere info."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
@@ -213,7 +219,6 @@ async def leave_family(
     request: Request,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Lahku perest."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
@@ -232,7 +237,6 @@ async def leave_family(
             family["id"], user_id
         )
 
-        # Kui admin lahkub ja pere on tühi, kustuta pere
         remaining = await conn.fetchval(
             "SELECT COUNT(*) FROM family_members WHERE family_id = $1", family["id"]
         )
@@ -249,7 +253,6 @@ async def get_family_basket(
     request: Request,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Tagasta pere ühine ostukorv."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
@@ -293,13 +296,70 @@ async def get_family_basket(
     return {"family_id": family["id"], "items": items, "count": len(items)}
 
 
+@router.post("/family/basket/share")
+async def share_basket_to_family(
+    request: Request,
+    body: ShareBasketRequest,
+    authorization: Optional[str] = Header(None),
+) -> Dict[str, Any]:
+    """
+    Jaga isiklik korv perekorvi — lisab ainult tooted mis pole juba perekorvis.
+    Võrdlus käib product_name alusel (lowercased trim).
+    Tagastab: added (lisatud), skipped (juba olemas).
+    """
+    pool = await _get_pool(request)
+    async with pool.acquire() as conn:
+        user_id = await _require_user_id(conn, authorization)
+
+        family = await conn.fetchrow(
+            "SELECT f.id FROM families f "
+            "JOIN family_members fm ON fm.family_id = f.id "
+            "WHERE fm.user_id = $1",
+            user_id
+        )
+        if not family:
+            raise HTTPException(status_code=404, detail="Sa pole ühegi pere liige.")
+
+        family_id = family["id"]
+
+        # Leia olemasolevad tooted perekorvis (nime järgi)
+        existing_rows = await conn.fetch(
+            "SELECT LOWER(TRIM(product_name)) AS norm_name "
+            "FROM family_basket_items WHERE family_id = $1",
+            family_id
+        )
+        existing_names = {r["norm_name"] for r in existing_rows}
+
+        added = 0
+        skipped = 0
+
+        for item in body.items:
+            norm_name = item.product_name.strip().lower()
+            if norm_name in existing_names:
+                skipped += 1
+                continue
+
+            await conn.execute(
+                "INSERT INTO family_basket_items "
+                "(family_id, user_id, product_id, product_name, quantity, is_per_kg, "
+                "kg_quantity, image_url, brand, size_text) "
+                "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+                family_id, user_id, item.product_id, item.product_name.strip(),
+                item.quantity, item.is_per_kg, item.kg_quantity,
+                item.image_url, item.brand, item.size_text,
+            )
+            existing_names.add(norm_name)
+            added += 1
+
+    return {"success": True, "added": added, "skipped": skipped}
+
+
 @router.post("/family/basket")
 async def add_to_family_basket(
     request: Request,
     body: AddItemRequest,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Lisa toode pere ostukorvi."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
@@ -333,7 +393,6 @@ async def remove_from_family_basket(
     item_id: int,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Eemalda toode pere ostukorvist."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
@@ -363,7 +422,6 @@ async def clear_family_basket(
     request: Request,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    """Tühjenda pere ostukorv."""
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
