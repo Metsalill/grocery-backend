@@ -88,6 +88,13 @@ _SUB_RU = {
     'wine_sweet': 'Десертное вино',
     'drinks_beer_cider': 'Пиво и сидр',
     'drinks_spirits': 'Крепкие напитки',
+    'spirits_vodka': 'Водка',
+    'spirits_whisky': 'Виски и бурбон',
+    'spirits_gin': 'Джин',
+    'spirits_rum': 'Ром',
+    'spirits_cognac': 'Коньяк и бренди',
+    'spirits_liqueur': 'Ликёры',
+    'spirits_other': 'Другие крепкие напитки',
     # drinks
     'drinks_water': 'Вода',
     'drinks_soft_soda': 'Газировка',
