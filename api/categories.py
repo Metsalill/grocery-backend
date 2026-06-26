@@ -26,7 +26,7 @@ _MAIN_RU = {
     'coffee': 'Кофе и чай',
     'sweets_snacks': 'Сладости и снеки',
     'world_spices': 'Специи и приправы',
-    'sauces_oils': 'Соусы и масла',
+    'sauces_oils': 'Соусы ja масла',
     'baby': 'Детские товары',
     'personal_care': 'Гигиена и уход',
     'household': 'Бытовые товары',
@@ -232,7 +232,7 @@ async def list_main_categories(
     ]
 
 # ─────────────────────────────────────────────────────────
-# 2) Subcategories under a main category
+# 2) Subcategories under a main category (only top-level, no parent)
 # ─────────────────────────────────────────────────────────
 @router.get("/{main_code}/sub")
 async def list_subcategories(
@@ -252,15 +252,70 @@ async def list_subcategories(
             s.code,
             s.label_et,
             COALESCE(s.label_en, s.label_et) AS label_en,
+            s.parent_id,
             COUNT(DISTINCT p.id) AS product_count
         FROM categories_sub s
         JOIN categories_main m ON s.main_id = m.id
         LEFT JOIN products p ON p.sub_code = s.code
         WHERE m.code = $1
-        GROUP BY s.id, s.code, s.label_et, s.label_en, s.sort_order
+          AND s.parent_id IS NULL
+        GROUP BY s.id, s.code, s.label_et, s.label_en, s.sort_order, s.parent_id
         ORDER BY s.sort_order, s.id;
     """
     rows = await db.fetch(sql, main_code)
+    result = []
+    for r in rows:
+        # For drinks_spirits, count includes all child sub-subcategories too
+        count = r["product_count"]
+        if r["code"] == "drinks_spirits":
+            child_count = await db.fetchval("""
+                SELECT COUNT(DISTINCT p.id)
+                FROM categories_sub s
+                LEFT JOIN products p ON p.sub_code = s.code
+                WHERE s.parent_id = (SELECT id FROM categories_sub WHERE code = 'drinks_spirits')
+            """)
+            count = (count or 0) + (child_count or 0)
+        result.append({
+            "code": r["code"],
+            "label": r["label_et"],
+            "label_et": r["label_et"],
+            "label_ru": _SUB_RU.get(r["code"], r["label_et"]),
+            "label_en": r["label_en"],
+            "product_count": count,
+            "has_children": r["code"] == "drinks_spirits",
+        })
+    return result
+
+# ─────────────────────────────────────────────────────────
+# 3) Sub-subcategories under a subcategory (by sub_code)
+# ─────────────────────────────────────────────────────────
+@router.get("/{main_code}/sub/{sub_code}/sub")
+async def list_sub_subcategories(
+    main_code: str,
+    sub_code: str,
+    request: Request,
+    db=Depends(get_db),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+):
+    parent_row = await db.fetchrow(
+        "SELECT id, code, label_et FROM categories_sub WHERE code = $1",
+        sub_code,
+    )
+    if not parent_row:
+        raise HTTPException(status_code=404, detail="Subcategory not found")
+    sql = """
+        SELECT
+            s.code,
+            s.label_et,
+            COALESCE(s.label_en, s.label_et) AS label_en,
+            COUNT(DISTINCT p.id) AS product_count
+        FROM categories_sub s
+        LEFT JOIN products p ON p.sub_code = s.code
+        WHERE s.parent_id = $1
+        GROUP BY s.id, s.code, s.label_et, s.label_en, s.sort_order
+        ORDER BY s.sort_order, s.id;
+    """
+    rows = await db.fetch(sql, parent_row["id"])
     return [
         {
             "code": r["code"],
@@ -269,6 +324,7 @@ async def list_subcategories(
             "label_ru": _SUB_RU.get(r["code"], r["label_et"]),
             "label_en": r["label_en"],
             "product_count": r["product_count"],
+            "has_children": False,
         }
         for r in rows
     ]
