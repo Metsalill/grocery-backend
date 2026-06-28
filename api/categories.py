@@ -11,7 +11,7 @@ async def get_db(request: Request):
         raise HTTPException(status_code=500, detail="DB pool not available")
     return conn
 
-# ─── Russian translations (no DB column needed) ────────────────────────────
+# ─── Translations (no DB column needed) ───────────────────────────────────
 
 _MAIN_RU = {
     'produce': 'Фрукты и овощи',
@@ -26,11 +26,31 @@ _MAIN_RU = {
     'coffee': 'Кофе и чай',
     'sweets_snacks': 'Сладости и снеки',
     'world_spices': 'Специи и приправы',
-    'sauces_oils': 'Соусы ja масла',
+    'sauces_oils': 'Соусы и масла',
     'baby': 'Детские товары',
     'personal_care': 'Гигиена и уход',
     'household': 'Бытовые товары',
     'pet': 'Корм для животных',
+}
+
+_MAIN_EN = {
+    'produce': 'Fruit & vegetables',
+    'meat_fish': 'Meat & fish',
+    'dairy_eggs_fats': 'Dairy, eggs & fats',
+    'cheese': 'Cheese',
+    'bakery': 'Bread & bakery',
+    'frozen_food': 'Frozen food',
+    'dry_preserves': 'Dry goods & preserves',
+    'drinks': 'Drinks',
+    'alcohol': 'Alcohol',
+    'coffee': 'Coffee & tea',
+    'sweets_snacks': 'Sweets & snacks',
+    'world_spices': 'Spices & seasonings',
+    'sauces_oils': 'Sauces & oils',
+    'baby': 'Baby products',
+    'personal_care': 'Personal care',
+    'household': 'Household',
+    'pet': 'Pet food',
 }
 
 _SUB_RU = {
@@ -197,6 +217,170 @@ _SUB_RU = {
     'sauces_other': 'Соусы прочее',
 }
 
+_SUB_EN = {
+    # produce
+    'produce_root_veg': 'Root vegetables',
+    'produce_apples_pears': 'Apples & pears',
+    'produce_tropical': 'Tropical & exotic fruit',
+    'produce_berries': 'Berries',
+    'produce_herbs_salads_sprouts': 'Herbs, salads & sprouts',
+    'produce_mushrooms': 'Mushrooms',
+    'produce_fruit_salads': 'Fruit salads',
+    'produce_smoothies_fresh_juices': 'Smoothies & fresh juices',
+    # meat
+    'meat_pork': 'Pork',
+    'meat_poultry': 'Poultry',
+    'meat_beef_lamb_game': 'Beef, lamb & game',
+    'meat_minced': 'Minced meat',
+    'meat_sausages': 'Sausages',
+    'meat_hams': 'Ham & rolls',
+    'meat_grill_blood_sausages': 'Grill & blood sausages',
+    'meat_gourmet': 'Gourmet meat products',
+    'meat_other': 'Other meat products',
+    # fish
+    'fish_fresh': 'Fresh fish & seafood',
+    'fish_salted_smoked': 'Salted & smoked fish',
+    'fish_processed': 'Processed fish products',
+    'fish_other': 'Other fish',
+    # dairy
+    'dairy_milk': 'Milk',
+    'dairy_plant_drinks': 'Plant-based drinks',
+    'dairy_yogurt_kefir': 'Yoghurt & kefir',
+    'dairy_cottage_quark': 'Cottage cheese & quark',
+    'dairy_cream_sourcream': 'Cream & sour cream',
+    'dairy_butter_margarine': 'Butter & margarine',
+    'dairy_eggs': 'Eggs',
+    'dairy_desserts': 'Dairy desserts',
+    'dairy_other': 'Other dairy',
+    # cheese
+    'cheese_regular': 'Cheese',
+    'cheese_delicatessen': 'Delicatessen cheese',
+    'dairy_cheese_slices': 'Sliced cheese',
+    # bakery
+    'bakery_bread_loaves': 'Bread loaves',
+    'bakery_buns_croissants': 'Buns & croissants',
+    'bakery_cakes_pastries': 'Cakes & pastries',
+    'bakery_flatbreads_wraps': 'Flatbreads & wraps',
+    'bakery_sweet_buns_donuts': 'Sweet buns & donuts',
+    'bakery_gluten_free': 'Gluten-free bakery',
+    'bakery_other': 'Other bakery',
+    # alcohol/wine
+    'wine_red': 'Red wine',
+    'wine_white': 'White wine',
+    'wine_rose': 'Rosé wine',
+    'wine_sparkling': 'Sparkling wine',
+    'wine_sweet': 'Dessert wine',
+    'drinks_beer_cider': 'Beer & cider',
+    'drinks_spirits': 'Spirits',
+    'spirits_vodka': 'Vodka',
+    'spirits_whisky': 'Whisky & bourbon',
+    'spirits_gin': 'Gin',
+    'spirits_rum': 'Rum',
+    'spirits_cognac': 'Cognac & brandy',
+    'spirits_liqueur': 'Liqueurs',
+    'spirits_other': 'Other spirits',
+    # drinks
+    'drinks_water': 'Water',
+    'drinks_soft_soda': 'Soft drinks & soda',
+    'drinks_juices': 'Juices',
+    'drinks_energy': 'Energy drinks',
+    'drinks_sport': 'Sports drinks',
+    'drinks_syrups_powders': 'Syrups & powders',
+    'drinks_other': 'Other drinks',
+    # coffee/tea
+    'coffee_beans_ground': 'Coffee beans & ground coffee',
+    'coffee_capsules': 'Coffee capsules',
+    'coffee_instant': 'Instant coffee',
+    'tea': 'Tea',
+    # sweets
+    'sweets_chocolate_bars': 'Chocolate',
+    'sweets_candies': 'Candies',
+    'sweets_biscuits_cookies': 'Biscuits & cookies',
+    'sweets_waffles_cakes': 'Waffles & cakes',
+    'sweets_snacks_salty': 'Salty snacks',
+    'sweets_nuts_driedfruit': 'Nuts & dried fruit',
+    'sweets_gums_mints': 'Gum & mints',
+    'sweets_other': 'Other sweets',
+    # household
+    'hh_cleaners': 'Cleaning products',
+    'hh_laundry': 'Laundry products',
+    'hh_dishwashing': 'Dishwashing products',
+    'hh_paper': 'Paper products',
+    'hh_bins_bags': 'Bins & bags',
+    'hh_candles_airfresh': 'Candles & air fresheners',
+    'hh_kitchenware': 'Kitchenware',
+    'hh_other': 'Other household',
+    # personal care
+    'pcare_shampoo_cond': 'Shampoo & conditioner',
+    'pcare_body_wash': 'Body wash',
+    'pcare_soap': 'Soap',
+    'pcare_deo': 'Deodorant',
+    'pcare_oral_care': 'Oral care',
+    'pcare_shaving': 'Shaving',
+    'pcare_feminine_hygiene': 'Feminine hygiene',
+    'pcare_cosmetics': 'Cosmetics',
+    'pcare_other': 'Other personal care',
+    # pet
+    'pet_cat_dry': 'Dry cat food',
+    'pet_cat_wet': 'Wet cat food',
+    'pet_cat_treats': 'Cat treats',
+    'pet_dog_dry': 'Dry dog food',
+    'pet_dog_wet': 'Wet dog food',
+    'pet_dog_treats': 'Dog treats',
+    'pet_litter_sand': 'Cat litter',
+    'pet_birds_fish': 'Bird & fish food',
+    'pet_small_animals': 'Small animal food',
+    'pet_other': 'Other pet products',
+    # baby
+    'baby_food_jars': 'Baby food (jars)',
+    'baby_food_pouches': 'Baby food (pouches)',
+    'baby_formula': 'Baby formula',
+    'baby_porridge_cereal': 'Baby porridge & cereal',
+    'baby_snacks': 'Baby snacks',
+    'baby_diapers': 'Diapers',
+    'baby_wipes': 'Baby wipes',
+    'baby_care': 'Baby care',
+    'baby_other': 'Other baby products',
+    # dry
+    'dry_pasta_rice': 'Pasta & rice',
+    'dry_groats_beans': 'Groats & beans',
+    'dry_flour_sugar_baking': 'Flour, sugar & baking',
+    'dry_cereals_muesli': 'Cereals & muesli',
+    'dry_soups_noodles': 'Soups & noodles',
+    'dry_canned_meat_fish': 'Canned meat & fish',
+    'dry_canned_veg': 'Canned vegetables',
+    'dry_canned_fruit': 'Canned fruit',
+    'dry_ready_meals_jars': 'Ready meals',
+    'dry_other': 'Other dry goods',
+    # frozen
+    'frozen_meat': 'Frozen meat',
+    'frozen_fish': 'Frozen fish',
+    'frozen_veg': 'Frozen vegetables',
+    'frozen_berries_fruit': 'Frozen berries & fruit',
+    'frozen_pizza': 'Pizza',
+    'frozen_ready_meals': 'Frozen ready meals',
+    'frozen_potato_products': 'Potato products',
+    'frozen_bakery': 'Frozen bakery',
+    'frozen_desserts_icecream': 'Ice cream & desserts',
+    'frozen_other': 'Other frozen',
+    # spices/sauces/oils
+    'spices_basic_salt_pepper': 'Salt & pepper',
+    'spices_herbs_spice_mix': 'Herbs & spice mixes',
+    'spices_broth_stock': 'Broth & stock',
+    'spices_asian': 'Asian spices',
+    'spices_mexican': 'Mexican spices',
+    'spices_other': 'Other spices',
+    'oils_olive': 'Olive oil',
+    'oils_other': 'Other oils',
+    'oils_vinegar': 'Vinegar',
+    'sauces_ketchup_mayo': 'Ketchup & mayonnaise',
+    'sauces_pasta_cooking': 'Pasta & cooking sauces',
+    'sauces_salad_dressings': 'Salad dressings',
+    'sauces_marinades': 'Marinades',
+    'sauces_soy_worcester': 'Soy & worcestershire sauce',
+    'sauces_other': 'Other sauces',
+}
+
 # ─────────────────────────────────────────────────────────
 # 1) Main categories
 # ─────────────────────────────────────────────────────────
@@ -225,7 +409,7 @@ async def list_main_categories(
             "label": r["label_et"],
             "label_et": r["label_et"],
             "label_ru": _MAIN_RU.get(r["code"], r["label_et"]),
-            "label_en": r["label_en"],
+            "label_en": _MAIN_EN.get(r["code"], r["label_en"] or r["label_et"]),
             "product_count": r["product_count"],
         }
         for r in rows
@@ -265,7 +449,6 @@ async def list_subcategories(
     rows = await db.fetch(sql, main_code)
     result = []
     for r in rows:
-        # For drinks_spirits, count includes all child sub-subcategories too
         count = r["product_count"]
         if r["code"] == "drinks_spirits":
             child_count = await db.fetchval("""
@@ -280,7 +463,7 @@ async def list_subcategories(
             "label": r["label_et"],
             "label_et": r["label_et"],
             "label_ru": _SUB_RU.get(r["code"], r["label_et"]),
-            "label_en": r["label_en"],
+            "label_en": _SUB_EN.get(r["code"], r["label_en"] or r["label_et"]),
             "product_count": count,
             "has_children": r["code"] == "drinks_spirits",
         })
@@ -322,7 +505,7 @@ async def list_sub_subcategories(
             "label": r["label_et"],
             "label_et": r["label_et"],
             "label_ru": _SUB_RU.get(r["code"], r["label_et"]),
-            "label_en": r["label_en"],
+            "label_en": _SUB_EN.get(r["code"], r["label_en"] or r["label_et"]),
             "product_count": r["product_count"],
             "has_children": False,
         }
