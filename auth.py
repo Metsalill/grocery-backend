@@ -13,7 +13,9 @@ from google.auth.transport import requests as google_requests
 router = APIRouter()
 
 # ===== JWT & password settings =====
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is not set")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
