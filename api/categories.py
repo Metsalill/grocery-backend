@@ -21,7 +21,7 @@ _MAIN_RU = {
     'bakery': 'Хлеб и выпечка',
     'frozen_food': 'Замороженные продукты',
     'dry_preserves': 'Сухие продукты и консервы',
-    'drinks': 'Напитки',
+    'drinks': 'Безалкогольные напитки',
     'alcohol': 'Алкоголь',
     'coffee': 'Кофе и чай',
     'sweets_snacks': 'Сладости и снеки',
@@ -41,7 +41,7 @@ _MAIN_EN = {
     'bakery': 'Bread & bakery',
     'frozen_food': 'Frozen food',
     'dry_preserves': 'Dry goods & preserves',
-    'drinks': 'Drinks',
+    'drinks': 'Non-alcoholic drinks',
     'alcohol': 'Alcohol',
     'coffee': 'Coffee & tea',
     'sweets_snacks': 'Sweets & snacks',
@@ -123,6 +123,7 @@ _SUB_RU = {
     'drinks_sport': 'Спортивные напитки',
     'drinks_syrups_powders': 'Сиропы и порошки',
     'drinks_other': 'Напитки прочее',
+    'drinks_non_alcoholic': 'Безалкогольные напитки',
     # coffee/tea
     'coffee_beans_ground': 'Зерновой и молотый кофе',
     'coffee_capsules': 'Кофе в капсулах',
@@ -287,6 +288,7 @@ _SUB_EN = {
     'drinks_sport': 'Sports drinks',
     'drinks_syrups_powders': 'Syrups & powders',
     'drinks_other': 'Other drinks',
+    'drinks_non_alcoholic': 'Non-alcoholic drinks',
     # coffee/tea
     'coffee_beans_ground': 'Coffee beans & ground coffee',
     'coffee_capsules': 'Coffee capsules',
