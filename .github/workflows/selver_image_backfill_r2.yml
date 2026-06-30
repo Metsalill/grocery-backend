@@ -6,7 +6,7 @@ on:
       limit:
         description: "Max products to process"
         required: false
-        default: "10000"
+        default: "15000"
 
 concurrency:
   group: selver-image-backfill-r2
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     env:
       ENV: production
       ENABLE_DOCS: "0"
