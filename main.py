@@ -188,6 +188,11 @@ async def privacy():
     return FileResponse(os.path.join(APP_ROOT, "static", "privacy_policy.html"))
 
 
+@app.get("/delete-account")
+async def delete_account():
+    return FileResponse(os.path.join(APP_ROOT, "static", "delete_account.html"))
+
+
 if LOG_REQUESTS:
     @app.middleware("http")
     async def _req_logger(request, call_next):
