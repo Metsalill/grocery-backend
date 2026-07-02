@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konto kustutamine / Delete Account — Seivy</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F9F6F1;
+      --surface: #FFFFFF;
+      --accent: #C94B7C;
+      --text: #1A1A1A;
+      --muted: #6B6560;
+      --border: #E8E2D9;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .lang-switch {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lang-btn {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 24px 96px;
+    }
+
+    .eyebrow {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 40px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: 21px;
+      margin-bottom: 14px;
+    }
+
+    .card p, .card li {
+      color: #3A3630;
+      font-size: 15px;
+    }
+
+    .card ul, .card ol {
+      padding-left: 20px;
+      margin-top: 8px;
+    }
+
+    .card li {
+      margin-bottom: 8px;
+    }
+
+    .card li:last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .highlight-box {
+      background: #FBF0F4;
+      border: 1px solid #F0D3DE;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .lang-en { display: none; }
+    body.lang-en .lang-et { display: none; }
+    body.lang-en .lang-en { display: block; }
+    body.lang-en h1.lang-en { display: block; }
+    body.lang-en .eyebrow.lang-en { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Seivy</div>
+    <div class="lang-switch">
+      <button class="lang-btn active" id="btn-et" onclick="setLang('et')">ET</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ESTONIAN -->
+    <div class="lang-et">
+      <div class="eyebrow">Juriidiline teave</div>
+      <h1>Konto kustutamine</h1>
+      <div class="updated">Viimati uuendatud: juuli 2026</div>
+
+      <div class="card">
+        <h2>1. Kuidas kontot kustutada</h2>
+        <p>Kui soovid oma Seivy konto ja sellega seotud andmed kustutada, saada meile e-kiri aadressilt, millega oled Seivys registreeritud:</p>
+        <ul>
+          <li><strong>E-post:</strong> <a href="mailto:info@seivy.ee">info@seivy.ee</a></li>
+          <li><strong>Teema:</strong> "Konto kustutamine"</li>
+          <li><strong>Sisu:</strong> palun kinnita oma nimi ja registreerimisel kasutatud e-posti aadress</li>
+        </ul>
+        <div class="highlight-box">
+          <p>Töötleme kustutamistaotlusi <strong>30 päeva</strong> jooksul alates taotluse saamisest. Saad kinnituse, kui konto on kustutatud.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Millised andmed kustutatakse</h2>
+        <ul>
+          <li>Konto andmed: e-posti aadress, eesnimi, perekonnanimi, parool (räsitud)</li>
+          <li>Kasutusandmed: vaadatud tooted, ostukorvi ajalugu, lemmikud, eelistused</li>
+          <li>Asukohaandmed, mis on seotud sinu kontoga</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Mida me säilitame</h2>
+        <p>Osa andmeid võime säilitada kustutamise järel:</p>
+        <ul>
+          <li><strong>Anonümiseeritud statistika:</strong> agregeeritud ja anonüümne kasutusstatistika, mis ei ole enam sinuga seostatav, võib jääda meie süsteemidesse (nt hinnatrendide analüüs)</li>
+          <li><strong>Raamatupidamiskohustus:</strong> kui kontoga on seotud maksedokumente, säilitame neid seadusega ettenähtud tähtaja jooksul</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>4. Küsimused</h2>
+        <p>Kui sul on küsimusi konto kustutamise või andmete töötlemise kohta, võta ühendust: <a href="mailto:info@seivy.ee">info@seivy.ee</a></p>
+        <p style="margin-top: 12px;">Loe ka meie <a href="https://api.seivy.ee/privacy">privaatsuspoliitikat</a>.</p>
+      </div>
+    </div>
+
+    <!-- ENGLISH -->
+    <div class="lang-en">
+      <div class="eyebrow lang-en">Legal Information</div>
+      <h1 class="lang-en">Delete Account</h1>
+      <div class="updated">Last updated: July 2026</div>
+
+      <div class="card">
+        <h2>1. How to delete your account</h2>
+        <p>If you'd like to delete your Seivy account and associated data, send us an email from the address you registered with:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:info@seivy.ee">info@seivy.ee</a></li>
+          <li><strong>Subject:</strong> "Delete account"</li>
+          <li><strong>Content:</strong> please confirm your name and the email address used at registration</li>
+        </ul>
+        <div class="highlight-box">
+          <p>We process deletion requests within <strong>30 days</strong> of receiving them. You'll receive confirmation once your account has been deleted.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. What data is deleted</h2>
+        <ul>
+          <li>Account data: email address, first name, last name, password (hashed)</li>
+          <li>Usage data: viewed products, basket history, favourites, preferences</li>
+          <li>Location data associated with your account</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. What we retain</h2>
+        <p>We may retain some data after deletion:</p>
+        <ul>
+          <li><strong>Anonymised statistics:</strong> aggregated, anonymous usage statistics that can no longer be linked to you may remain in our systems (e.g. price trend analysis)</li>
+          <li><strong>Accounting obligations:</strong> if payment records are linked to your account, we retain them for the period required by law</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>4. Questions</h2>
+        <p>If you have questions about account deletion or data processing, contact: <a href="mailto:info@seivy.ee">info@seivy.ee</a></p>
+        <p style="margin-top: 12px;">Also read our <a href="https://api.seivy.ee/privacy">privacy policy</a>.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setLang(lang) {
+      document.body.className = lang === 'en' ? 'lang-en' : '';
+      document.getElementById('btn-et').classList.toggle('active', lang === 'et');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    }
+  </script>
+</body>
+</html>
