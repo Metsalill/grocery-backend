@@ -25,6 +25,12 @@
       line-height: 1.7;
     }
 
+    .lang-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -49,7 +55,7 @@
       gap: 8px;
     }
 
-    .lang-btn {
+    .lang-switch label {
       padding: 6px 16px;
       border-radius: 999px;
       border: 1px solid var(--border);
@@ -59,12 +65,7 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s ease;
-    }
-
-    .lang-btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
+      user-select: none;
     }
 
     main {
@@ -146,19 +147,30 @@
       font-size: 14px;
     }
 
+    /* Default: Estonian visible, English hidden */
     .lang-en { display: none; }
-    body.lang-en .lang-et { display: none; }
-    body.lang-en .lang-en { display: block; }
-    body.lang-en h1.lang-en { display: block; }
-    body.lang-en .eyebrow.lang-en { display: block; }
+
+    /* When EN radio is checked, everything after it in the DOM can react via ~ */
+    #lang-en:checked ~ main .lang-et { display: none; }
+    #lang-en:checked ~ main .lang-en { display: block; }
+
+    #lang-et:checked ~ header .lbl-et,
+    #lang-en:checked ~ header .lbl-en {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
+  <input type="radio" id="lang-et" name="lang" class="lang-radio" checked>
+  <input type="radio" id="lang-en" name="lang" class="lang-radio">
+
   <header>
     <div class="logo">Seivy</div>
     <div class="lang-switch">
-      <button class="lang-btn active" id="btn-et" onclick="setLang('et')">ET</button>
-      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      <label for="lang-et" class="lbl-et">ET</label>
+      <label for="lang-en" class="lbl-en">EN</label>
     </div>
   </header>
 
@@ -174,7 +186,7 @@
         <p>Kui soovid oma Seivy konto ja sellega seotud andmed kustutada, saada meile e-kiri aadressilt, millega oled Seivys registreeritud:</p>
         <ul>
           <li><strong>E-post:</strong> <a href="mailto:info@seivy.ee">info@seivy.ee</a></li>
-          <li><strong>Teema:</strong> "Konto kustutamine"</li>
+          <li><strong>Teema:</strong> Konto kustutamine</li>
           <li><strong>Sisu:</strong> palun kinnita oma nimi ja registreerimisel kasutatud e-posti aadress</li>
         </ul>
         <div class="highlight-box">
@@ -209,8 +221,8 @@
 
     <!-- ENGLISH -->
     <div class="lang-en">
-      <div class="eyebrow lang-en">Legal Information</div>
-      <h1 class="lang-en">Delete Account</h1>
+      <div class="eyebrow">Legal Information</div>
+      <h1>Delete Account</h1>
       <div class="updated">Last updated: July 2026</div>
 
       <div class="card">
@@ -218,7 +230,7 @@
         <p>If you'd like to delete your Seivy account and associated data, send us an email from the address you registered with:</p>
         <ul>
           <li><strong>Email:</strong> <a href="mailto:info@seivy.ee">info@seivy.ee</a></li>
-          <li><strong>Subject:</strong> "Delete account"</li>
+          <li><strong>Subject:</strong> Delete account</li>
           <li><strong>Content:</strong> please confirm your name and the email address used at registration</li>
         </ul>
         <div class="highlight-box">
@@ -251,13 +263,5 @@
       </div>
     </div>
   </main>
-
-  <script>
-    function setLang(lang) {
-      document.body.className = lang === 'en' ? 'lang-en' : '';
-      document.getElementById('btn-et').classList.toggle('active', lang === 'et');
-      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-    }
-  </script>
 </body>
 </html>
