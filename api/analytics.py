@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Request, HTTPException
+import hashlib
+import hmac
+import os
+from fastapi import APIRouter, Request, HTTPException, Header
 from pydantic import BaseModel
 from typing import Optional
 import logging
@@ -6,6 +9,27 @@ import logging
 logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
+
+# Server-side secret for hashing device identifiers. The raw device ID sent
+# by the client (X-Device-Id header) is NEVER stored — only
+# HMAC_SHA256(secret, device_id) is written to the database. This means a
+# database leak does not expose the raw per-device identifier used in the
+# app, and the identifier cannot be recomputed without this secret.
+_DEVICE_HMAC_SECRET = os.environ.get("ANALYTICS_DEVICE_HMAC_SECRET", "")
+
+
+def _hash_device_id(raw_device_id: str) -> Optional[str]:
+    """Returns a stable pseudonymous hash for a raw device ID, or None if
+    no device ID was provided or no HMAC secret is configured (fail-safe:
+    we never fall back to storing the raw ID)."""
+    if not raw_device_id or not _DEVICE_HMAC_SECRET:
+        return None
+    digest = hmac.new(
+        _DEVICE_HMAC_SECRET.encode("utf-8"),
+        raw_device_id.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return digest
 
 
 class AnalyticsEvent(BaseModel):
@@ -17,7 +41,11 @@ class AnalyticsEvent(BaseModel):
 
 
 @router.post("/event")
-async def log_event(event: AnalyticsEvent, request: Request):
+async def log_event(
+    event: AnalyticsEvent,
+    request: Request,
+    x_device_id: Optional[str] = Header(default=None, alias="X-Device-Id"),
+):
     valid_event_types = {"product_view", "basket_add", "basket_win"}
     if event.event_type not in valid_event_types:
         raise HTTPException(status_code=400, detail=f"Invalid event_type. Must be one of: {valid_event_types}")
@@ -44,17 +72,23 @@ async def log_event(event: AnalyticsEvent, request: Request):
         except Exception as e:
             logger.warning(f"Could not resolve chain for product {event.product_id}: {e}")
 
+    # Pseudonümiseeritud seadme-ID: ainult HMAC-hash salvestatakse, toores
+    # X-Device-Id ei jõua kunagi andmebaasi. Kasutatakse ainult koond-
+    # statistika (unikaalsete külastajate) jaoks, mitte kasutajaprofiiliks.
+    device_key = _hash_device_id(x_device_id) if x_device_id else None
+
     try:
         await db.execute(
             """
-            INSERT INTO analytics_events (event_type, product_id, group_id, chain, user_id)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO analytics_events (event_type, product_id, group_id, chain, user_id, device_key)
+            VALUES ($1, $2, $3, $4, $5, $6)
             """,
             event.event_type,
             event.product_id,
             event.group_id,
             chain_normalized,
             event.user_id,
+            device_key,
         )
         return {"status": "ok"}
     except Exception as e:
