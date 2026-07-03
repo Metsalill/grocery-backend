@@ -4,6 +4,8 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request, Query
 from typing import Optional
 
+from utils.throttle import throttle
+
 router = APIRouter()
 
 THEMEALDB_BASE = "https://www.themealdb.com/api/json/v1/1"
@@ -516,7 +518,8 @@ async def _get_nearby_chains(db, lat: float, lon: float, radius_km: float) -> di
 
 
 @router.get("/recipes")
-async def get_recipes():
+@throttle(limit=60, window=60)
+async def get_recipes(request: Request):
     recipes = []
     async with httpx.AsyncClient(timeout=15.0) as client:
         for meal_id, estonian_name in FEATURED_MEALS:
@@ -541,6 +544,7 @@ async def get_recipes():
 
 
 @router.get("/recipes/{meal_id}/compare")
+@throttle(limit=15, window=60)
 async def get_recipe_compare(
     meal_id: str,
     request: Request,
@@ -650,6 +654,7 @@ async def get_recipe_compare(
 
 
 @router.get("/recipes/{meal_id}/basket")
+@throttle(limit=15, window=60)
 async def get_recipe_basket(meal_id: str, request: Request):
     db = request.app.state.db
     if not db:
@@ -699,6 +704,7 @@ async def get_recipe_basket(meal_id: str, request: Request):
 
 
 @router.get("/recipes/{meal_id}")
+@throttle(limit=60, window=60)
 async def get_recipe(meal_id: str, request: Request):
     db = getattr(request.app.state, "db", None)
 
