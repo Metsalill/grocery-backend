@@ -14,7 +14,6 @@ async def dashboard(request: Request):
         return HTMLResponse("<h2>DB not ready yet. Try again in a few seconds.</h2>", status_code=503)
 
     async with request.app.state.db.acquire() as conn:
-        # Kasutajad
         users = await conn.fetchrow("""
             SELECT
                 COUNT(*) AS total,
@@ -23,7 +22,6 @@ async def dashboard(request: Request):
             FROM users WHERE deleted_at IS NULL
         """)
 
-        # Ketide coverage
         chains = await conn.fetch("""
             SELECT
                 p.chain,
@@ -36,7 +34,6 @@ async def dashboard(request: Request):
             ORDER BY total DESC
         """)
 
-        # Grupeerimata top 10
         ungrouped = await conn.fetch("""
             SELECT sub_code, COUNT(*) AS cnt
             FROM products
@@ -51,7 +48,6 @@ async def dashboard(request: Request):
             WHERE id NOT IN (SELECT product_id FROM product_group_members)
         """)
 
-        # Tooted ilma hinnata top 5
         no_price = await conn.fetch("""
             SELECT p.sub_code, COUNT(DISTINCT p.id) AS cnt
             FROM products p
@@ -62,7 +58,6 @@ async def dashboard(request: Request):
             LIMIT 5
         """)
 
-        # Integrity check
         integrity_count = await conn.fetchval("""
             SELECT COUNT(DISTINCT p.id)
             FROM products p
@@ -77,7 +72,6 @@ async def dashboard(request: Request):
             )
         """)
 
-        # Scraperите viimane aktiivsus
         scraper_rows = await conn.fetch("""
             SELECT
                 chain,
@@ -88,10 +82,8 @@ async def dashboard(request: Request):
             ORDER BY last_update DESC NULLS LAST
         """)
 
-        # NULL sub_code
         null_subcode = await conn.fetchval("SELECT COUNT(*) FROM products WHERE sub_code IS NULL")
 
-    # HTML ehitamine
     def pct(a, b):
         return f"{round(a/b*100,1)}%" if b else "0%"
 
@@ -226,7 +218,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
     from html import escape
     from fastapi.responses import RedirectResponse
 
-    # Token -> chain mapping
     TOKEN_MAP = {
         os.environ.get("ANALYTICS_TOKEN_SELVER", ""): "selver",
         os.environ.get("ANALYTICS_TOKEN_RIMI", ""): "rimi",
@@ -238,7 +229,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
 
     admin_token = os.environ.get("ANALYTICS_TOKEN_ADMIN", "")
 
-    # --- Token auth + cookie ---
     COOKIE_NAME = "seivy_analytics_token"
     cookie_token = request.cookies.get(COOKIE_NAME)
     resolved_token = token or cookie_token
@@ -258,18 +248,15 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
     else:
         return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
 
-    # Fix 1: chain filter normalization
     allowed_chains = {"selver", "rimi", "prisma", "coop", "maxima"}
     if chain:
         chain = chain.lower().strip()
         if chain not in allowed_chains:
             chain = None
 
-    # Ketil ei saa chain'i muuta
     if not is_admin and locked_chain:
         chain = locked_chain
 
-    # Fix 2: kui token URL-is, suuna puhtale URL-ile ja sea küpsis
     if token:
         chain_part = f"&chain={chain}" if chain else ""
         redirect_url = f"/admin/analytics?days={days}{chain_part}"
@@ -289,9 +276,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
 
     async with request.app.state.db.acquire() as conn:
-        # Kõik päringud kasutavad kalendripäevi (CURRENT_DATE), mitte jooksvaid tunde
-
-        # Korvivõitude koguarv ainult 5 teadaolevalt ketilt
         all_wins_total = await conn.fetchval("""
             SELECT COUNT(*) FROM analytics_events
             WHERE event_type = 'basket_win'
@@ -300,7 +284,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
               AND created_at < CURRENT_DATE + INTERVAL '1 day'
         """, days)
 
-        # Ranking - kõik 5 ketti, RANK() viikide käsitlemiseks
         basket_wins_rows = await conn.fetch("""
             WITH chains(chain) AS (
                 VALUES ('selver'), ('rimi'), ('prisma'), ('coop'), ('maxima')
@@ -337,6 +320,73 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             LIMIT 10
         """, days, chain)
 
+        # Kaitstud try/except: kui categories_sub/categories_main skeem
+        # peaks erinema oodatust, ei kuku kogu dashboard 500-ga kokku —
+        # sektsioon jääb lihtsalt tühjaks ("pole andmeid").
+        try:
+            category_rows = await conn.fetch("""
+                SELECT COALESCE(cm.label_et, 'Muu') AS category, COUNT(*) AS cnt
+                FROM analytics_events a
+                JOIN products p ON p.id = a.product_id
+                LEFT JOIN categories_sub cs ON cs.code = p.sub_code
+                LEFT JOIN categories_main cm ON cm.id = cs.main_id
+                WHERE a.event_type = 'basket_add'
+                  AND a.product_id IS NOT NULL
+                  AND a.created_at >= CURRENT_DATE - ($1::int - 1)
+                  AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+                  AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
+                GROUP BY COALESCE(cm.label_et, 'Muu')
+                ORDER BY cnt DESC
+                LIMIT 8
+            """, days, chain)
+        except Exception as e:
+            print(f"[analytics_dashboard] category_rows query failed: {e}")
+            category_rows = []
+
+        missing_rows = []
+        if chain:
+            try:
+                missing_rows = await conn.fetch("""
+                    WITH demand AS (
+                        SELECT a.product_id, COUNT(*) AS demand_count
+                        FROM analytics_events a
+                        WHERE a.event_type IN ('basket_add', 'product_view')
+                          AND a.product_id IS NOT NULL
+                          AND a.created_at >= CURRENT_DATE - ($1::int - 1)
+                          AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+                        GROUP BY a.product_id
+                    ),
+                    demand_products AS (
+                        SELECT d.product_id, d.demand_count, p.name,
+                               COALESCE(pgm.group_id, -d.product_id) AS grp
+                        FROM demand d
+                        JOIN products p ON p.id = d.product_id
+                        LEFT JOIN product_group_members pgm ON pgm.product_id = d.product_id
+                    ),
+                    grouped AS (
+                        SELECT grp,
+                               SUM(demand_count) AS demand_count,
+                               (array_agg(name ORDER BY demand_count DESC))[1] AS name,
+                               array_agg(product_id) AS product_ids
+                        FROM demand_products
+                        GROUP BY grp
+                    )
+                    SELECT g.name, g.demand_count
+                    FROM grouped g
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM prices pr
+                        JOIN stores s ON s.id = pr.store_id
+                        WHERE pr.product_id = ANY(g.product_ids)
+                          AND LOWER(s.chain) = LOWER($2)
+                    )
+                    ORDER BY g.demand_count DESC
+                    LIMIT 8
+                """, days, chain)
+            except Exception as e:
+                print(f"[analytics_dashboard] missing_rows query failed: {e}")
+                missing_rows = []
+
         daily_rows = await conn.fetch("""
             SELECT DATE(created_at) AS day, event_type, COUNT(*) AS cnt
             FROM analytics_events
@@ -352,7 +402,10 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
                 COUNT(*) FILTER (WHERE event_type = 'basket_win') AS total_wins,
                 COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS unique_users
+                COUNT(DISTINCT COALESCE(
+                    CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
+                    CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
+                )) AS unique_visitors
             FROM analytics_events
             WHERE created_at >= CURRENT_DATE - ($1::int - 1)
               AND created_at < CURRENT_DATE + INTERVAL '1 day'
@@ -364,7 +417,10 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
                 COUNT(*) FILTER (WHERE event_type = 'basket_win') AS total_wins,
                 COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS unique_users
+                COUNT(DISTINCT COALESCE(
+                    CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
+                    CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
+                )) AS unique_visitors
             FROM analytics_events
             WHERE created_at >= CURRENT_DATE - (($1::int * 2) - 1)
               AND created_at < CURRENT_DATE - ($1::int - 1)
@@ -376,7 +432,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             WHERE ($1::text IS NULL OR LOWER(chain) = LOWER($1))
         """, chain)
 
-    # Delta arvutus
     def delta_html(current, previous):
         if previous == 0:
             if current > 0:
@@ -393,18 +448,32 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
     total_adds = totals['total_adds'] or 0
     total_wins = totals['total_wins'] or 0
     total_views = totals['total_views'] or 0
-    unique_users = totals['unique_users'] or 0
+    unique_visitors = totals['unique_visitors'] or 0
+    prev_unique_visitors = prev_totals['unique_visitors'] or 0
 
     delta_adds = delta_html(total_adds, prev_totals['total_adds'] or 0)
     delta_wins = delta_html(total_wins, prev_totals['total_wins'] or 0)
     delta_views = delta_html(total_views, prev_totals['total_views'] or 0)
-    delta_users = delta_html(unique_users, prev_totals['unique_users'] or 0)
 
-    # Fix 3: suhtarvud
+    # Privaatsuslävi kehtib ainult partnerivaates — admin näeb alati täpset
+    # arvu, kuna admin ei ole väline osapool, kelle eest väikest valimit
+    # varjata (is_admin on juba varem funktsioonis arvutatud).
+    PRIVACY_THRESHOLD = 10
+    should_suppress_visitors = (not is_admin) and unique_visitors < PRIVACY_THRESHOLD
+    if should_suppress_visitors:
+        visitors_display = "&lt; 10"
+        visitors_note_html = (
+            'Privaatsuslävi rakendatud'
+            '<span class="info-dot" title="Loendab sisseloginud kasutajaid ja pseudonüümseid seadmetunnuseid. '
+            'Sama inimene mitmes seadmes võib lugeda mitme külastajana.">i</span>'
+        )
+    else:
+        visitors_display = f"{unique_visitors:,}"
+        visitors_note_html = f'Aktiivsed külastajad {delta_html(unique_visitors, prev_unique_visitors)}'
+
     basket_add_rate = round(total_adds / total_views * 100, 1) if total_views > 0 else None
     win_rate = round(total_wins / (all_wins_total or 1) * 100, 1) if chain and all_wins_total else None
 
-    # Fix 4: viimane uuendus
     if last_event:
         diff = datetime.datetime.now(datetime.timezone.utc) - last_event
         mins = int(diff.total_seconds() / 60)
@@ -417,10 +486,8 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
     else:
         last_event_str = "Andmed puuduvad"
 
-    is_admin = admin_token and resolved_token == admin_token
     chain_filter_label = chain.capitalize() if chain else "Kõik ketid"
 
-    # Fix 1: chain filter nupud korrektsed väärtused
     CHAINS = [("", "Kõik"), ("selver", "Selver"), ("rimi", "Rimi"), ("prisma", "Prisma"), ("coop", "Coop"), ("maxima", "Maxima")]
     if is_admin:
         chain_btns = "".join(
@@ -436,11 +503,9 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         for period in [7, 14, 30, 90]
     )
 
-    # Wins HTML - admin näeb nimesid, partner anonüümset vaadet
     max_wins = max((r['wins'] for r in basket_wins_rows), default=0)
     total_chains = len(basket_wins_rows)
 
-    # Leia partneri positsioon RANK()-ist
     partner_position = None
     partner_wins = 0
     if not is_admin and locked_chain:
@@ -450,12 +515,10 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 partner_wins = r['wins']
                 break
 
-    # Positsiooni kokkuvõte partnerivaates
     position_summary = ""
     if not is_admin and locked_chain:
         pos = partner_position or total_chains
         pos_wins = partner_wins or 0
-        # Viigi tekst
         ties = [r for r in basket_wins_rows if r['position'] == pos]
         if len(ties) > 1:
             pos_text = f"jagab {pos}. kohta {total_chains} jaeketi seas"
@@ -498,7 +561,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
 
     wins_html = position_summary + ("".join(wins_rows) or '<div class="empty-state">Valitud perioodi kohta ei ole veel korvi võitude andmeid.</div>')
 
-    # Fix 6: tooted koos ketiga
     max_adds = max((r['adds'] for r in top_products_rows), default=0)
     products_html = "".join(
         f"""<div class="product-row">
@@ -513,7 +575,35 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         for i, r in enumerate(top_products_rows, 1)
     ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel toodete lisamise andmeid.</div>'
 
-    # Fix 5: dünaamiline graafiku kõrgus
+    max_category = max((r['cnt'] for r in category_rows), default=0)
+    category_html = "".join(
+        f"""<div class="product-row">
+            <span class="product-rank">{i}</span>
+            <div class="product-content">
+                <div class="product-name">{escape(r['category'])}</div>
+                <div class="product-bar-track"><span class="product-bar-fill" style="--bar-width:{round(r['cnt']/max_category*100,1) if max_category else 0}%"></span></div>
+            </div>
+            <div class="product-count">{r['cnt']:,}<small>lisamist</small></div>
+        </div>"""
+        for i, r in enumerate(category_rows, 1)
+    ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel kategooria-andmeid.</div>'
+
+    if not chain:
+        missing_html = '<div class="empty-state">Vali jaekett, et näha puuduvat sortimenti.</div>'
+    else:
+        max_demand = max((r['demand_count'] for r in missing_rows), default=0)
+        missing_html = "".join(
+            f"""<div class="product-row">
+                <span class="product-rank">{i}</span>
+                <div class="product-content">
+                    <div class="product-name" title="{escape(r['name'] or '')}">{escape(r['name'] or '—')}</div>
+                    <div class="product-bar-track"><span class="product-bar-fill" style="--bar-width:{round(r['demand_count']/max_demand*100,1) if max_demand else 0}%"></span></div>
+                </div>
+                <div class="product-count">{r['demand_count']:,}<small>nõudlust</small></div>
+            </div>"""
+            for i, r in enumerate(missing_rows, 1)
+        ) or '<div class="empty-state">Puuduvat sortimenti ei tuvastatud valitud perioodil.</div>'
+
     daily_dict = {}
     for r in daily_rows:
         d = str(r['day'])
@@ -521,7 +611,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             daily_dict[d] = {}
         daily_dict[d][r['event_type']] = r['cnt']
 
-    # Täida kõik perioodi päevad (k.a. tühjad nulliga)
     today = datetime.datetime.now(datetime.timezone.utc).date()
     all_days = [today - datetime.timedelta(days=offset) for offset in range(days - 1, -1, -1)]
     daily_labels_json = json.dumps([d.strftime("%m-%d") for d in all_days], ensure_ascii=False)
@@ -542,7 +631,6 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         '</p>'
     ) if active_days == 1 else ""
 
-    # Fix 3: suhtarvude HTML
     rates_html = ""
     if basket_add_rate is not None:
         rates_html += f'<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">Korvi lisamise määr: <b style="color:var(--text)">{basket_add_rate}%</b> vaatamistest</div>'
@@ -618,7 +706,9 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .metric-icon {{ display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--accent-soft); color: var(--accent-dark); }}
 .metric-icon svg {{ width: 19px; height: 19px; stroke: currentColor; }}
 .metric-value {{ position: relative; z-index: 1; margin: 0; font-size: clamp(27px,2.4vw,38px); font-weight: 770; letter-spacing: -.045em; line-height: 1; }}
-.metric-note {{ position: relative; z-index: 1; margin: 10px 0 0; color: var(--text-muted); font-size: 12px; font-weight: 550; }}
+.metric-note {{ position: relative; z-index: 1; margin: 10px 0 0; color: var(--text-muted); font-size: 12px; font-weight: 550; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }}
+.info-dot {{ display: inline-grid; place-items: center; width: 16px; height: 16px; margin-left: 5px; border-radius: 999px; background: var(--surface-muted); color: var(--text-muted); font-size: 10px; font-weight: 800; cursor: help; }}
+.privacy-badge {{ display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 5px 8px; border-radius: 999px; background: #F3F5F8; color: var(--text-secondary); font-size: 11px; font-weight: 650; }}
 .dashboard-grid {{ display: grid; grid-template-columns: minmax(0,1.6fr) minmax(330px,.8fr); gap: 22px; }}
 .dashboard-column {{ display: flex; flex-direction: column; gap: 22px; }}
 .panel {{ padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }}
@@ -738,11 +828,11 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
     </article>
     <article class="metric-card">
       <div class="metric-top">
-        <span class="metric-label">Unikaalsed kasutajad</span>
+        <span class="metric-label">Unikaalsed külastajad</span>
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
       </div>
-      <p class="metric-value">{unique_users:,}</p>
-      <p class="metric-note">Aktiivsed kasutajad {delta_users}</p>
+      <p class="metric-value">{visitors_display}</p>
+      <p class="metric-note">{visitors_note_html}</p>
     </article>
   </section>
 
@@ -772,6 +862,16 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
         </div>
         <div class="product-list">{products_html}</div>
       </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Potentsiaalselt puuduv sortiment</h2>
+            <p class="panel-description">Tooted, mille vastu kasutajad huvi näitavad, kuid mida selles ketis ei leitud. Nõudlus = toote vaatamised + korvi lisamised.</p>
+          </div>
+        </div>
+        <div class="product-list">{missing_html}</div>
+      </article>
     </div>
 
     <div class="dashboard-column">
@@ -783,6 +883,16 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
           </div>
         </div>
         <div class="ranking-list">{wins_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Kategooria jaotus</h2>
+            <p class="panel-description">Millised kategooriad toovad enim korvi lisamisi.</p>
+          </div>
+        </div>
+        <div class="product-list">{category_html}</div>
       </article>
 
       <article class="panel">
@@ -800,7 +910,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
   </section>
 
   <footer class="footer">
-    <span>Näitajad põhinevad Seivy rakenduses anonüümselt kogutud kasutussündmustel.</span>
+    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsed külastajad arvestavad sisselogitud kasutajaid ja pseudonüümseid seadmetunnuseid.</span>
     <span class="footer-brand">Seivy partneranalüütika{"&nbsp;·&nbsp;<a href='/' style='color:inherit'>← Admin</a>" if is_admin else ""}</span>
   </footer>
 </main>
@@ -908,12 +1018,10 @@ async def analytics_export(request: Request, days: int = 30, chain: str = None):
     import csv, io, os
     from fastapi.responses import StreamingResponse
 
-    # Days valideerimine
     ALLOWED_DAYS = {7, 14, 30, 90}
     if days not in ALLOWED_DAYS:
         days = 30
 
-    # Token auth küpsisest
     COOKIE_NAME = "seivy_analytics_token"
     cookie_token = request.cookies.get(COOKIE_NAME)
     if not cookie_token:
