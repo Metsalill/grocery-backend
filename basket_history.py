@@ -97,6 +97,13 @@ class BasketItemIn(BaseModel):
     brand: Optional[str] = None
     size_text: Optional[str] = None
     image_url: Optional[str] = None
+    product_id: Optional[int] = Field(
+        default=None,
+        description="Canonical product id, when known. Used to resolve the "
+                     "item via ID lookup instead of an exact name match, "
+                     "which is more reliable when the displayed name is a "
+                     "grouped/canonical name that differs from products.name.",
+    )
 
 
 class SaveBasketIn(BaseModel):
@@ -173,7 +180,11 @@ async def save_basket(
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     items_dicts = [
-        {"product": it.product, "quantity": int(it.quantity), "product_id": None}
+        {
+            "product": it.product,
+            "quantity": int(it.quantity),
+            "product_id": it.product_id,
+        }
         for it in payload.items
         if (it.product or "").strip()
     ]
