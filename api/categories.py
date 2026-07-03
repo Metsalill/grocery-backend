@@ -1,9 +1,9 @@
 # categories.py
 from fastapi import APIRouter, Request, Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from utils.throttle import throttle
 
 router = APIRouter(prefix="/categories", tags=["categories"])
-bearer_scheme = HTTPBearer(auto_error=False)
 
 async def get_db(request: Request):
     conn = getattr(request.app.state, "db", None)
@@ -387,10 +387,10 @@ _SUB_EN = {
 # 1) Main categories
 # ─────────────────────────────────────────────────────────
 @router.get("/main")
+@throttle(limit=120, window=60)
 async def list_main_categories(
     request: Request,
     db=Depends(get_db),
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     sql = """
         SELECT
@@ -421,11 +421,11 @@ async def list_main_categories(
 # 2) Subcategories under a main category (only top-level, no parent)
 # ─────────────────────────────────────────────────────────
 @router.get("/{main_code}/sub")
+@throttle(limit=120, window=60)
 async def list_subcategories(
     main_code: str,
     request: Request,
     db=Depends(get_db),
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     main_row = await db.fetchrow(
         "SELECT id, code, label_et FROM categories_main WHERE code = $1",
@@ -475,12 +475,12 @@ async def list_subcategories(
 # 3) Sub-subcategories under a subcategory (by sub_code)
 # ─────────────────────────────────────────────────────────
 @router.get("/{main_code}/sub/{sub_code}/sub")
+@throttle(limit=120, window=60)
 async def list_sub_subcategories(
     main_code: str,
     sub_code: str,
     request: Request,
     db=Depends(get_db),
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     parent_row = await db.fetchrow(
         "SELECT id, code, label_et FROM categories_sub WHERE code = $1",
