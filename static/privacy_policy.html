@@ -192,7 +192,7 @@
   <div class="container">
     <div class="section-label">Juriidiline teave</div>
     <h1>Privaatsus&shy;poliitika</h1>
-    <p class="updated">Viimati uuendatud: mai 2026</p>
+    <p class="updated">Viimati uuendatud: juuli 2026</p>
 
     <div class="card">
       <h2>1. Kes me oleme</h2>
@@ -208,37 +208,48 @@
         <li><strong>Konto andmed:</strong> e-posti aadress, eesnimi, perekonnanimi — registreerimisel e-posti ja parooliga, Google Sign-In või Apple Sign-In kaudu</li>
         <li><strong>Kasutusandmed:</strong> milliseid tooteid vaatad, milliseid tooteid ostukorvi lisad, millised poed sulle huvi pakuvad</li>
         <li><strong>Asukohaandmed:</strong> ligikaudne asukoht lähedalasuvate poodide leidmiseks (ainult rakenduse kasutamise ajal)</li>
-        <li><strong>Ostukorvi ajalugu:</strong> eelnevad hinnavõrdlused ja ostukorvi koosseis</li>
+        <li><strong>Ostukorvi ajalugu:</strong> eelnevad hinnavõrdlused ja ostukorvi koosseis (ainult sisseloginud kasutajatel)</li>
+        <li><strong>Pseudonüümne seadme identifikaator:</strong> vt punkt 3 allpool</li>
       </ul>
     </div>
 
     <div class="card">
-      <h2>3. Miks me andmeid kogume</h2>
-      <ul>
-        <li>Rakenduse toimimiseks ja personaliseeritud kogemuse pakkumiseks</li>
-        <li>Sagedamini valitud toodete eelistamiseks otsingutulemustes</li>
-        <li>Lähedalasuvate poodide kuvamiseks</li>
-        <li><strong>Agregeeritud kasutusstatistika müümiseks kauplusekettidele</strong> — näiteks milliseid tooteid võrreldakse kõige rohkem, millised tooted on populaarseimad jne. <em>Jagame ainult anonümiseeritud ja agregeeritud andmeid, mitte üksikute kasutajate andmeid.</em></li>
-      </ul>
+      <h2>3. Rakenduse kasutamisel loodav seadme identifikaator</h2>
+      <p>Rakenduse kasutamisel võime luua ja salvestada seadmesse juhusliku rakenduse identifikaatori. Seda kasutatakse ainult koondatud kasutusstatistika jaoks, näiteks selleks, et hinnata, kui palju unikaalseid seadmeid on vaadanud tooteid, lisanud tooteid ostukorvi või kasutanud hinnavõrdlust.</p>
+      <p>Seda identifikaatorit ei kasutata reklaami suunamiseks, kasutajaprofiili loomiseks ega ostuajaloo salvestamiseks. Kui kasutaja ei ole sisse loginud, ei seo me seda identifikaatorit nime, e-posti aadressi ega muu kontoinfoga. Partneritele kuvatakse ainult koondatud statistikat, mitte üksikkasutajate andmeid.</p>
+      <p>Serveris salvestame identifikaatorist ainult ühesuunalise räsi (HMAC-SHA256), mitte seadmes olevat algväärtust — seega ka andmebaasi lekke korral ei ole rakenduses kasutatav identifikaator otse taastatav.</p>
       <div class="highlight">
-        ⚠️ Müüme kauplusekettidele ainult anonüümset agregeeritud statistikat. Sinu isikuandmeid ei müüda kunagi kolmandatele osapooltele.
+        See identifikaator on eristatav igal ajal rakenduse uuesti paigaldamisel või seadme andmete kustutamisel.
       </div>
     </div>
 
     <div class="card">
-      <h2>4. Andmete jagamine</h2>
+      <h2>4. Miks me andmeid kogume</h2>
+      <ul>
+        <li>Rakenduse toimimiseks ja personaliseeritud kogemuse pakkumiseks</li>
+        <li>Sagedamini valitud toodete eelistamiseks otsingutulemustes</li>
+        <li>Lähedalasuvate poodide kuvamiseks</li>
+        <li><strong>Agregeeritud kasutusstatistika müümiseks kauplusekettidele ja tootjatele</strong> — näiteks milliseid tooteid võrreldakse kõige rohkem, millised tooted on populaarseimad jne. <em>Jagame ainult anonümiseeritud ja agregeeritud andmeid, mitte üksikute kasutajate andmeid.</em></li>
+      </ul>
+      <div class="highlight">
+        ⚠️ Müüme kauplusekettidele ja tootjatele ainult anonüümset agregeeritud statistikat. Sinu isikuandmeid ei müüda kunagi kolmandatele osapooltele.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5. Andmete jagamine</h2>
       <p>Jagame andmeid järgmiselt:</p>
       <ul>
         <li><strong>Google:</strong> kasutame Google Sign-In autentimiseks (Google privaatsuspoliitika kehtib)</li>
         <li><strong>Apple:</strong> kasutame Apple Sign-In autentimiseks iOS seadmetel (Apple privaatsuspoliitika kehtib)</li>
-        <li><strong>Kauplusekettid:</strong> ainult anonümiseeritud agregeeritud statistika</li>
+        <li><strong>Kauplusekettid ja tootjad:</strong> ainult anonümiseeritud agregeeritud statistika</li>
         <li><strong>Teenusepakkujad:</strong> Railway (andmebaasihosting) — ainult rakenduse toimimiseks vajalik</li>
       </ul>
       <p>Sinu isikuandmeid ei jagata, müüda ega renditata kolmandatele osapooltele.</p>
     </div>
 
     <div class="card">
-      <h2>5. Sinu õigused (GDPR)</h2>
+      <h2>6. Sinu õigused (GDPR)</h2>
       <ul>
         <li><strong>Juurdepääs:</strong> saad küsida, milliseid andmeid me sinu kohta hoiame</li>
         <li><strong>Parandamine:</strong> saad paluda ebaõigete andmete parandamist</li>
@@ -250,13 +261,14 @@
     </div>
 
     <div class="card">
-      <h2>6. Andmete säilitamine</h2>
-      <p>Hoiame sinu andmeid nii kaua, kui sul on aktiivne konto. Konto kustutamisel eemaldatakse kõik isikuandmed 30 päeva jooksul.</p>
+      <h2>7. Andmete säilitamine</h2>
+      <p>Hoiame sinu konto andmeid nii kaua, kui sul on aktiivne konto. Konto kustutamisel eemaldatakse kõik isikuandmed 30 päeva jooksul.</p>
+      <p>Üksiksündmuste tasemel kasutusstatistikat (nt konkreetne toote vaatamine kindlal ajahetkel) säilitame kuni 12 kuud, misjärel see kas kustutatakse või jääb alles ainult agregeeritud (kokku liidetud) kujul, millest üksikuid sündmusi ei ole enam võimalik eristada.</p>
     </div>
 
     <div class="card">
-      <h2>7. Küpsised ja jälgimine</h2>
-      <p>Mobiilirakendus ei kasuta küpsiseid. Kasutame seansi tokenit (JWT) autentimiseks, mis salvestatakse turvaliselt sinu seadmes.</p>
+      <h2>8. Küpsised ja jälgimine</h2>
+      <p>Mobiilirakendus ei kasuta veebiküpsiseid. Kasutame seansi tokenit (JWT) autentimiseks, mis salvestatakse turvaliselt sinu seadmes, ning punktis 3 kirjeldatud pseudonüümset seadme identifikaatorit koondstatistika jaoks.</p>
     </div>
 
     <div class="contact-box">
@@ -272,7 +284,7 @@
   <div class="container">
     <div class="section-label">Legal information</div>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: May 2026</p>
+    <p class="updated">Last updated: July 2026</p>
 
     <div class="card">
       <h2>1. Who we are</h2>
@@ -288,37 +300,48 @@
         <li><strong>Account data:</strong> email address, first name, last name — via email/password registration, Google Sign-In, or Apple Sign-In</li>
         <li><strong>Usage data:</strong> which products you view, add to basket, and which stores interest you</li>
         <li><strong>Location data:</strong> approximate location to find nearby stores (only while using the app)</li>
-        <li><strong>Basket history:</strong> previous price comparisons and basket contents</li>
+        <li><strong>Basket history:</strong> previous price comparisons and basket contents (logged-in users only)</li>
+        <li><strong>Pseudonymous device identifier:</strong> see section 3 below</li>
       </ul>
     </div>
 
     <div class="card">
-      <h2>3. Why we collect data</h2>
-      <ul>
-        <li>To operate the app and provide a personalised experience</li>
-        <li>To prioritise frequently selected products in search results</li>
-        <li>To display nearby stores</li>
-        <li><strong>To sell aggregated usage statistics to supermarket chains</strong> — for example, which products are compared most often, which products are most popular, etc. <em>We share only anonymised and aggregated data, never individual user data.</em></li>
-      </ul>
+      <h2>3. Device identifier created when using the app</h2>
+      <p>When using the app, we may create and store a random app installation identifier on your device. This is used solely for aggregated usage statistics — for example, to estimate how many unique devices have viewed products, added products to a basket, or used the price comparison feature.</p>
+      <p>This identifier is not used for ad targeting, building a user profile, or storing purchase history. If you are not logged in, we do not link this identifier to your name, email address, or other account information. Partners are shown only aggregated statistics, never individual user data.</p>
+      <p>On our server, we store only a one-way hash (HMAC-SHA256) of the identifier, not the raw value from your device — so even in the event of a database breach, the identifier used in the app cannot be directly recovered.</p>
       <div class="highlight">
-        ⚠️ We sell only anonymous aggregated statistics to supermarket chains. Your personal data is never sold to third parties.
+        This identifier changes whenever you reinstall the app or clear your device's app data.
       </div>
     </div>
 
     <div class="card">
-      <h2>4. Data sharing</h2>
+      <h2>4. Why we collect data</h2>
+      <ul>
+        <li>To operate the app and provide a personalised experience</li>
+        <li>To prioritise frequently selected products in search results</li>
+        <li>To display nearby stores</li>
+        <li><strong>To sell aggregated usage statistics to supermarket chains and manufacturers</strong> — for example, which products are compared most often, which products are most popular, etc. <em>We share only anonymised and aggregated data, never individual user data.</em></li>
+      </ul>
+      <div class="highlight">
+        ⚠️ We sell only anonymous aggregated statistics to supermarket chains and manufacturers. Your personal data is never sold to third parties.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5. Data sharing</h2>
       <p>We share data as follows:</p>
       <ul>
         <li><strong>Google:</strong> we use Google Sign-In for authentication (Google's privacy policy applies)</li>
         <li><strong>Apple:</strong> we use Apple Sign-In for authentication on iOS devices (Apple's privacy policy applies)</li>
-        <li><strong>Supermarket chains:</strong> anonymised aggregated statistics only</li>
+        <li><strong>Supermarket chains and manufacturers:</strong> anonymised aggregated statistics only</li>
         <li><strong>Service providers:</strong> Railway (database hosting) — only what is necessary for the app to function</li>
       </ul>
       <p>Your personal data is not shared, sold, or rented to third parties.</p>
     </div>
 
     <div class="card">
-      <h2>5. Your rights (GDPR)</h2>
+      <h2>6. Your rights (GDPR)</h2>
       <ul>
         <li><strong>Access:</strong> you may request what data we hold about you</li>
         <li><strong>Rectification:</strong> you may request correction of inaccurate data</li>
@@ -330,13 +353,14 @@
     </div>
 
     <div class="card">
-      <h2>6. Data retention</h2>
-      <p>We retain your data for as long as you have an active account. Upon account deletion, all personal data will be removed within 30 days.</p>
+      <h2>7. Data retention</h2>
+      <p>We retain your account data for as long as you have an active account. Upon account deletion, all personal data will be removed within 30 days.</p>
+      <p>Event-level usage statistics (e.g. a specific product view at a specific time) are retained for up to 12 months, after which they are either deleted or retained only in aggregated form, from which individual events can no longer be distinguished.</p>
     </div>
 
     <div class="card">
-      <h2>7. Cookies and tracking</h2>
-      <p>The mobile app does not use cookies. We use a session token (JWT) for authentication, stored securely on your device.</p>
+      <h2>8. Cookies and tracking</h2>
+      <p>The mobile app does not use web cookies. We use a session token (JWT) for authentication, stored securely on your device, and the pseudonymous device identifier described in section 3 for aggregated statistics.</p>
     </div>
 
     <div class="contact-box">
