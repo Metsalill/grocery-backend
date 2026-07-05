@@ -28,6 +28,7 @@ from auth import router as auth_router
 from compare import router as compare_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router
+from admin.partners import router as partners_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router
 from admin.image_gallery import router as image_admin_router
@@ -139,6 +140,7 @@ app.include_router(favourites_router)
 app.include_router(family_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
+app.include_router(partners_router)
 app.include_router(basket_history_router)
 app.include_router(upload_image_router)
 app.include_router(image_admin_router)
