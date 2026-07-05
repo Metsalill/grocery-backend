@@ -75,12 +75,23 @@ def _build_chain_totals(results: List[Dict[str, Any]]) -> Tuple[Dict[str, float]
         total = r.get("total_price")
         if total is None:
             continue
+        # A store that didn't find every item still gets a total_price
+        # (the sum of what it did find), which would otherwise look
+        # artificially cheap and get mistaken for a real win. Only
+        # complete baskets are meaningful for a chain-vs-chain price
+        # comparison.
+        if r.get("lines_found") != r.get("required_lines"):
+            continue
         chain = (r.get("chain") or "").lower().strip()
         if not chain:
             continue
         if chain not in chain_totals or total < chain_totals[chain]:
-            chain_totals[chain] = total
-            chain_store_ids[chain] = r.get("store_id")
+            chain_totals[chain] = float(total)
+            store_id = r.get("store_id")
+            if store_id is not None:
+                chain_store_ids[chain] = int(store_id)
+            else:
+                chain_store_ids.pop(chain, None)
     return chain_totals, chain_store_ids
 
 
@@ -108,9 +119,11 @@ async def _log_basket_compare(
         if len(chain_totals) < 2:
             return
 
-        totals = payload_out.get("totals", {}) or {}
-        cheapest_chain = totals.get("cheapest_chain")
-        cheapest_total = totals.get("cheapest_total")
+        # Derived from chain_totals itself (not payload_out["totals"])
+        # so cheapest_chain, cheapest_total and chain_totals can never
+        # disagree with each other in the stored event.
+        cheapest_chain = min(chain_totals, key=chain_totals.get)
+        cheapest_total = chain_totals[cheapest_chain]
         stores_compared = sum(1 for r in results if r.get("total_price") is not None)
         required_lines = next(
             (r.get("required_lines") for r in results if r.get("required_lines") is not None),
