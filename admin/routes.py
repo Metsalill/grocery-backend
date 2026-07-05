@@ -212,6 +212,878 @@ async def dashboard(request: Request):
     return HTMLResponse(html)
 
 
+async def _render_brand_dashboard(conn, partner_name: str, brand_filter: list, days: int):
+    """Renders the brand/producer analytics view. Separate from the
+    retailer/admin dashboard function to keep the two code paths
+    independent — a bug in one cannot affect the other. Reuses the same
+    CSS design system (colors, radii, card styles) per the design brief:
+    same accent color, just different heading/KPI semantics and a
+    'Tootja' badge, per ChatGPT design consultation.
+    """
+    import json
+    from html import escape
+
+    ALLOWED_DAYS = {7, 14, 30, 90}
+    if days not in ALLOWED_DAYS:
+        days = 30
+
+    brand_filter_lower = [b.lower() for b in brand_filter]
+
+    # Resolve all product_ids belonging to groups whose canonical brand
+    # matches this partner's brand_filter (case-insensitive exact match
+    # only — see design decision: no ILIKE wildcard, to avoid a partner
+    # ever seeing a competitor's products due to a fuzzy match).
+    product_id_rows = await conn.fetch("""
+        SELECT pgm.product_id, pgm.group_id
+        FROM product_group_members pgm
+        JOIN product_groups pg ON pg.id = pgm.group_id
+        WHERE LOWER(pg.brand) = ANY($1::text[])
+    """, brand_filter_lower)
+    brand_product_ids = [r["product_id"] for r in product_id_rows]
+    brand_group_ids = list({r["group_id"] for r in product_id_rows})
+
+    if not brand_product_ids:
+        return HTMLResponse(
+            f"<h2>{escape(partner_name)}: brändi tooteid ei leitud. "
+            "Kontrolli brand_filter väärtust /admin/partners lehel.</h2>",
+            status_code=200,
+        )
+
+    # "Viimane sündmus" peab kajastama BRÄNDI enda toodete viimast
+    # sündmust, mitte kogu Seivy süsteemi viimast sündmust — muidu näeks
+    # partner eksitavalt värsket ajatemplit ka siis, kui tema enda
+    # toodetel pole päevi/nädalaid tegevust olnud.
+    last_event = await conn.fetchval("""
+        SELECT MAX(created_at) FROM analytics_events
+        WHERE product_id = ANY($1::int[])
+    """, brand_product_ids)
+    if last_event:
+        diff = datetime.datetime.now(datetime.timezone.utc) - last_event
+        mins = int(diff.total_seconds() / 60)
+        if mins < 60:
+            last_event_str = f"{mins} min tagasi"
+        elif mins < 1440:
+            last_event_str = f"{mins // 60} tundi tagasi"
+        else:
+            last_event_str = last_event.strftime("%d.%m kell %H:%M")
+    else:
+        last_event_str = "Andmed puuduvad"
+
+    totals = await conn.fetchrow("""
+        SELECT
+            COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
+            COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
+            COUNT(DISTINCT COALESCE(
+                CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
+                CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
+            )) AS unique_visitors
+        FROM analytics_events
+        WHERE product_id = ANY($1::int[])
+          AND created_at >= CURRENT_DATE - ($2::int - 1)
+          AND created_at < CURRENT_DATE + INTERVAL '1 day'
+    """, brand_product_ids, days)
+
+    prev_totals = await conn.fetchrow("""
+        SELECT
+            COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
+            COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
+            COUNT(DISTINCT COALESCE(
+                CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
+                CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
+            )) AS unique_visitors
+        FROM analytics_events
+        WHERE product_id = ANY($1::int[])
+          AND created_at >= CURRENT_DATE - (($2::int * 2) - 1)
+          AND created_at < CURRENT_DATE - ($2::int - 1)
+    """, brand_product_ids, days)
+
+    top_products_rows = await conn.fetch("""
+        SELECT a.product_id, p.name, COUNT(*) AS adds
+        FROM analytics_events a
+        JOIN products p ON p.id = a.product_id
+        WHERE a.event_type = 'basket_add'
+          AND a.product_id = ANY($1::int[])
+          AND a.created_at >= CURRENT_DATE - ($2::int - 1)
+          AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+        GROUP BY a.product_id, p.name
+        ORDER BY adds DESC
+        LIMIT 10
+    """, brand_product_ids, days)
+
+    daily_rows = await conn.fetch("""
+        SELECT DATE(created_at) AS day, event_type, COUNT(*) AS cnt
+        FROM analytics_events
+        WHERE product_id = ANY($1::int[])
+          AND created_at >= CURRENT_DATE - ($2::int - 1)
+          AND created_at < CURRENT_DATE + INTERVAL '1 day'
+        GROUP BY DATE(created_at), event_type
+        ORDER BY day ASC
+    """, brand_product_ids, days)
+
+    # Price comparison heat-map: up to 15 groups, each row = one grouped
+    # product, columns = the 5 known chains. Limited to groups with the
+    # most analytics demand in the period, so the table shows the
+    # partner's most-relevant products first.
+    price_rows = await conn.fetch("""
+        WITH demand AS (
+            SELECT pgm.group_id, COUNT(*) AS demand_count
+            FROM analytics_events a
+            JOIN product_group_members pgm ON pgm.product_id = a.product_id
+            WHERE pgm.group_id = ANY($1::int[])
+              AND a.event_type IN ('product_view', 'basket_add')
+              AND a.created_at >= CURRENT_DATE - ($2::int - 1)
+              AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+            GROUP BY pgm.group_id
+        ),
+        top_groups AS (
+            SELECT group_id FROM demand ORDER BY demand_count DESC LIMIT 15
+        )
+        SELECT
+            pg.id AS group_id,
+            COALESCE(pg.canonical_name, 'Toode #' || pg.id) AS name,
+            LOWER(s.chain) AS chain,
+            MIN(COALESCE(NULLIF(pr.promo_price, 0), pr.price)) AS price
+        FROM top_groups tg
+        JOIN product_groups pg ON pg.id = tg.group_id
+        JOIN product_group_members pgm ON pgm.group_id = pg.id
+        JOIN prices pr ON pr.product_id = pgm.product_id
+        JOIN stores s ON s.id = pr.store_id
+        WHERE pr.collected_at > NOW() - INTERVAL '14 days'
+          AND pr.price > 0
+        GROUP BY pg.id, pg.canonical_name, LOWER(s.chain)
+    """, brand_group_ids, days)
+
+    # If no analytics-driven demand yet (e.g. brand new partner), fall
+    # back to just showing any 15 groups for this brand so the table
+    # isn't empty on day one.
+    if not price_rows and brand_group_ids:
+        price_rows = await conn.fetch("""
+            WITH top_groups AS (
+                SELECT id AS group_id
+                FROM product_groups
+                WHERE id = ANY($1::int[])
+                ORDER BY canonical_name ASC
+                LIMIT 15
+            )
+            SELECT
+                pg.id AS group_id,
+                COALESCE(pg.canonical_name, 'Toode #' || pg.id) AS name,
+                LOWER(s.chain) AS chain,
+                MIN(COALESCE(NULLIF(pr.promo_price, 0), pr.price)) AS price
+            FROM top_groups tg
+            JOIN product_groups pg ON pg.id = tg.group_id
+            JOIN product_group_members pgm ON pgm.group_id = pg.id
+            JOIN prices pr ON pr.product_id = pgm.product_id
+            JOIN stores s ON s.id = pr.store_id
+            WHERE pr.collected_at > NOW() - INTERVAL '14 days'
+              AND pr.price > 0
+            GROUP BY pg.id, pg.canonical_name, LOWER(s.chain)
+        """, brand_group_ids)
+
+    # Pivot into {group_id: {name, prices: {chain: price}}}
+    CHAINS_ORDER = ["selver", "rimi", "prisma", "coop", "maxima"]
+    pivot: dict = {}
+    for r in price_rows:
+        gid = r["group_id"]
+        if gid not in pivot:
+            pivot[gid] = {"name": r["name"], "prices": {}}
+        pivot[gid]["prices"][r["chain"]] = float(r["price"])
+
+    price_table_rows = ""
+    price_mobile_cards = ""
+    for gid, data in pivot.items():
+        chain_prices = data["prices"]
+        known_prices = [p for p in chain_prices.values() if p is not None]
+        min_p = min(known_prices) if known_prices else None
+        max_p = max(known_prices) if known_prices else None
+        cells = ""
+        card_rows = ""
+        for ch in CHAINS_ORDER:
+            p = chain_prices.get(ch)
+            chain_label = ch.capitalize()
+            if p is None:
+                cells += '<td class="price-cell missing">—</td>'
+                card_rows += f'<div class="price-card-row"><span class="price-card-chain">{chain_label}</span><span class="price-card-price missing">—</span></div>'
+            elif min_p is not None and p == min_p and min_p != max_p:
+                cells += f'<td class="price-cell best">{p:.2f} €</td>'
+                card_rows += f'<div class="price-card-row"><span class="price-card-chain">{chain_label}</span><span class="price-card-price best">{p:.2f} €</span></div>'
+            elif max_p is not None and p == max_p and min_p != max_p:
+                cells += f'<td class="price-cell highest">{p:.2f} €</td>'
+                card_rows += f'<div class="price-card-row"><span class="price-card-chain">{chain_label}</span><span class="price-card-price highest">{p:.2f} €</span></div>'
+            else:
+                cells += f'<td class="price-cell">{p:.2f} €</td>'
+                card_rows += f'<div class="price-card-row"><span class="price-card-chain">{chain_label}</span><span class="price-card-price">{p:.2f} €</span></div>'
+
+        if min_p is not None and max_p is not None and min_p > 0:
+            spread_abs = max_p - min_p
+            spread_pct = round(spread_abs / min_p * 100, 1)
+            spread_pct_text = str(spread_pct).replace('.', ',')
+            spread = f"{spread_abs:.2f} € · {spread_pct_text}%"
+        else:
+            spread = "—"
+
+        price_table_rows += f"""
+        <tr>
+            <td class="price-product-name">{escape(data['name'])}</td>
+            {cells}
+            <td class="price-spread">{spread}</td>
+        </tr>"""
+
+        price_mobile_cards += f"""
+        <div class="price-card">
+            <div class="price-card-title">{escape(data['name'])}</div>
+            {card_rows}
+            <div class="price-card-spread">Vahe: {spread}</div>
+        </div>"""
+
+    if not price_table_rows:
+        price_table_rows = '<tr><td colspan="7" style="text-align:center;color:#9198A3;padding:20px">Hinnaandmeid ei leitud.</td></tr>'
+        price_mobile_cards = '<div class="empty-state">Hinnaandmeid ei leitud.</div>'
+
+    # --- Sortimendi katvus kettides ---
+    # Mitu brändi gruppi on igas ketis hinnaga esindatud, kogu grupiarvust.
+    coverage_rows = await conn.fetch("""
+        SELECT LOWER(s.chain) AS chain, COUNT(DISTINCT pgm.group_id) AS covered
+        FROM product_group_members pgm
+        JOIN prices pr ON pr.product_id = pgm.product_id
+        JOIN stores s ON s.id = pr.store_id
+        WHERE pgm.group_id = ANY($1::int[])
+          AND pr.collected_at > NOW() - INTERVAL '14 days'
+          AND pr.price > 0
+        GROUP BY LOWER(s.chain)
+    """, brand_group_ids)
+    coverage_by_chain = {r["chain"]: r["covered"] for r in coverage_rows}
+    total_groups = len(brand_group_ids)
+    coverage_html = "".join(
+        f"""<div class="coverage-item">
+            <span class="coverage-chain">{ch.capitalize()}</span>
+            <span class="coverage-count">{coverage_by_chain.get(ch, 0)}/{total_groups}{f" · {round(coverage_by_chain.get(ch, 0) / total_groups * 100)}%" if total_groups else ""}</span>
+        </div>"""
+        for ch in CHAINS_ORDER
+    )
+
+    # --- Müügivõimalused kettide lõikes ---
+    # Brändi tooted, mille vastu on nõudlust (vaatamised+lisamised), aga
+    # mis PUUDUVAD konkreetsest ketist. Top 5 toodet ketti kohta.
+    opportunity_rows = await conn.fetch("""
+        WITH demand AS (
+            SELECT pgm.group_id, COUNT(*) AS demand_count
+            FROM analytics_events a
+            JOIN product_group_members pgm ON pgm.product_id = a.product_id
+            WHERE pgm.group_id = ANY($1::int[])
+              AND a.event_type IN ('product_view', 'basket_add')
+              AND a.created_at >= CURRENT_DATE - ($2::int - 1)
+              AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+            GROUP BY pgm.group_id
+        ),
+        group_names AS (
+            SELECT id AS group_id, COALESCE(canonical_name, 'Toode #' || id) AS name
+            FROM product_groups WHERE id = ANY($1::int[])
+        )
+        SELECT gn.group_id, gn.name, d.demand_count, missing_chain.chain
+        FROM group_names gn
+        JOIN demand d ON d.group_id = gn.group_id
+        CROSS JOIN (VALUES ('selver'),('rimi'),('prisma'),('coop'),('maxima')) AS missing_chain(chain)
+        WHERE NOT EXISTS (
+            SELECT 1 FROM product_group_members pgm2
+            JOIN prices pr2 ON pr2.product_id = pgm2.product_id
+            JOIN stores st2 ON st2.id = pr2.store_id
+            WHERE pgm2.group_id = gn.group_id
+              AND LOWER(st2.chain) = missing_chain.chain
+              AND pr2.collected_at > NOW() - INTERVAL '14 days'
+              AND pr2.price > 0
+        )
+        ORDER BY missing_chain.chain, d.demand_count DESC
+    """, brand_group_ids, days)
+
+    opportunities_by_chain: dict = {}
+    for r in opportunity_rows:
+        opportunities_by_chain.setdefault(r["chain"], []).append(r)
+
+    opportunity_sections_html = ""
+    for ch in CHAINS_ORDER:
+        items = opportunities_by_chain.get(ch, [])[:5]
+        if not items:
+            continue
+        items_html = "".join(
+            f'<li><span class="opportunity-name">{escape(r["name"])}</span><span class="opportunity-demand">{r["demand_count"]} nõudlust</span></li>'
+            for r in items
+        )
+        opportunity_sections_html += f"""
+        <div class="opportunity-chain-block">
+            <div class="opportunity-chain-title">{ch.capitalize()}</div>
+            <ul class="opportunity-list">{items_html}</ul>
+        </div>"""
+
+    if not opportunity_sections_html:
+        opportunity_sections_html = '<div class="empty-state">Praegu ei tuvastatud müügivõimalusi — teie tooted on hästi esindatud kõigis kettides.</div>'
+
+    # --- Kiiremini kasvavad tooted (võrreldes eelmise sama pika perioodiga) ---
+    momentum_rows = await conn.fetch("""
+        WITH current_period AS (
+            SELECT product_id, COUNT(*) AS cnt
+            FROM analytics_events
+            WHERE product_id = ANY($1::int[])
+              AND event_type = 'basket_add'
+              AND created_at >= CURRENT_DATE - ($2::int - 1)
+              AND created_at < CURRENT_DATE + INTERVAL '1 day'
+            GROUP BY product_id
+        ),
+        previous_period AS (
+            SELECT product_id, COUNT(*) AS cnt
+            FROM analytics_events
+            WHERE product_id = ANY($1::int[])
+              AND event_type = 'basket_add'
+              AND created_at >= CURRENT_DATE - (($2::int * 2) - 1)
+              AND created_at < CURRENT_DATE - ($2::int - 1)
+            GROUP BY product_id
+        )
+        SELECT p.id, p.name,
+               COALESCE(c.cnt, 0) AS current_cnt,
+               COALESCE(pr.cnt, 0) AS prev_cnt
+        FROM products p
+        LEFT JOIN current_period c ON c.product_id = p.id
+        LEFT JOIN previous_period pr ON pr.product_id = p.id
+        WHERE p.id = ANY($1::int[])
+          AND (COALESCE(c.cnt, 0) > 0 OR COALESCE(pr.cnt, 0) > 0)
+    """, brand_product_ids, days)
+
+    MIN_CURRENT_FOR_MOMENTUM = 3
+    MIN_PREVIOUS_FOR_PERCENT = 2
+    momentum_list = []
+    for r in momentum_rows:
+        cur = r["current_cnt"] or 0
+        prev = r["prev_cnt"] or 0
+        if cur < MIN_CURRENT_FOR_MOMENTUM:
+            continue
+        if prev == 0:
+            momentum_list.append((r["name"], cur, None))  # None = "Uus"
+        elif prev >= MIN_PREVIOUS_FOR_PERCENT:
+            growth = round((cur - prev) / prev * 100, 1)
+            if growth > 0:
+                momentum_list.append((r["name"], cur, growth))
+    momentum_list = sorted(
+        momentum_list,
+        key=lambda x: (
+            x[1],                              # praegune maht
+            x[2] if x[2] is not None else 999  # kasv/uudsus
+        ),
+        reverse=True,
+    )[:5]
+
+    momentum_html = "".join(
+        f"""<div class="product-row">
+            <span class="product-rank">{i}</span>
+            <div class="product-content">
+                <div class="product-name">{escape(name)}</div>
+            </div>
+            <div class="product-count" style="color:{'#1B9A59' if growth is not None else 'var(--accent-dark)'}">
+                {f"↑ {str(growth).replace('.', ',')}% · {cur} lisamist" if growth is not None else f"Uus · {cur} lisamist"}
+            </div>
+        </div>"""
+        for i, (name, cur, growth) in enumerate(momentum_list, 1)
+    ) or '<div class="empty-state">Valitud perioodil ei tuvastatud kasvavaid tooteid.</div>'
+
+    # --- Huvi vs ostusoov ---
+    # Tooted, mille vastu on suur vaatamishuvi, aga madal korvi lisamise
+    # määr — signaal võimalikest probleemidest (hind, pakend, positsioon
+    # võrdluses). Nõuab vähemalt 5 vaatamist, et vältida juhuslikku müra
+    # väikese valimi korral.
+    interest_rows = await conn.fetch("""
+        SELECT a.product_id, p.name,
+            COUNT(*) FILTER (WHERE a.event_type = 'product_view') AS views,
+            COUNT(*) FILTER (WHERE a.event_type = 'basket_add') AS adds
+        FROM analytics_events a
+        JOIN products p ON p.id = a.product_id
+        WHERE a.product_id = ANY($1::int[])
+          AND a.created_at >= CURRENT_DATE - ($2::int - 1)
+          AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+        GROUP BY a.product_id, p.name
+        HAVING COUNT(*) FILTER (WHERE a.event_type = 'product_view') >= 5
+        ORDER BY (
+            COUNT(*) FILTER (WHERE a.event_type = 'basket_add')::float
+            / NULLIF(COUNT(*) FILTER (WHERE a.event_type = 'product_view'), 0)
+        ) ASC
+        LIMIT 8
+    """, brand_product_ids, days)
+
+    interest_html = "".join(
+        f"""<div class="interest-row">
+            <div class="interest-name" title="{escape(r['name'] or '')}">{escape(r['name'] or '—')}</div>
+            <div class="interest-stats">
+                <span>{r['views']:,} vaatamist</span>
+                <span>·</span>
+                <span>{r['adds']:,} lisamist</span>
+                <span>·</span>
+                <span class="interest-rate">{round(r['adds']/r['views']*100, 1)}% määr</span>
+            </div>
+        </div>"""
+        for r in interest_rows
+    ) or '<div class="empty-state">Valitud perioodil pole piisavalt vaatamisi analüüsiks.</div>'
+
+    # --- Hinnapositsiooni kokkuvõte ---
+    # Kokkuvõte juba arvutatud pivot-andmetest — kiire ülevaade ilma
+    # tabelit lugemata.
+    spread_values = []
+    for gid, data in pivot.items():
+        prices_known = [p for p in data["prices"].values() if p is not None]
+        if len(prices_known) >= 2:
+            spread_values.append(max(prices_known) - min(prices_known))
+    price_summary_tracked = len(pivot)
+    price_summary_avg_spread = (sum(spread_values) / len(spread_values)) if spread_values else None
+    price_summary_max_spread = max(spread_values) if spread_values else None
+
+    def delta_html(current, previous):
+        if previous == 0:
+            if current > 0:
+                return '<span style="color:#1B9A59;font-size:12px;font-weight:600">Uus aktiivsus</span>'
+            return ''
+        pct = round((current - previous) / previous * 100, 1)
+        pct_text = str(abs(pct)).replace('.', ',')
+        if pct > 0:
+            return f'<span style="color:#1B9A59;font-size:12px;font-weight:600">↑ {pct_text}%</span>'
+        elif pct < 0:
+            return f'<span style="color:#e74c3c;font-size:12px;font-weight:600">↓ {pct_text}%</span>'
+        return '<span style="color:#9198A3;font-size:12px">Muutuseta</span>'
+
+    total_adds = totals["total_adds"] or 0
+    total_views = totals["total_views"] or 0
+    unique_visitors = totals["unique_visitors"] or 0
+    prev_unique_visitors = prev_totals["unique_visitors"] or 0
+    basket_add_rate = round(total_adds / total_views * 100, 1) if total_views > 0 else None
+
+    # Brand view has no admin exemption concept (there is no "admin
+    # viewing a brand" case) — privacy threshold always applies here.
+    PRIVACY_THRESHOLD = 10
+    if unique_visitors < PRIVACY_THRESHOLD:
+        visitors_display = "&lt; 10"
+        visitors_note_html = (
+            'Privaatsuslävi rakendatud'
+            '<span class="info-dot" title="Loendab sisseloginud kasutajaid ja pseudonüümseid seadmetunnuseid. '
+            'Sama inimene mitmes seadmes võib lugeda mitme külastajana.">i</span>'
+        )
+    else:
+        visitors_display = f"{unique_visitors:,}"
+        visitors_note_html = f'Aktiivsed külastajad {delta_html(unique_visitors, prev_unique_visitors)}'
+
+    max_adds = max((r["adds"] for r in top_products_rows), default=0)
+    products_html = "".join(
+        f"""<div class="product-row">
+            <span class="product-rank">{i}</span>
+            <div class="product-content">
+                <div class="product-name" title="{escape(r['name'] or '')}">{escape(r['name'] or f'ID {r["product_id"]}')}</div>
+                <div class="product-bar-track"><span class="product-bar-fill" style="--bar-width:{round(r['adds']/max_adds*100,1) if max_adds else 0}%"></span></div>
+            </div>
+            <div class="product-count">{r['adds']:,}<small>lisamist</small></div>
+        </div>"""
+        for i, r in enumerate(top_products_rows, 1)
+    ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel toodete lisamise andmeid.</div>'
+
+    daily_dict: dict = {}
+    for r in daily_rows:
+        d = str(r["day"])
+        daily_dict.setdefault(d, {})[r["event_type"]] = r["cnt"]
+
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+    all_days = [today - datetime.timedelta(days=offset) for offset in range(days - 1, -1, -1)]
+    daily_labels_json = json.dumps([d.strftime("%m-%d") for d in all_days], ensure_ascii=False)
+    daily_adds_json = json.dumps([daily_dict.get(str(d), {}).get("basket_add", 0) for d in all_days])
+    daily_views_json = json.dumps([daily_dict.get(str(d), {}).get("product_view", 0) for d in all_days])
+    chart_height = 250 if days <= 7 else 355
+
+    rates_html = ""
+    if basket_add_rate is not None:
+        rates_html = f'<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">Korvi lisamise määr: <b style="color:var(--text)">{basket_add_rate}%</b> vaatamistest</div>'
+
+    days_btns = "".join(
+        f'<a class="filter-pill{"  active" if period == days else ""}" href="/admin/analytics?days={period}">{period}p</a>'
+        for period in [7, 14, 30, 90]
+    )
+
+    title = f"{escape(partner_name)} — viimased {days} päeva"
+
+    html = f"""<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Seivy Analytics — {escape(partner_name)}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {{
+    --accent: #FF9100;
+    --accent-dark: #E97800;
+    --accent-soft: #FFF4E5;
+    --accent-softer: #FFF9F2;
+    --background: #F5F6F8;
+    --surface: #FFFFFF;
+    --surface-muted: #F8F9FB;
+    --text: #171A1F;
+    --text-secondary: #68707D;
+    --text-muted: #9198A3;
+    --border: #E6E9EE;
+    --border-strong: #D9DDE4;
+    --success: #1B9A59;
+    --success-soft: #EAF8F0;
+    --shadow: 0 1px 2px rgba(20,24,32,.04), 0 8px 24px rgba(20,24,32,.055);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+}}
+* {{ box-sizing: border-box; }}
+body {{ margin: 0; background: var(--background); color: var(--text); font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing: antialiased; }}
+button, a {{ font: inherit; }}
+.topbar {{ position: sticky; top: 0; z-index: 50; border-bottom: 1px solid rgba(230,233,238,.92); background: rgba(255,255,255,.92); backdrop-filter: blur(16px); }}
+.topbar-inner {{ display: flex; align-items: center; justify-content: space-between; width: min(1440px, calc(100% - 48px)); min-height: 72px; margin: 0 auto; gap: 24px; }}
+.brand {{ display: flex; align-items: center; gap: 12px; }}
+.brand-mark {{ display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--accent); color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.03em; }}
+.brand-name {{ margin: 0; font-size: 18px; font-weight: 750; letter-spacing: -.03em; display: flex; align-items: center; gap: 8px; }}
+.partner-badge {{ display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-dark); font-size: 11px; font-weight: 750; letter-spacing: .02em; }}
+.partner-badge-dot {{ width: 6px; height: 6px; border-radius: 999px; background: var(--accent); }}
+.brand-section {{ margin: 2px 0 0; color: var(--text-secondary); font-size: 12px; font-weight: 550; }}
+.topbar-context {{ display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }}
+.live-dot {{ width: 8px; height: 8px; border-radius: 999px; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); }}
+.content {{ width: min(1440px, calc(100% - 48px)); margin: 0 auto; padding: 38px 0 56px; }}
+.page-heading {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 24px; }}
+.eyebrow {{ display: inline-flex; align-items: center; margin-bottom: 10px; gap: 8px; color: var(--accent-dark); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }}
+.eyebrow::before {{ width: 18px; height: 2px; border-radius: 999px; background: var(--accent); content: ""; }}
+h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spacing: -.045em; line-height: 1.08; }}
+.heading-description {{ max-width: 690px; margin: 12px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.65; }}
+.period-summary {{ flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); font-size: 13px; font-weight: 650; }}
+.period-summary span {{ display: block; margin-bottom: 3px; color: var(--text-secondary); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }}
+.period-summary strong {{ display: block; color: var(--text); font-size: 14px; }}
+.filters-panel {{ display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); gap: 24px; }}
+.filter-groups {{ display: flex; flex-wrap: wrap; gap: 26px; }}
+.filter-group {{ display: flex; flex-direction: column; gap: 9px; }}
+.filter-label {{ color: var(--text-muted); font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }}
+.filter-pills {{ display: flex; flex-wrap: wrap; gap: 7px; }}
+.filter-pill {{ display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 650; text-decoration: none; transition: border-color 160ms,background 160ms,color 160ms; }}
+.filter-pill:hover {{ border-color: #FFC06C; background: var(--accent-softer); color: var(--accent-dark); }}
+.filter-pill.active {{ border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 5px 12px rgba(255,145,0,.18); }}
+.metrics-grid {{ display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); margin-bottom: 22px; gap: 16px; }}
+.metric-card {{ position: relative; overflow: hidden; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }}
+.metric-card::after {{ position: absolute; top: -48px; right: -48px; width: 116px; height: 116px; border-radius: 999px; background: var(--accent-soft); content: ""; opacity: .65; }}
+.metric-top {{ position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 19px; gap: 16px; }}
+.metric-label {{ color: var(--text-secondary); font-size: 13px; font-weight: 650; }}
+.metric-icon {{ display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--accent-soft); color: var(--accent-dark); }}
+.metric-icon svg {{ width: 19px; height: 19px; stroke: currentColor; }}
+.metric-value {{ position: relative; z-index: 1; margin: 0; font-size: clamp(27px,2.4vw,38px); font-weight: 770; letter-spacing: -.045em; line-height: 1; }}
+.metric-note {{ position: relative; z-index: 1; margin: 10px 0 0; color: var(--text-muted); font-size: 12px; font-weight: 550; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }}
+.info-dot {{ display: inline-grid; place-items: center; width: 16px; height: 16px; margin-left: 5px; border-radius: 999px; background: var(--surface-muted); color: var(--text-muted); font-size: 10px; font-weight: 800; cursor: help; }}
+.dashboard-grid {{ display: grid; grid-template-columns: minmax(0,1.6fr) minmax(330px,.8fr); gap: 22px; }}
+.dashboard-column {{ display: flex; flex-direction: column; gap: 22px; }}
+.panel {{ padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }}
+.panel-full {{ grid-column: 1 / -1; }}
+.panel-header {{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 23px; gap: 18px; }}
+.panel-title {{ margin: 0; color: var(--text); font-size: 17px; font-weight: 730; letter-spacing: -.025em; }}
+.panel-description {{ margin: 6px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }}
+.panel-badge {{ padding: 7px 10px; border-radius: 999px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 700; }}
+.chart-wrapper {{ position: relative; width: 100%; height: {chart_height}px; }}
+.product-list {{ display: flex; flex-direction: column; gap: 2px; }}
+.product-row {{ display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; padding: 13px 4px; border-bottom: 1px solid var(--border); gap: 12px; }}
+.product-row:last-child {{ border-bottom: 0; }}
+.product-rank {{ display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 750; }}
+.product-row:first-child .product-rank {{ background: var(--accent-soft); color: var(--accent-dark); }}
+.product-name {{ margin-bottom: 4px; overflow: hidden; color: var(--text); font-size: 13px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }}
+.product-bar-track {{ width: 100%; height: 5px; overflow: hidden; border-radius: 999px; background: #ECEFF3; }}
+.product-bar-fill {{ display: block; width: var(--bar-width,0%); height: 100%; border-radius: inherit; background: var(--accent); }}
+.product-count {{ min-width: 58px; color: var(--text); font-size: 13px; font-weight: 750; text-align: right; }}
+.product-count small {{ display: block; margin-top: 2px; color: var(--text-muted); font-size: 9px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }}
+.empty-state {{ display: grid; min-height: 180px; place-items: center; padding: 24px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface-muted); color: var(--text-secondary); font-size: 13px; text-align: center; }}
+.footer {{ display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding: 0 4px; gap: 20px; color: var(--text-muted); font-size: 11px; }}
+.price-table-wrapper {{ overflow-x: auto; }}
+.price-table {{ width: 100%; border-collapse: collapse; min-width: 640px; }}
+.price-table th {{ text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); }}
+.price-table td {{ padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }}
+.price-product-name {{ font-weight: 650; color: var(--text); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+.price-cell {{ text-align: right; font-weight: 650; }}
+.price-cell.best {{ background: #EAF8F0; color: #127A45; border-radius: 6px; }}
+.price-cell.highest {{ background: #FFF4E5; color: #A85600; border-radius: 6px; }}
+.price-cell.missing {{ background: #F1F3F6; color: var(--text-muted); text-align: center; border-radius: 6px; }}
+.price-spread {{ text-align: right; color: var(--text-secondary); font-weight: 650; }}
+.coverage-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }}
+.coverage-item {{ display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-muted); }}
+.coverage-chain {{ font-size: 12px; font-weight: 700; color: var(--text-secondary); }}
+.coverage-count {{ font-size: 18px; font-weight: 800; color: var(--text); }}
+.opportunity-chain-block {{ margin-bottom: 16px; }}
+.opportunity-chain-block:last-child {{ margin-bottom: 0; }}
+.opportunity-chain-title {{ font-size: 12px; font-weight: 750; color: var(--accent-dark); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }}
+.opportunity-list {{ list-style: none; margin: 0; padding: 0; }}
+.opportunity-list li {{ display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }}
+.opportunity-list li:last-child {{ border-bottom: 0; }}
+.opportunity-name {{ color: var(--text); font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }}
+.opportunity-demand {{ color: var(--text-muted); font-size: 12px; font-weight: 650; white-space: nowrap; }}
+.interest-row {{ padding: 12px 4px; border-bottom: 1px solid var(--border); }}
+.interest-row:last-child {{ border-bottom: 0; }}
+.interest-name {{ font-size: 13px; font-weight: 650; color: var(--text); margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+.interest-stats {{ display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }}
+.interest-rate {{ font-weight: 750; color: var(--accent-dark); }}
+.price-summary-badges {{ display: flex; gap: 8px; flex-wrap: wrap; }}
+.price-summary-badge {{ padding: 6px 12px; border-radius: 999px; background: var(--surface-muted); color: var(--text-secondary); font-size: 12px; font-weight: 650; }}
+.price-summary-badge strong {{ color: var(--text); }}
+@media (max-width: 760px) {{
+    .coverage-grid {{ grid-template-columns: repeat(2, 1fr); }}
+}}
+.mobile-price-cards {{ display: none; }}
+.export-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 650; text-decoration: none; transition: border-color 160ms,background 160ms; }}
+.export-btn-disabled {{ opacity: .55; cursor: not-allowed; background: var(--surface-muted); pointer-events: none; }}
+@media (max-width: 760px) {{
+    .desktop-price-table {{ display: none; }}
+    .mobile-price-cards {{ display: flex; flex-direction: column; gap: 12px; }}
+    .price-card {{ border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-muted); padding: 14px; }}
+    .price-card-title {{ font-size: 13px; font-weight: 750; color: var(--text); margin-bottom: 10px; line-height: 1.35; }}
+    .price-card-row {{ display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border); font-size: 13px; }}
+    .price-card-chain {{ color: var(--text-secondary); font-weight: 650; }}
+    .price-card-price {{ font-weight: 750; padding: 4px 8px; border-radius: 8px; }}
+    .price-card-price.best {{ background: #EAF8F0; color: #127A45; }}
+    .price-card-price.highest {{ background: #FFF4E5; color: #A85600; }}
+    .price-card-price.missing {{ background: #F1F3F6; color: var(--text-muted); }}
+    .price-card-spread {{ margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-secondary); font-size: 12px; font-weight: 650; }}
+}}
+@media (max-width: 1100px) {{
+    .metrics-grid {{ grid-template-columns: repeat(2,minmax(0,1fr)); }}
+    .dashboard-grid {{ grid-template-columns: 1fr; }}
+}}
+@media (max-width: 760px) {{
+    .topbar-inner, .content {{ width: min(100% - 28px, 1440px); }}
+    .metrics-grid {{ grid-template-columns: 1fr; }}
+    .filters-panel {{ flex-direction: column; }}
+}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div>
+        <p class="brand-name">Seivy <span class="partner-badge"><span class="partner-badge-dot"></span>Tootja</span></p>
+        <p class="brand-section">Partneranalüütika</p>
+      </div>
+    </div>
+    <div class="topbar-context">
+      <span class="live-dot"></span>
+      Viimane sündmus: {last_event_str}
+      &nbsp;·&nbsp;<a href="/admin/analytics/logout" style="color:var(--text-secondary);font-size:12px;text-decoration:none">Logi välja</a>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <section class="page-heading">
+    <div>
+      <div class="eyebrow">Tootja ülevaade</div>
+      <h1>Teie toodete tulemuslikkus</h1>
+      <p style="margin:6px 0 0;color:var(--text-secondary);font-size:16px;font-weight:500">{title}</p>
+      <p class="heading-description">Ülevaade sellest, kuidas kasutajad {escape(partner_name)} tooteid vaatavad, ostukorvi lisavad, ning kuidas teie toodete hinnad erinevad kettide vahel.</p>
+      {rates_html}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+      <div class="period-summary"><span>Analüüsiperiood</span><strong>Viimased {days} päeva</strong></div>
+      <a class="export-btn" href="/admin/analytics/export?days={days}">⬇ Ekspordi CSV</a>
+    </div>
+  </section>
+
+  <section class="filters-panel">
+    <div class="filter-groups">
+      <div class="filter-group">
+        <div class="filter-label">Periood</div>
+        <nav class="filter-pills">{days_btns}</nav>
+      </div>
+    </div>
+  </section>
+
+  <section class="metrics-grid">
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Korvi lisamised</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H7"></path><path d="M12 6v6"></path><path d="M9 9h6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg></span>
+      </div>
+      <p class="metric-value">{total_adds:,}</p>
+      <p class="metric-note">Teie toodete lisamised korvidesse</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Toote vaatamised</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></span>
+      </div>
+      <p class="metric-value">{total_views:,}</p>
+      <p class="metric-note">Teie tootekaartide avamised</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Korvi lisamise määr</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 14l4-4 3 3 5-6"></path></svg></span>
+      </div>
+      <p class="metric-value">{f"{basket_add_rate}%" if basket_add_rate is not None else "—"}</p>
+      <p class="metric-note">Vaatamistest korvi lisamiseni</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-top">
+        <span class="metric-label">Unikaalsed külastajad</span>
+        <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
+      </div>
+      <p class="metric-value">{visitors_display}</p>
+      <p class="metric-note">{visitors_note_html}</p>
+    </article>
+  </section>
+
+  <section class="panel" style="margin-bottom:22px">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Hinnapositsioon kettide vahel</h2>
+        <p class="panel-description">Teie enim nõudlust saanud toodete hetkehinnad viies suuremas ketis. Roheline = odavaim leitud hind, oranž = kõrgeim leitud hind. Vahe = kõrgeima ja madalaima leitud hinna erinevus.</p>
+        <div class="price-summary-badges" style="margin-top:12px">
+          <span class="price-summary-badge">Jälgitud tooteid: <strong>{price_summary_tracked}</strong></span>
+          <span class="price-summary-badge">Keskmine hinnavahe: <strong>{f"{price_summary_avg_spread:.2f} €" if price_summary_avg_spread is not None else "—"}</strong></span>
+          <span class="price-summary-badge">Suurim hinnavahe: <strong>{f"{price_summary_max_spread:.2f} €" if price_summary_max_spread is not None else "—"}</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="price-table-wrapper desktop-price-table">
+      <table class="price-table">
+        <tr>
+          <th>Toode</th>
+          <th style="text-align:right">Selver</th>
+          <th style="text-align:right">Rimi</th>
+          <th style="text-align:right">Prisma</th>
+          <th style="text-align:right">Coop</th>
+          <th style="text-align:right">Maxima</th>
+          <th style="text-align:right">Vahe</th>
+        </tr>
+        {price_table_rows}
+      </table>
+    </div>
+    <div class="mobile-price-cards">
+      {price_mobile_cards}
+    </div>
+  </section>
+
+  <section class="panel" style="margin-bottom:22px">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Sortimendi katvus kettides</h2>
+        <p class="panel-description">Mitu teie toodet ({total_groups} kokku) on igas ketis praegu saadaval.</p>
+      </div>
+    </div>
+    <div class="coverage-grid">{coverage_html}</div>
+  </section>
+
+  <section class="panel" style="margin-bottom:22px">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Müügivõimalused kettide lõikes</h2>
+        <p class="panel-description">Tooted, mille vastu oli Seivy kasutajatel nõudlust, kuid mille aktiivset hinda või sortimendi vastet konkreetses ketis Seivy andmetes ei leitud. Sobib sisendiks sortimendi- ja müügivestlustele.</p>
+      </div>
+    </div>
+    {opportunity_sections_html}
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="dashboard-column">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Igapäevane aktiivsus</h2>
+            <p class="panel-description">Toote vaatamiste ja korvi lisamiste muutus päevade lõikes.</p>
+          </div>
+          <span class="panel-badge">{days} päeva</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="brandDailyChart"></canvas>
+        </div>
+      </article>
+    </div>
+
+    <div class="dashboard-column">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Populaarseimad tooted brändi seest</h2>
+            <p class="panel-description">Teie tooted, mis on kasutajate seas kõige rohkem korvi lisatud.</p>
+          </div>
+        </div>
+        <div class="product-list">{products_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Kiiremini kasvavad tooted</h2>
+            <p class="panel-description">Võrreldes eelmise sama pika perioodiga.</p>
+          </div>
+        </div>
+        <div class="product-list">{momentum_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Huvi vs ostusoov</h2>
+            <p class="panel-description">Tooted, mida palju vaadatakse, aga harva korvi lisatakse — võimalik hinna, pakendi või positsioneerimise signaal.</p>
+          </div>
+        </div>
+        {interest_html}
+      </article>
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsed külastajad arvestavad sisselogitud kasutajaid ja pseudonüümseid seadmetunnuseid.</span>
+    <span>Seivy partneranalüütika</span>
+  </footer>
+</main>
+
+<script>
+(function() {{
+  "use strict";
+  const labels = {daily_labels_json};
+  const dailyAdds = {daily_adds_json};
+  const dailyViews = {daily_views_json};
+
+  Chart.defaults.font.family = 'Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+  Chart.defaults.color = "#68707D";
+  Chart.defaults.borderColor = "#E9ECF1";
+
+  const sharedScales = {{
+    x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ color: "#7A828E", font: {{ size: 11, weight: "600" }}, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }} }},
+    y: {{ beginAtZero: true, grid: {{ color: "#EEF0F4", drawTicks: false }}, border: {{ display: false }}, ticks: {{ color: "#8B929D", padding: 10, precision: 0, font: {{ size: 10, weight: "600" }} }} }}
+  }};
+
+  const barCanvas = document.getElementById("brandDailyChart");
+  if (barCanvas) {{
+    new Chart(barCanvas, {{
+      type: "bar",
+      data: {{
+        labels,
+        datasets: [
+          {{ label: "Korvi lisamised", data: dailyAdds, backgroundColor: "#FF9100", borderRadius: 6, maxBarThickness: 26 }},
+          {{ label: "Toote vaatamised", data: dailyViews, backgroundColor: "#FFD7A3", borderRadius: 6, maxBarThickness: 26 }}
+        ]
+      }},
+      options: {{
+        responsive: true, maintainAspectRatio: false,
+        interaction: {{ mode: "index", intersect: false }},
+        plugins: {{
+          legend: {{ position: "top", align: "end", labels: {{ usePointStyle: true, pointStyle: "rectRounded", boxWidth: 8, boxHeight: 8, padding: 18, font: {{ size: 11, weight: "650" }} }} }}
+        }},
+        scales: sharedScales
+      }}
+    }});
+  }}
+}})();
+</script>
+</body></html>"""
+    resp = HTMLResponse(html)
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Referrer-Policy"] = "no-referrer"
+    resp.headers["Cache-Control"] = "private, no-store"
+    return resp
+
+
 @router.get("/admin/analytics", response_class=HTMLResponse)
 async def analytics_dashboard(request: Request, token: str = None, days: int = 30, chain: str = None):
     import json, os
@@ -241,12 +1113,17 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         days = 30
 
     is_admin = admin_token and resolved_token == admin_token
+    partner_type = None
+    partner_name = None
+    partner_brand_filter = None
     if is_admin:
         locked_chain = None
+        partner_type = "admin"
     elif resolved_token in TOKEN_MAP:
         locked_chain = TOKEN_MAP[resolved_token]
+        partner_type = "retailer"
     else:
-        return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
+        locked_chain = None
 
     allowed_chains = {"selver", "rimi", "prisma", "coop", "maxima"}
     if chain:
@@ -254,9 +1131,55 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         if chain not in allowed_chains:
             chain = None
 
+    # DB must be ready before we can look up analytics_partners tokens —
+    # moved this check ahead of the redirect block (previously it ran
+    # after the redirect, which meant a brand/partner token could be
+    # written into a cookie before ever being validated against the
+    # database).
+    if getattr(request.app.state, "db", None) is None:
+        return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
+
+    if partner_type is None:
+        # Not admin, not a legacy chain env-var token — check the
+        # analytics_partners table (brand partners, and any newer
+        # retailer partners added via the /admin/partners UI instead of
+        # env vars). Resolved here, BEFORE the redirect below, so an
+        # invalid token never gets written into a cookie, and a valid
+        # brand token's "no chain" state is correctly reflected in the
+        # redirect URL.
+        async with request.app.state.db.acquire() as conn:
+            partner_row = await conn.fetchrow("""
+                SELECT partner_type, name, brand_filter, chain_filter
+                FROM analytics_partners
+                WHERE token = $1
+            """, resolved_token)
+
+        if not partner_row:
+            return HTMLResponse("<h2>Ligipääs keelatud. Token on vale.</h2>", status_code=403)
+
+        partner_type = partner_row["partner_type"]
+        partner_name = partner_row["name"]
+
+        if partner_type == "brand":
+            partner_brand_filter = partner_row["brand_filter"] or []
+            if not partner_brand_filter:
+                return HTMLResponse("<h2>Partnerile pole brändi määratud. Võta ühendust administraatoriga.</h2>", status_code=500)
+        elif partner_type == "retailer":
+            locked_chain = (partner_row["chain_filter"] or "").lower().strip() or None
+            if not locked_chain:
+                return HTMLResponse("<h2>Partnerile pole ketti määratud. Võta ühendust administraatoriga.</h2>", status_code=500)
+        else:
+            return HTMLResponse("<h2>Ligipääs keelatud. Tundmatu partneri tüüp.</h2>", status_code=403)
+
     if not is_admin and locked_chain:
         chain = locked_chain
 
+    # Redirect to strip the token out of the URL and store it in a
+    # cookie instead — now happens AFTER full token validation above, so
+    # we never set a cookie for a token that turned out to be invalid,
+    # and the chain_part below correctly reflects "no chain" for brand
+    # partners (chain stays None for them) vs the locked chain for
+    # retailer/admin.
     if token:
         chain_part = f"&chain={chain}" if chain else ""
         redirect_url = f"/admin/analytics?days={days}{chain_part}"
@@ -272,8 +1195,14 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         )
         return response
 
-    if getattr(request.app.state, "db", None) is None:
-        return HTMLResponse("<h2>DB not ready yet.</h2>", status_code=503)
+    if partner_type == "brand":
+        async with request.app.state.db.acquire() as conn:
+            return await _render_brand_dashboard(
+                conn=conn,
+                partner_name=partner_name,
+                brand_filter=partner_brand_filter,
+                days=days,
+            )
 
     async with request.app.state.db.acquire() as conn:
         all_wins_total = await conn.fetchval("""
@@ -343,10 +1272,52 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             print(f"[analytics_dashboard] category_rows query failed: {e}")
             category_rows = []
 
+        # Kiiremini kasvavad kategooriad — võrdlus eelmise sama pika
+        # perioodiga. Sama try/except kaitse, kuna kasutab sama
+        # categories_sub/categories_main skeemi.
+        try:
+            category_momentum_rows = await conn.fetch("""
+                WITH current_period AS (
+                    SELECT COALESCE(cm.label_et, 'Muu') AS category, COUNT(*) AS cnt
+                    FROM analytics_events a
+                    JOIN products p ON p.id = a.product_id
+                    LEFT JOIN categories_sub cs ON cs.code = p.sub_code
+                    LEFT JOIN categories_main cm ON cm.id = cs.main_id
+                    WHERE a.event_type = 'basket_add'
+                      AND a.created_at >= CURRENT_DATE - ($1::int - 1)
+                      AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+                      AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
+                    GROUP BY COALESCE(cm.label_et, 'Muu')
+                ),
+                previous_period AS (
+                    SELECT COALESCE(cm.label_et, 'Muu') AS category, COUNT(*) AS cnt
+                    FROM analytics_events a
+                    JOIN products p ON p.id = a.product_id
+                    LEFT JOIN categories_sub cs ON cs.code = p.sub_code
+                    LEFT JOIN categories_main cm ON cm.id = cs.main_id
+                    WHERE a.event_type = 'basket_add'
+                      AND a.created_at >= CURRENT_DATE - (($1::int * 2) - 1)
+                      AND a.created_at < CURRENT_DATE - ($1::int - 1)
+                      AND ($2::text IS NULL OR LOWER(a.chain) = LOWER($2))
+                    GROUP BY COALESCE(cm.label_et, 'Muu')
+                )
+                SELECT
+                    COALESCE(c.category, p2.category) AS category,
+                    COALESCE(c.cnt, 0) AS current_cnt,
+                    COALESCE(p2.cnt, 0) AS prev_cnt
+                FROM current_period c
+                FULL OUTER JOIN previous_period p2 ON p2.category = c.category
+                WHERE COALESCE(c.cnt, 0) > 0 OR COALESCE(p2.cnt, 0) > 0
+            """, days, chain)
+        except Exception as e:
+            print(f"[analytics_dashboard] category_momentum_rows query failed: {e}")
+            category_momentum_rows = []
+
         missing_rows = []
+        missing_total_count = 0
         if chain:
             try:
-                missing_rows = await conn.fetch("""
+                missing_rows_all = await conn.fetch("""
                     WITH demand AS (
                         SELECT a.product_id, COUNT(*) AS demand_count
                         FROM analytics_events a
@@ -379,13 +1350,17 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                         JOIN stores s ON s.id = pr.store_id
                         WHERE pr.product_id = ANY(g.product_ids)
                           AND LOWER(s.chain) = LOWER($2)
+                          AND pr.collected_at > NOW() - INTERVAL '14 days'
+                          AND pr.price > 0
                     )
                     ORDER BY g.demand_count DESC
-                    LIMIT 8
                 """, days, chain)
+                missing_total_count = len(missing_rows_all)
+                missing_rows = missing_rows_all[:8]
             except Exception as e:
                 print(f"[analytics_dashboard] missing_rows query failed: {e}")
                 missing_rows = []
+                missing_total_count = 0
 
         daily_rows = await conn.fetch("""
             SELECT DATE(created_at) AS day, event_type, COUNT(*) AS cnt
@@ -588,11 +1563,54 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
         for i, r in enumerate(category_rows, 1)
     ) or '<div class="empty-state">Valitud perioodi kohta ei ole veel kategooria-andmeid.</div>'
 
+    MIN_CURRENT_FOR_MOMENTUM = 3
+    MIN_PREVIOUS_FOR_PERCENT = 2
+    category_momentum_list = []
+    for r in category_momentum_rows:
+        cur = r["current_cnt"] or 0
+        prev = r["prev_cnt"] or 0
+        if cur < MIN_CURRENT_FOR_MOMENTUM:
+            continue
+        if prev == 0:
+            category_momentum_list.append((r["category"], cur, None))
+        elif prev >= MIN_PREVIOUS_FOR_PERCENT:
+            growth = round((cur - prev) / prev * 100, 1)
+            if growth > 0:
+                category_momentum_list.append((r["category"], cur, growth))
+    category_momentum_list = sorted(
+        category_momentum_list,
+        key=lambda x: (
+            x[1],                              # praegune maht
+            x[2] if x[2] is not None else 999  # kasv/uudsus
+        ),
+        reverse=True,
+    )[:5]
+    category_momentum_html = "".join(
+        f"""<div class="product-row">
+            <span class="product-rank">{i}</span>
+            <div class="product-content">
+                <div class="product-name">{escape(name)}</div>
+            </div>
+            <div class="product-count" style="color:{'#1B9A59' if growth is not None else 'var(--accent-dark)'}">
+                {f"↑ {str(growth).replace('.', ',')}% · {cur} lisamist" if growth is not None else f"Uus · {cur} lisamist"}
+            </div>
+        </div>"""
+        for i, (name, cur, growth) in enumerate(category_momentum_list, 1)
+    ) or '<div class="empty-state">Valitud perioodil ei tuvastatud kasvavaid kategooriaid.</div>'
+
     if not chain:
         missing_html = '<div class="empty-state">Vali jaekett, et näha puuduvat sortimenti.</div>'
     else:
         max_demand = max((r['demand_count'] for r in missing_rows), default=0)
-        missing_html = "".join(
+        if missing_total_count > 0:
+            top3_names = ", ".join(escape(r["name"] or "—") for r in missing_rows[:3])
+            missing_summary_html = f"""<div class="missing-summary">
+                <strong>{missing_total_count} toodet</strong>, mille vastu kasutajad huvi näitasid, kuid mille aktiivset hinda või sortimendi vastet teie ketis Seivy andmetes ei leitud.
+                <div class="missing-summary-top">Top puuduv nõudlus: {top3_names}</div>
+            </div>"""
+        else:
+            missing_summary_html = ""
+        missing_html = missing_summary_html + ("".join(
             f"""<div class="product-row">
                 <span class="product-rank">{i}</span>
                 <div class="product-content">
@@ -602,7 +1620,7 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 <div class="product-count">{r['demand_count']:,}<small>nõudlust</small></div>
             </div>"""
             for i, r in enumerate(missing_rows, 1)
-        ) or '<div class="empty-state">Puuduvat sortimenti ei tuvastatud valitud perioodil.</div>'
+        ) or '<div class="empty-state">Puuduvat sortimenti ei tuvastatud valitud perioodil.</div>')
 
     daily_dict = {}
     for r in daily_rows:
@@ -738,6 +1756,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .product-bar-fill {{ display: block; width: var(--bar-width,0%); height: 100%; border-radius: inherit; background: var(--accent); }}
 .product-count {{ min-width: 58px; color: var(--text); font-size: 13px; font-weight: 750; text-align: right; }}
 .product-count small {{ display: block; margin-top: 2px; color: var(--text-muted); font-size: 9px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }}
+.missing-summary {{ padding: 14px 16px; margin-bottom: 14px; border-radius: var(--radius-md); background: var(--accent-soft); border: 1px solid #FFD7A3; font-size: 13px; color: var(--text); }}
+.missing-summary-top {{ margin-top: 6px; font-size: 12px; color: var(--text-secondary); }}
 .empty-state {{ display: grid; min-height: 180px; place-items: center; padding: 24px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface-muted); color: var(--text-secondary); font-size: 13px; text-align: center; }}
 .footer {{ display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding: 0 4px; gap: 20px; color: var(--text-muted); font-size: 11px; }}
 .footer-brand {{ color: var(--text-secondary); font-weight: 700; }}
@@ -866,8 +1886,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
       <article class="panel">
         <div class="panel-header">
           <div>
-            <h2 class="panel-title">Potentsiaalselt puuduv sortiment</h2>
-            <p class="panel-description">Tooted, mille vastu kasutajad huvi näitavad, kuid mida selles ketis ei leitud. Nõudlus = toote vaatamised + korvi lisamised.</p>
+            <h2 class="panel-title">Kaotatud nõudlus</h2>
+            <p class="panel-description">Tooted, mille vastu kasutajad huvi näitasid, kuid mille aktiivset hinda või sortimendi vastet selles ketis Seivy andmetes ei leitud. Nõudlus = toote vaatamised + korvi lisamised.</p>
           </div>
         </div>
         <div class="product-list">{missing_html}</div>
@@ -893,6 +1913,16 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
           </div>
         </div>
         <div class="product-list">{category_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Kiiremini kasvavad kategooriad</h2>
+            <p class="panel-description">Võrreldes eelmise sama pika perioodiga.</p>
+          </div>
+        </div>
+        <div class="product-list">{category_momentum_html}</div>
       </article>
 
       <article class="panel">
@@ -1012,9 +2042,131 @@ h2{font-size:24px;font-weight:700;margin-bottom:12px}p{color:#68707D;font-size:1
     return response
 
 
+async def _export_brand_csv(conn, partner_name: str, brand_filter: list, days: int):
+    """Builds the brand/producer CSV export: one row per product group,
+    with views/adds/add-rate plus the per-chain price pivot and a list
+    of chains where no active price was found. Mirrors the same
+    brand_filter resolution and active-price filtering used in
+    _render_brand_dashboard, so the CSV and the on-screen dashboard
+    never disagree.
+    """
+    import csv, io
+    from fastapi.responses import StreamingResponse
+
+    ALLOWED_DAYS = {7, 14, 30, 90}
+    if days not in ALLOWED_DAYS:
+        days = 30
+
+    CHAINS_ORDER = ["selver", "rimi", "prisma", "coop", "maxima"]
+    header = ["Toode", "Vaatamised", "Korvi lisamised", "Lisamise määr"] + \
+        [f"{ch.capitalize()} hind" for ch in CHAINS_ORDER] + ["Puuduvad ketid"]
+
+    def _csv_response(rows):
+        output = io.StringIO()
+        writer = csv.writer(output, delimiter=";")
+        writer.writerow(header)
+        for row in rows:
+            writer.writerow(row)
+        csv_content = "\ufeff" + output.getvalue()
+        safe_partner = "".join(
+            c.lower() if c.isalnum() else "_"
+            for c in (partner_name or "tootja")
+        ).strip("_")[:40] or "tootja"
+        filename = f"seivy_tootja_{safe_partner}_{days}p.csv"
+        return StreamingResponse(
+            iter([csv_content]),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+
+    brand_filter_lower = [b.lower() for b in brand_filter]
+
+    product_id_rows = await conn.fetch("""
+        SELECT pgm.product_id, pgm.group_id
+        FROM product_group_members pgm
+        JOIN product_groups pg ON pg.id = pgm.group_id
+        WHERE LOWER(pg.brand) = ANY($1::text[])
+    """, brand_filter_lower)
+    brand_product_ids = [r["product_id"] for r in product_id_rows]
+    brand_group_ids = list({r["group_id"] for r in product_id_rows})
+    group_by_product = {r["product_id"]: r["group_id"] for r in product_id_rows}
+
+    if not brand_product_ids:
+        return _csv_response([])
+
+    group_names_rows = await conn.fetch("""
+        SELECT id AS group_id, COALESCE(canonical_name, 'Toode #' || id) AS name
+        FROM product_groups WHERE id = ANY($1::int[])
+    """, brand_group_ids)
+    group_names = {r["group_id"]: r["name"] for r in group_names_rows}
+
+    demand_rows = await conn.fetch("""
+        SELECT a.product_id,
+            COUNT(*) FILTER (WHERE a.event_type = 'product_view') AS views,
+            COUNT(*) FILTER (WHERE a.event_type = 'basket_add') AS adds
+        FROM analytics_events a
+        WHERE a.product_id = ANY($1::int[])
+          AND a.created_at >= CURRENT_DATE - ($2::int - 1)
+          AND a.created_at < CURRENT_DATE + INTERVAL '1 day'
+        GROUP BY a.product_id
+    """, brand_product_ids, days)
+
+    group_demand: dict = {}
+    for r in demand_rows:
+        gid = group_by_product.get(r["product_id"])
+        if gid is None:
+            continue
+        entry = group_demand.setdefault(gid, {"views": 0, "adds": 0})
+        entry["views"] += r["views"] or 0
+        entry["adds"] += r["adds"] or 0
+
+    # Same active-price filter as the dashboard: only prices collected
+    # in the last 14 days, and promo_price=0 treated as "no promo".
+    price_rows = await conn.fetch("""
+        SELECT
+            pgm.group_id,
+            LOWER(s.chain) AS chain,
+            MIN(COALESCE(NULLIF(pr.promo_price, 0), pr.price)) AS price
+        FROM product_group_members pgm
+        JOIN prices pr ON pr.product_id = pgm.product_id
+        JOIN stores s ON s.id = pr.store_id
+        WHERE pgm.group_id = ANY($1::int[])
+          AND pr.collected_at > NOW() - INTERVAL '14 days'
+          AND pr.price > 0
+        GROUP BY pgm.group_id, LOWER(s.chain)
+    """, brand_group_ids)
+
+    group_prices: dict = {}
+    for r in price_rows:
+        group_prices.setdefault(r["group_id"], {})[r["chain"]] = float(r["price"])
+
+    rows_out = []
+    for gid in brand_group_ids:
+        name = group_names.get(gid, f"Grupp #{gid}")
+        demand = group_demand.get(gid, {"views": 0, "adds": 0})
+        views = demand["views"]
+        adds = demand["adds"]
+        add_rate = f"{round(adds / views * 100, 1)}%".replace(".", ",") if views > 0 else ""
+        prices = group_prices.get(gid, {})
+        price_cells = []
+        missing = []
+        for ch in CHAINS_ORDER:
+            p = prices.get(ch)
+            if p is None:
+                price_cells.append("")
+                missing.append(ch.capitalize())
+            else:
+                price_cells.append(f"{p:.2f}".replace(".", ","))
+        rows_out.append([name, views, adds, add_rate, *price_cells, ", ".join(missing)])
+
+    return _csv_response(rows_out)
+
+
 @router.get("/admin/analytics/export")
 async def analytics_export(request: Request, days: int = 30, chain: str = None):
-    """Fix 7: CSV eksport"""
+    """CSV eksport. Jaeketi/admin vaates sündmuste päevane jaotus;
+    tootja (brand) vaates brändi toodete kokkuvõte (vt _export_brand_csv).
+    """
     import csv, io, os
     from fastapi.responses import StreamingResponse
 
@@ -1038,10 +2190,38 @@ async def analytics_export(request: Request, days: int = 30, chain: str = None):
     admin_token = os.environ.get("ANALYTICS_TOKEN_ADMIN", "")
 
     is_admin = admin_token and cookie_token == admin_token
+    brand_name = None
+    brand_filter = None
+
+    db = getattr(request.app.state, "db", None)
+
     if not is_admin and cookie_token in TOKEN_MAP:
         chain = TOKEN_MAP[cookie_token]
     elif not is_admin:
-        return HTMLResponse("<h2>Ligipääs keelatud.</h2>", status_code=403)
+        # Not a legacy env-var token — check analytics_partners for a
+        # brand token (or a newer retailer token added via /admin/partners
+        # instead of an env var), same fallback as analytics_dashboard.
+        if db is None:
+            return HTMLResponse("<h2>Andmebaas ei ole veel valmis.</h2>", status_code=503)
+        async with db.acquire() as conn:
+            partner_row = await conn.fetchrow("""
+                SELECT partner_type, name, brand_filter, chain_filter
+                FROM analytics_partners
+                WHERE token = $1
+            """, cookie_token)
+        if not partner_row:
+            return HTMLResponse("<h2>Ligipääs keelatud.</h2>", status_code=403)
+        if partner_row["partner_type"] == "retailer":
+            chain = (partner_row["chain_filter"] or "").lower().strip() or None
+            if not chain:
+                return HTMLResponse("<h2>Partnerile pole ketti määratud.</h2>", status_code=500)
+        elif partner_row["partner_type"] == "brand":
+            brand_name = partner_row["name"]
+            brand_filter = partner_row["brand_filter"] or []
+            if not brand_filter:
+                return HTMLResponse("<h2>Partnerile pole brändi määratud.</h2>", status_code=500)
+        else:
+            return HTMLResponse("<h2>Ligipääs keelatud.</h2>", status_code=403)
 
     allowed_chains_csv = {"selver", "rimi", "prisma", "coop", "maxima"}
     if chain:
@@ -1049,9 +2229,15 @@ async def analytics_export(request: Request, days: int = 30, chain: str = None):
         if chain not in allowed_chains_csv:
             chain = None
 
-    db = getattr(request.app.state, "db", None)
+    if db is None:
+        db = getattr(request.app.state, "db", None)
     if db is None:
         return HTMLResponse("<h2>Andmebaas ei ole veel valmis.</h2>", status_code=503)
+
+    if brand_filter is not None:
+        async with db.acquire() as conn:
+            return await _export_brand_csv(conn, brand_name, brand_filter, days)
+
     async with db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT
