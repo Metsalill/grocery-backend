@@ -158,13 +158,18 @@ async def dashboard(request: Request):
   td {{ padding: 8px 12px; border-top: 1px solid #f0f0f0; font-size: 0.9rem; }}
   .integrity {{ background: white; border-radius: 10px; padding: 16px;
                 box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px; }}
-  .analytics-link {{ display: inline-block; margin-top: 8px; padding: 8px 16px;
+  .analytics-link {{ display: inline-block; margin-top: 8px; margin-right: 8px; padding: 8px 16px;
                      background: #FF9100; color: white; border-radius: 8px;
                      text-decoration: none; font-weight: 600; font-size: 0.9rem; }}
+  .partners-link {{ background: #1A1A1A; }}
+  @media (max-width: 480px) {{
+    .analytics-link {{ display: block; margin-right: 0; text-align: center; }}
+  }}
 </style>
 </head><body>
 <h1>Seivy Admin</h1>
 <a class="analytics-link" href="{_analytics_href}">📊 Vaata Analytics Dashboardi</a>
+<a class="analytics-link partners-link" href="/admin/partners">🏷️ Halda partnereid (tootjad/ketid)</a>
 
 <h2>Kasutajad</h2>
 <div class="grid">
