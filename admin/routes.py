@@ -1367,6 +1367,23 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 missing_rows = []
                 missing_total_count = 0
 
+        # Hinnatundlikud kaotused — toorandmed. Arvutus (bucketid, near
+        # win/loss, competitor breakdown) tehakse hiljem Python-poolel,
+        # kuna JSONB payload'i sisemuses agregeerimine on SQL-is
+        # ebamugav ja andmemaht on väike (üks rida iga /compare kutse
+        # kohta selle perioodi jooksul).
+        try:
+            basket_compare_rows = await conn.fetch("""
+                SELECT payload
+                FROM analytics_events
+                WHERE event_type = 'basket_compare'
+                  AND created_at >= CURRENT_DATE - ($1::int - 1)
+                  AND created_at < CURRENT_DATE + INTERVAL '1 day'
+            """, days)
+        except Exception as e:
+            print(f"[analytics_dashboard] basket_compare_rows query failed: {e}")
+            basket_compare_rows = []
+
         daily_rows = await conn.fetch("""
             SELECT DATE(created_at) AS day, event_type, COUNT(*) AS cnt
             FROM analytics_events
@@ -1627,6 +1644,133 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
             for i, r in enumerate(missing_rows, 1)
         ) or '<div class="empty-state">Puuduvat sortimenti ei tuvastatud valitud perioodil.</div>')
 
+    # --- Hinnatundlikud kaotused ---
+    # V1 spec (ChatGPT design consult, juuli 2026): peamine KPI on
+    # "near_losses_under_1eur" — kaotused, kus valitud kett jäi
+    # võitjast alla 1€ vahega maha. Sekundaarne mõõdik on "ohustatud
+    # võidud" (near-wins) — võidud, kus lähim konkurent oli alla 1€
+    # kaugusel, et vältida partneri enesepettust "me võitsime palju"
+    # stiilis, kui võidud olid tegelikult haprad.
+    #
+    # Kaks miinimumi kaitsevad väikese valimi väärtõlgendamise eest:
+    # kogu paneel vajab vähemalt 30 sobivat (eligible) basket_compare
+    # sündmust perioodis, ja valitud kett vajab vähemalt 10 võrdlust,
+    # kus ta osales, enne kui talle midagi näidatakse. "Trendina" kõlav
+    # tekst (kollane callout) tuleb alles 3+ napi kaotuse juures —
+    # sama põhimõte, mis MIN_CURRENT_FOR_MOMENTUM=3 mujal dashboardil.
+    MIN_BASKET_COMPARE_FOR_PRICE_SENSITIVITY = 30
+    MIN_CHAIN_COMPARE_FOR_PRICE_SENSITIVITY = 10
+    MIN_NEAR_LOSSES_TO_HIGHLIGHT = 3
+
+    if not chain:
+        price_sensitivity_html = '<div class="empty-state">Vali jaekett, et näha hinnatundlikke kaotusi.</div>'
+    else:
+        eligible_compares = []
+        for r in basket_compare_rows:
+            raw_payload = r["payload"]
+            try:
+                payload = raw_payload if isinstance(raw_payload, dict) else json.loads(raw_payload)
+            except Exception:
+                continue
+            raw_totals = payload.get("chain_totals") or {}
+            cheapest_chain_val = payload.get("cheapest_chain")
+            cheapest_total_val = payload.get("cheapest_total")
+            if cheapest_chain_val is None or cheapest_total_val is None:
+                continue
+            try:
+                normalized_totals = {
+                    str(k).lower().strip(): float(v)
+                    for k, v in raw_totals.items()
+                    if k is not None and v is not None
+                }
+                cheapest_total_float = float(cheapest_total_val)
+            except Exception:
+                continue
+            if len(normalized_totals) < 2:
+                continue
+            eligible_compares.append({
+                "chain_totals": normalized_totals,
+                "cheapest_chain": str(cheapest_chain_val).lower().strip(),
+                "cheapest_total": cheapest_total_float,
+            })
+
+        chain_lower = chain.lower()
+
+        if len(eligible_compares) < MIN_BASKET_COMPARE_FOR_PRICE_SENSITIVITY:
+            price_sensitivity_html = '<div class="empty-state">Hinnatundlike kaotuste kuvamiseks kogume veel andmeid.</div>'
+        else:
+            chain_events = [e for e in eligible_compares if chain_lower in e["chain_totals"]]
+            chain_compare_count = len(chain_events)
+
+            if chain_compare_count < MIN_CHAIN_COMPARE_FOR_PRICE_SENSITIVITY:
+                price_sensitivity_html = '<div class="empty-state">Selle keti kohta pole perioodis veel piisavalt võrdlusi.</div>'
+            else:
+                win_count = 0
+                near_loss_050 = near_loss_100 = near_loss_200 = 0
+                near_win_050 = near_win_100 = near_win_200 = 0
+                lost_to_counter: dict = {}
+
+                for e in chain_events:
+                    ct = e["chain_totals"]
+                    own_total = ct[chain_lower]
+                    if e["cheapest_chain"] == chain_lower:
+                        win_count += 1
+                        others = [v for k, v in ct.items() if k != chain_lower]
+                        if others:
+                            gap = min(others) - own_total
+                            if 0 < gap <= 0.50:
+                                near_win_050 += 1
+                            elif 0.50 < gap <= 1.00:
+                                near_win_100 += 1
+                            elif 1.00 < gap <= 2.00:
+                                near_win_200 += 1
+                    else:
+                        gap = own_total - e["cheapest_total"]
+                        if 0 < gap <= 0.50:
+                            near_loss_050 += 1
+                            lost_to_counter[e["cheapest_chain"]] = lost_to_counter.get(e["cheapest_chain"], 0) + 1
+                        elif 0.50 < gap <= 1.00:
+                            near_loss_100 += 1
+                            lost_to_counter[e["cheapest_chain"]] = lost_to_counter.get(e["cheapest_chain"], 0) + 1
+                        elif 1.00 < gap <= 2.00:
+                            near_loss_200 += 1
+
+                near_losses_under_1eur = near_loss_050 + near_loss_100
+                near_wins_under_1eur = near_win_050 + near_win_100
+
+                top_lost_to = sorted(lost_to_counter.items(), key=lambda x: -x[1])[:3]
+                top_lost_html = "".join(
+                    f"""<div class="sensitivity-row">
+                        <div class="product-content"><div class="product-name">{escape(c.capitalize() if is_admin else f"Konkurent {chr(64 + i)}")}</div></div>
+                        <div class="product-count">{n:,}<small>korda</small></div>
+                    </div>"""
+                    for i, (c, n) in enumerate(top_lost_to, 1)
+                ) or '<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">Alla 1 € kaotusi ei tuvastatud.</div>'
+
+                callout_html = ""
+                if near_losses_under_1eur >= MIN_NEAR_LOSSES_TO_HIGHLIGHT:
+                    callout_html = f"""<div style="padding:14px 16px;margin:4px 0 14px;border-radius:var(--radius-md);background:var(--accent-soft);border:1px solid #FFD7A3;font-size:13px;color:var(--text);line-height:1.5">
+                        Kui korv oleks olnud kuni <b>1 €</b> odavam, oleks {escape(chain.capitalize())} võitnud veel <b>{near_losses_under_1eur}</b> lisavõrdlust selle perioodi jooksul.
+                    </div>"""
+
+                price_sensitivity_html = f"""
+                    <p class="metric-value" style="font-size:32px;margin:0 0 2px">{near_losses_under_1eur:,}</p>
+                    <p class="metric-note" style="margin-bottom:12px">kaotust alla 1 € vahega</p>
+                    {callout_html}
+                    <div class="product-list">
+                        <div class="sensitivity-row"><div class="product-content"><div class="product-name">Väga napp &lt;0.50 €</div></div><div class="product-count">{near_loss_050:,}</div></div>
+                        <div class="sensitivity-row"><div class="product-content"><div class="product-name">Napp 0.50–1.00 €</div></div><div class="product-count">{near_loss_100:,}</div></div>
+                        <div class="sensitivity-row"><div class="product-content"><div class="product-name">Võidetav 1.00–2.00 €</div></div><div class="product-count">{near_loss_200:,}</div></div>
+                    </div>
+                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                        <div class="panel-description" style="margin-bottom:8px">Enim kaotati napilt (alla 1 €):</div>
+                        <div class="product-list">{top_lost_html}</div>
+                    </div>
+                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--text-secondary)">
+                        Ohustatud võidud alla 1 €: <b style="color:var(--text)">{near_wins_under_1eur:,}</b> ({win_count:,} võidust)
+                    </div>
+                """
+
     daily_dict = {}
     for r in daily_rows:
         d = str(r['day'])
@@ -1754,6 +1898,8 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 .product-list {{ display: flex; flex-direction: column; gap: 2px; }}
 .product-row {{ display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; padding: 13px 4px; border-bottom: 1px solid var(--border); gap: 12px; }}
 .product-row:last-child {{ border-bottom: 0; }}
+.sensitivity-row {{ display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; padding: 13px 4px; border-bottom: 1px solid var(--border); gap: 12px; }}
+.sensitivity-row:last-child {{ border-bottom: 0; }}
 .product-rank {{ display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; font-weight: 750; }}
 .product-row:first-child .product-rank {{ background: var(--accent-soft); color: var(--accent-dark); }}
 .product-name {{ margin-bottom: 4px; overflow: hidden; color: var(--text); font-size: 13px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }}
@@ -1908,6 +2054,16 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
           </div>
         </div>
         <div class="ranking-list">{wins_html}</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Hinnatundlikud kaotused</h2>
+            <p class="panel-description">Korvid, kus valitud kett jäi võitjast väikese hinnavahega maha.</p>
+          </div>
+        </div>
+        {price_sensitivity_html}
       </article>
 
       <article class="panel">
