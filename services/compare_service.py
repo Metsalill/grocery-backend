@@ -148,7 +148,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
         if sub_codes:
             rows = await conn.fetch("""
                 SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
-                    MIN(COALESCE(pr.promo_price, pr.price)) as min_price
+                    MIN(COALESCE(NULLIF(pr.promo_price, 0), pr.price)) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
                 WHERE p.name ILIKE $1
@@ -164,7 +164,7 @@ async def _find_cheapest_per_chain(conn, ingredient_en: str) -> Dict[str, Dict]:
         else:
             rows = await conn.fetch("""
                 SELECT p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
-                    MIN(COALESCE(pr.promo_price, pr.price)) as min_price
+                    MIN(COALESCE(NULLIF(pr.promo_price, 0), pr.price)) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
                 WHERE p.name ILIKE $1
@@ -345,7 +345,7 @@ async def _latest_prices(conn, product_ids, store_ids):
     latest AS (
       SELECT DISTINCT ON (p.product_id, p.store_id)
              p.product_id, p.store_id,
-             COALESCE(p.promo_price, p.price) AS price,
+             COALESCE(NULLIF(p.promo_price, 0), p.price) AS price,
              p.collected_at
       FROM prices p
       WHERE p.product_id = ANY($1::int[])
@@ -362,7 +362,7 @@ async def _latest_prices(conn, product_ids, store_ids):
         return await conn.fetch(
             """SELECT DISTINCT ON (p.product_id, p.store_id)
                p.product_id, p.store_id,
-               COALESCE(p.promo_price, p.price) AS price,
+               COALESCE(NULLIF(p.promo_price, 0), p.price) AS price,
                p.collected_at
                FROM prices p
                WHERE p.product_id = ANY($1::int[]) AND p.store_id = ANY($2::int[])
