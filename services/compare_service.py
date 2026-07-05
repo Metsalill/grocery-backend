@@ -505,8 +505,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         required_total = required_normal + required_recipe
 
         results: List[Dict] = []
-        best_total: Optional[float] = None
-        best_store_id: Optional[int] = None
 
         for s in stores:
             sid = int(_rv(s, "id"))
@@ -592,10 +590,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 result["lines"] = lines
             results.append(result)
 
-            if total_price is not None and (best_total is None or total_price < best_total):
-                best_total = total_price
-                best_store_id = sid
-
         def sort_key(x):
             complete = 1 if (x.get("total_price") is not None and x.get("lines_found") == x.get("required_lines")) else 0
             price = x.get("total_price") if x.get("total_price") is not None else float("inf")
@@ -605,16 +599,21 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
 
+        # The "winner" shown in totals is always the first sorted result —
+        # sort_key already ranks complete baskets ahead of incomplete ones,
+        # so this can never disagree with what the UI displays as the top
+        # store. Previously this was tracked separately during the store
+        # loop using only total_price, which ignored completeness and
+        # could crown an incomplete (partial-sum) basket as "cheapest".
+        winner = next((r for r in results if r.get("total_price") is not None), None)
         totals: Dict[str, Any] = {}
-        if best_total is not None and best_store_id is not None:
-            win = next((r for r in results if r["store_id"] == best_store_id), None)
-            if win:
-                totals = {
-                    "cheapest_store_id": best_store_id,
-                    "cheapest_total": win["total_price"],
-                    "cheapest_chain": win["chain"],
-                    "cheapest_store_name": win["store_name"],
-                }
+        if winner is not None:
+            totals = {
+                "cheapest_store_id": winner["store_id"],
+                "cheapest_total": winner["total_price"],
+                "cheapest_chain": winner["chain"],
+                "cheapest_store_name": winner["store_name"],
+            }
 
         return {
             "results": results,
