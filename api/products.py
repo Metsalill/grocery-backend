@@ -32,9 +32,10 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     if not is_per_kg and size_text and _SIZE_IN_NAME_RE.search(name):
         size_text = ""
 
-    group_brand = (row.get("group_brand") or "").strip()
-    product_brand = (row.get("brand") or "").strip()
-    display_brand = group_brand if group_brand else product_brand
+    # Bränd tuleb AINULT product_groups.brand väljalt (kureeritud brändifiltri
+    # audit). products.brand ei sobi kuvamiseks (ketinimed, OÜ/AS-nimed,
+    # katkine kodeering) ja seda EI TOHI kasutada fallback'ina.
+    display_brand = (row.get("group_brand") or "").strip()
 
     return {
         "id": row.get("id"),
@@ -239,9 +240,11 @@ async def get_alternatives(
             is_per_kg = size_text.lower() == "kg"
             canonical = (r["canonical_name"] or "").strip()
             name = canonical if canonical else (r["name"] or "")
-            group_brand = (r["group_brand"] or "").strip()
-            product_brand = (r["brand"] or "").strip()
-            display_brand = group_brand if group_brand else product_brand
+            # Bränd tuleb AINULT product_groups.brand väljalt — vt märkust
+            # _row_to_safe_product juures. products.brand ei kasutata enam
+            # fallback'ina, kuna see sisaldab ketinimesid, OÜ/AS-nimesid jm
+            # kureerimata müra.
+            display_brand = (r["group_brand"] or "").strip()
 
             items.append({
                 "id": r["id"],
