@@ -32,9 +32,10 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     if not is_per_kg and size_text and _SIZE_IN_NAME_RE.search(name):
         size_text = ""
 
-    # Bränd tuleb AINULT product_groups.brand väljalt (kureeritud brändifiltri
-    # audit). products.brand ei sobi kuvamiseks (ketinimed, OÜ/AS-nimed,
-    # katkine kodeering) ja seda EI TOHI kasutada fallback'ina.
+    # Brand tuleb AINULT product_groups.brand valjalt (kureeritud brandifiltri
+    # audit). products.brand ei sobi kuvamiseks (ketinimed, OU/AS-nimed,
+    # katkine kodeering) ja seda EI TOHI kasutada fallback'ina kuvamises.
+    # (Otsingus kasutame products.brand siiski abiv2ljana - vt search_text.)
     display_brand = (row.get("group_brand") or "").strip()
 
     return {
@@ -82,6 +83,42 @@ async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optiona
         return row["id"] if row else None
     except Exception:
         return None
+
+
+def _build_token_search_clause(q: str, params: List[Any]) -> Optional[str]:
+    """
+    Tukeldab otsingu sonadeks (whitespace jargi) ja tagastab SQL tingimuse,
+    mis nouab, et IGA sona esineks kas:
+      - toote enda otsingutekstis (p.search_text = name + brand), VOI
+      - grupi otsingutekstis (pg.search_text = canonical_name + kureeritud brand)
+
+    Sonade jarjekord ei loe ja iga sona voib tabada erinevat valja.
+    See lahendab nt "kreeka proteiini" (sonad vastupidises jarjekorras nimes)
+    ja "kreeka alma" (Alma on brand valjas, mitte name valjas) otsingud.
+
+    Eeldab, et paring kasutab aliaseid "p" (products) ja "pg" (product_groups),
+    ning et migration_search_text.sql on eelnevalt kaivitatud (search_text
+    veerud olemas).
+
+    Tagastab None, kui parast tukeldamist ei jaa uhtegi kasutatavat (>=2
+    tahemargiga) sona jarele - sel juhul ei tohiks paringut uldse kaivitada.
+    """
+    tokens = [t for t in q.lower().split() if len(t) >= 2]
+    if not tokens:
+        return None
+
+    params.append(tokens)
+    idx = len(params)
+
+    return f"""
+        NOT EXISTS (
+            SELECT 1 FROM unnest(${idx}::text[]) AS tok
+            WHERE NOT (
+                p.search_text ILIKE '%' || lower(unaccent(tok)) || '%'
+                OR pg.search_text ILIKE '%' || lower(unaccent(tok)) || '%'
+            )
+        )
+    """
 
 
 SOURCE_PRIORITY_SQL = """
@@ -174,6 +211,27 @@ def _build_personalized_sql(where_sql: str, user_param_index: int) -> str:
     """
 
 
+def _relevance_order_clause(q_norm_param: int) -> str:
+    """
+    Lihtne relevantsuse jarjestus kui otsingusona on olemas:
+    0 = tapne vaste canonical_name/name-le
+    1 = canonical_name/name algab otsinguga
+    2 = tapne vaste kureeritud brand'ile
+    3 = koik muu (tabas mone sona kuskil), tahestikuline jarjekord
+    """
+    return f"""
+        ORDER BY
+            CASE
+                WHEN lower(COALESCE(NULLIF(canonical_name, ''), name)) = ${q_norm_param} THEN 0
+                WHEN lower(COALESCE(NULLIF(canonical_name, ''), name)) LIKE ${q_norm_param} || '%' THEN 1
+                WHEN lower(COALESCE(group_brand, '')) = ${q_norm_param} THEN 2
+                ELSE 3
+            END,
+            COALESCE(NULLIF(canonical_name, ''), name),
+            id
+    """
+
+
 @router.get("/products/alternatives")
 @throttle(limit=300, window=60)
 async def get_alternatives(
@@ -240,10 +298,10 @@ async def get_alternatives(
             is_per_kg = size_text.lower() == "kg"
             canonical = (r["canonical_name"] or "").strip()
             name = canonical if canonical else (r["name"] or "")
-            # Bränd tuleb AINULT product_groups.brand väljalt — vt märkust
+            # Brand tuleb AINULT product_groups.brand valjalt - vt markust
             # _row_to_safe_product juures. products.brand ei kasutata enam
-            # fallback'ina, kuna see sisaldab ketinimesid, OÜ/AS-nimesid jm
-            # kureerimata müra.
+            # fallback'ina, kuna see sisaldab ketinimesid, OU/AS-nimesid jm
+            # kureerimata mura.
             display_brand = (r["group_brand"] or "").strip()
 
             items.append({
@@ -273,7 +331,7 @@ async def get_alternatives(
 @throttle(limit=120, window=60)
 async def list_products(
     request: Request,
-    q: Optional[str] = Query("", description="Search by product name (ILIKE)."),
+    q: Optional[str] = Query("", description="Search by product name (token-based, order-independent)."),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
     main_code: Optional[str] = Query(None),
@@ -299,12 +357,15 @@ async def list_products(
         params.append(main_code)
         where.append(f"p.food_group = ${len(params)}")
 
+    q_norm = None
     if q:
-        params.append(f"%{q}%")
-        where.append(
-            f"(p.name ILIKE ${len(params)} OR pg.canonical_name ILIKE ${len(params)}"
-            f" OR p.brand ILIKE ${len(params)} OR pg.brand ILIKE ${len(params)})"
-        )
+        q_norm = " ".join(q.lower().split())
+        clause = _build_token_search_clause(q, params)
+        if clause:
+            where.append(clause)
+        else:
+            # Koik sonad liiga luhikesed (alla 2 tahemargi) - ei tagasta midagi.
+            where.append("FALSE")
 
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
@@ -314,14 +375,14 @@ async def list_products(
     elif sort == "price_desc":
         price_order_clause = "ORDER BY min_price DESC NULLS LAST, COALESCE(NULLIF(canonical_name, ''), name), id"
     else:
-        price_order_clause = None  # kasutame allpool vaikimisi järjestust
+        price_order_clause = None  # kasutame allpool vaikimisi jarjestust
 
     try:
         async with pool.acquire() as conn:
             user_id = await _get_user_id_from_token(conn, authorization)
 
             if user_id and not sort:
-                # Personaliseeritud järjestus ainult siis kui sort pole määratud
+                # Personaliseeritud jarjestus ainult siis kui sort pole maaratud
                 user_param_index = len(params) + 1
                 params_for_query = params + [user_id]
                 dedup_sql = _build_personalized_sql(where_sql, user_param_index)
@@ -330,6 +391,12 @@ async def list_products(
                 params_for_query = params
                 dedup_sql = _build_dedup_sql(where_sql)
                 order_clause = price_order_clause
+            elif q_norm:
+                # Otsingu relevantsuse jarjestus (tapne vaste / algab sonaga / muu)
+                params_for_query = params + [q_norm]
+                q_norm_param = len(params_for_query)
+                dedup_sql = _build_dedup_sql(where_sql)
+                order_clause = _relevance_order_clause(q_norm_param)
             else:
                 params_for_query = params
                 dedup_sql = _build_dedup_sql(where_sql)
@@ -387,13 +454,14 @@ async def search_products(
 
     pool = await _get_pool(request)
 
-    params: List[Any] = [f"%{q}%"]
-    where_parts = ["""(
-        p.name ILIKE $1
-        OR pg.canonical_name ILIKE $1
-        OR p.brand ILIKE $1
-        OR pg.brand ILIKE $1
-    )"""]
+    params: List[Any] = []
+
+    clause = _build_token_search_clause(q, params)
+    if not clause:
+        # Koik sonad liiga luhikesed (alla 2 tahemargi) - ei ole motet paringut kaivitada.
+        return {"items": [], "count": 0, "q": q}
+
+    where_parts = [clause]
 
     if sub_code:
         params.append(sub_code.strip())
@@ -402,12 +470,18 @@ async def search_products(
     where_sql = "WHERE " + " AND ".join(where_parts)
     dedup_sql = _build_dedup_sql(where_sql)
 
+    q_norm = " ".join(q.lower().split())
+    params.append(q_norm)
+    q_norm_param = len(params)
+
     params.append(limit)
     limit_param = len(params)
 
+    order_clause = _relevance_order_clause(q_norm_param)
+
     sql = f"""
         SELECT * FROM ({dedup_sql}) AS deduped
-        ORDER BY COALESCE(NULLIF(canonical_name, ''), name), id
+        {order_clause}
         LIMIT ${limit_param}
     """
 
