@@ -114,8 +114,8 @@ def _build_token_search_clause(q: str, params: List[Any]) -> Optional[str]:
         NOT EXISTS (
             SELECT 1 FROM unnest(${idx}::text[]) AS tok
             WHERE NOT (
-                p.search_text ILIKE '%' || lower(unaccent(tok)) || '%'
-                OR pg.search_text ILIKE '%' || lower(unaccent(tok)) || '%'
+                COALESCE(p.search_text, '') ILIKE '%' || lower(unaccent(tok)) || '%'
+                OR COALESCE(pg.search_text, '') ILIKE '%' || lower(unaccent(tok)) || '%'
             )
         )
     """
