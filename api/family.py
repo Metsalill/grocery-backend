@@ -59,6 +59,7 @@ class AddItemRequest(BaseModel):
     image_url: Optional[str] = None
     brand: Optional[str] = None
     size_text: Optional[str] = None
+    ingredient_name_en: Optional[str] = None
 
 class ShareBasketItem(BaseModel):
     product_id: Optional[int] = None
@@ -69,6 +70,7 @@ class ShareBasketItem(BaseModel):
     image_url: Optional[str] = None
     brand: Optional[str] = None
     size_text: Optional[str] = None
+    ingredient_name_en: Optional[str] = None
 
 class ShareBasketRequest(BaseModel):
     items: List[ShareBasketItem]
@@ -289,6 +291,7 @@ async def get_family_basket(
             "image_url": d["image_url"],
             "brand": d["brand"],
             "size_text": d["size_text"],
+            "ingredient_name_en": d.get("ingredient_name_en"),
             "added_by": d["added_by_name"],
             "added_at": d["added_at"].isoformat(),
         })
@@ -306,19 +309,24 @@ async def share_basket_to_family(
     Jaga isiklik korv perekorvi.
 
     Reeglid:
-    - Tooted, millel puudub product_id, LÜKATAKSE TAGASI (ei salvestata) -
-      product_id on kohustuslik, kuna hinnavõrdlus sõltub sellest. Ilma
-      selleta salvestunud rida rikub hiljem "Võrdle perekorvi" flow (vaikne
-      andmekadu - vt 2026-07 intsident).
-    - Dedupe käib EELISTATULT product_id järgi (kindel identiteet), mitte
-      ainult toote nime järgi (nimi võib kattuda eri toodete vahel).
-    - Kui perekorvis on juba vanem "katkine" rida (product_id IS NULL) sama
-      nimega, ja uus jagamine toob korrektse product_id, siis PARANDATAKSE
+    - Iga tootel peab olema KAS product_id (tootekataloogi toode) VÕI
+      ingredient_name_en (retsepti koostisosa, lahendatakse Compare ajal
+      recipe_ingredient_cache kaudu). Kui mõlemad puuduvad, rida
+      LÜKATAKSE TAGASI (ei salvestata) - vastasel juhul ei saa Compare
+      seda toodet/koostisosa kunagi lahendada (vaikne andmekadu - vt
+      2026-07 intsident).
+    - Dedupe käib EELISTATULT product_id järgi (kindel identiteet) VÕI
+      ingredient_name_en järgi (koostisosade jaoks), mitte ainult toote
+      nime järgi (nimi võib kattuda eri toodete vahel).
+    - Kui perekorvis on juba vanem "katkine" rida (product_id JA
+      ingredient_name_en mõlemad NULL) sama nimega, ja uus jagamine toob
+      korrektse product_id VÕI ingredient_name_en, siis PARANDATAKSE
       (UPDATE) vana rida selle asemel, et see igavesti katki jätta.
 
     Tagastab: added (uued), skipped (juba olemas), repaired (vana katkine
-    rida parandatud), rejected (product_id puudus, ei salvestatud) +
-    rejected_items (nimekiri nimedest mis tagasi lükati).
+    rida parandatud), rejected (product_id JA ingredient_name_en mõlemad
+    puudusid, ei salvestatud) + rejected_items (nimekiri nimedest mis
+    tagasi lükati).
     """
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
@@ -336,7 +344,8 @@ async def share_basket_to_family(
         family_id = family["id"]
 
         existing_rows = await conn.fetch(
-            "SELECT id, product_id, LOWER(TRIM(product_name)) AS norm_name "
+            "SELECT id, product_id, ingredient_name_en, "
+            "LOWER(TRIM(product_name)) AS norm_name "
             "FROM family_basket_items WHERE family_id = $1",
             family_id
         )
@@ -345,10 +354,19 @@ async def share_basket_to_family(
         existing_by_product_id: Dict[int, int] = {
             r["product_id"]: r["id"] for r in existing_rows if r["product_id"] is not None
         }
-        # norm_name -> row id, ainult ridade jaoks kus product_id ON NULL
-        # (need on parandatavad "katkised" read)
+        # ingredient_name_en -> row id, retsepti koostisosade dedupe jaoks
+        existing_by_ingredient: Dict[str, int] = {
+            r["ingredient_name_en"]: r["id"]
+            for r in existing_rows
+            if r["product_id"] is None and r["ingredient_name_en"] is not None
+        }
+        # norm_name -> row id, ainult ridade jaoks kus product_id JA
+        # ingredient_name_en on MÕLEMAD NULL (need on parandatavad
+        # "katkised" read - vanad bugi jäänused)
         existing_null_by_name: Dict[str, int] = {
-            r["norm_name"]: r["id"] for r in existing_rows if r["product_id"] is None
+            r["norm_name"]: r["id"]
+            for r in existing_rows
+            if r["product_id"] is None and r["ingredient_name_en"] is None
         }
         # koik nimed, sh juba korras read - vaikimisi fallback duplikaadi kaitseks
         existing_names_all = {r["norm_name"] for r in existing_rows}
@@ -365,19 +383,40 @@ async def share_basket_to_family(
         for item in body.items:
             norm_name = item.product_name.strip().lower()
 
-            if item.product_id is None:
+            if item.product_id is None and not item.ingredient_name_en:
                 rejected += 1
                 rejected_items.append(item.product_name.strip())
                 continue
 
-            if item.product_id in existing_by_product_id:
+            if item.product_id is not None:
+                if item.product_id in existing_by_product_id:
+                    skipped += 1
+                    continue
+
+                if norm_name in existing_null_by_name:
+                    row_id = existing_null_by_name.pop(norm_name)
+                    repair_updates.append((row_id, item))
+                    existing_by_product_id[item.product_id] = row_id
+                    continue
+
+                if norm_name in existing_names_all:
+                    skipped += 1
+                    continue
+
+                new_items.append(item)
+                existing_names_all.add(norm_name)
+                existing_by_product_id[item.product_id] = -1  # kaitseb sama-paketi duplikaate
+                continue
+
+            # item.ingredient_name_en on olemas, product_id puudub
+            if item.ingredient_name_en in existing_by_ingredient:
                 skipped += 1
                 continue
 
             if norm_name in existing_null_by_name:
                 row_id = existing_null_by_name.pop(norm_name)
                 repair_updates.append((row_id, item))
-                existing_by_product_id[item.product_id] = row_id
+                existing_by_ingredient[item.ingredient_name_en] = row_id
                 continue
 
             if norm_name in existing_names_all:
@@ -386,19 +425,20 @@ async def share_basket_to_family(
 
             new_items.append(item)
             existing_names_all.add(norm_name)
-            existing_by_product_id[item.product_id] = -1  # kaitseb sama-paketi duplikaate
+            existing_by_ingredient[item.ingredient_name_en] = -1
 
         if new_items:
             await conn.executemany(
                 "INSERT INTO family_basket_items "
                 "(family_id, user_id, product_id, product_name, quantity, is_per_kg, "
-                "kg_quantity, image_url, brand, size_text) "
-                "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+                "kg_quantity, image_url, brand, size_text, ingredient_name_en) "
+                "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
                 [
                     (
                         family_id, user_id, item.product_id, item.product_name.strip(),
                         item.quantity, item.is_per_kg, item.kg_quantity,
                         item.image_url, item.brand, item.size_text,
+                        item.ingredient_name_en,
                     )
                     for item in new_items
                 ]
@@ -409,14 +449,15 @@ async def share_basket_to_family(
             await conn.executemany(
                 "UPDATE family_basket_items "
                 "SET product_id = $1, "
-                "    brand = COALESCE(NULLIF(brand, ''), $2), "
-                "    size_text = COALESCE(NULLIF(size_text, ''), $3), "
-                "    image_url = COALESCE(NULLIF(image_url, ''), $4) "
-                "WHERE id = $5 AND family_id = $6",
+                "    ingredient_name_en = COALESCE(ingredient_name_en, $2), "
+                "    brand = COALESCE(NULLIF(brand, ''), $3), "
+                "    size_text = COALESCE(NULLIF(size_text, ''), $4), "
+                "    image_url = COALESCE(NULLIF(image_url, ''), $5) "
+                "WHERE id = $6 AND family_id = $7",
                 [
                     (
-                        item.product_id, item.brand, item.size_text, item.image_url,
-                        row_id, family_id,
+                        item.product_id, item.ingredient_name_en, item.brand,
+                        item.size_text, item.image_url, row_id, family_id,
                     )
                     for row_id, item in repair_updates
                 ]
@@ -439,10 +480,10 @@ async def add_to_family_basket(
     body: AddItemRequest,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
-    if body.product_id is None:
+    if body.product_id is None and not body.ingredient_name_en:
         raise HTTPException(
             status_code=422,
-            detail="product_id on kohustuslik - toode peab tulema tootekataloogist.",
+            detail="product_id või ingredient_name_en on kohustuslik.",
         )
 
     pool = await _get_pool(request)
@@ -461,12 +502,12 @@ async def add_to_family_basket(
         row = await conn.fetchrow(
             "INSERT INTO family_basket_items "
             "(family_id, user_id, product_id, product_name, quantity, is_per_kg, "
-            "kg_quantity, image_url, brand, size_text) "
-            "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) "
+            "kg_quantity, image_url, brand, size_text, ingredient_name_en) "
+            "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) "
             "RETURNING id, added_at",
             family["id"], user_id, body.product_id, body.product_name.strip(),
             body.quantity, body.is_per_kg, body.kg_quantity,
-            body.image_url, body.brand, body.size_text,
+            body.image_url, body.brand, body.size_text, body.ingredient_name_en,
         )
 
     return {"success": True, "id": row["id"], "added_at": row["added_at"].isoformat()}
