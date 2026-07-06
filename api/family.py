@@ -303,9 +303,22 @@ async def share_basket_to_family(
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
     """
-    Jaga isiklik korv perekorvi — lisab ainult tooted mis pole juba perekorvis.
-    Võrdlus käib product_name alusel (lowercased trim).
-    Tagastab: added (lisatud), skipped (juba olemas).
+    Jaga isiklik korv perekorvi.
+
+    Reeglid:
+    - Tooted, millel puudub product_id, LÜKATAKSE TAGASI (ei salvestata) -
+      product_id on kohustuslik, kuna hinnavõrdlus sõltub sellest. Ilma
+      selleta salvestunud rida rikub hiljem "Võrdle perekorvi" flow (vaikne
+      andmekadu - vt 2026-07 intsident).
+    - Dedupe käib EELISTATULT product_id järgi (kindel identiteet), mitte
+      ainult toote nime järgi (nimi võib kattuda eri toodete vahel).
+    - Kui perekorvis on juba vanem "katkine" rida (product_id IS NULL) sama
+      nimega, ja uus jagamine toob korrektse product_id, siis PARANDATAKSE
+      (UPDATE) vana rida selle asemel, et see igavesti katki jätta.
+
+    Tagastab: added (uued), skipped (juba olemas), repaired (vana katkine
+    rida parandatud), rejected (product_id puudus, ei salvestatud) +
+    rejected_items (nimekiri nimedest mis tagasi lükati).
     """
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
@@ -322,28 +335,59 @@ async def share_basket_to_family(
 
         family_id = family["id"]
 
-        # Leia olemasolevad tooted perekorvis (nime järgi)
         existing_rows = await conn.fetch(
-            "SELECT LOWER(TRIM(product_name)) AS norm_name "
+            "SELECT id, product_id, LOWER(TRIM(product_name)) AS norm_name "
             "FROM family_basket_items WHERE family_id = $1",
             family_id
         )
-        existing_names = {r["norm_name"] for r in existing_rows}
+
+        # product_id -> row id, ainult mitte-NULL product_id ridade jaoks
+        existing_by_product_id: Dict[int, int] = {
+            r["product_id"]: r["id"] for r in existing_rows if r["product_id"] is not None
+        }
+        # norm_name -> row id, ainult ridade jaoks kus product_id ON NULL
+        # (need on parandatavad "katkised" read)
+        existing_null_by_name: Dict[str, int] = {
+            r["norm_name"]: r["id"] for r in existing_rows if r["product_id"] is None
+        }
+        # koik nimed, sh juba korras read - vaikimisi fallback duplikaadi kaitseks
+        existing_names_all = {r["norm_name"] for r in existing_rows}
 
         added = 0
         skipped = 0
+        repaired = 0
+        rejected = 0
+        rejected_items: List[str] = []
 
-        # Filtreeri välja juba olemasolevad
         new_items = []
+        repair_updates = []  # (row_id, item)
+
         for item in body.items:
             norm_name = item.product_name.strip().lower()
-            if norm_name in existing_names:
-                skipped += 1
-            else:
-                new_items.append(item)
-                existing_names.add(norm_name)
 
-        # Batch INSERT kõik uued tooted ühe käsuga
+            if item.product_id is None:
+                rejected += 1
+                rejected_items.append(item.product_name.strip())
+                continue
+
+            if item.product_id in existing_by_product_id:
+                skipped += 1
+                continue
+
+            if norm_name in existing_null_by_name:
+                row_id = existing_null_by_name.pop(norm_name)
+                repair_updates.append((row_id, item))
+                existing_by_product_id[item.product_id] = row_id
+                continue
+
+            if norm_name in existing_names_all:
+                skipped += 1
+                continue
+
+            new_items.append(item)
+            existing_names_all.add(norm_name)
+            existing_by_product_id[item.product_id] = -1  # kaitseb sama-paketi duplikaate
+
         if new_items:
             await conn.executemany(
                 "INSERT INTO family_basket_items "
@@ -361,7 +405,32 @@ async def share_basket_to_family(
             )
             added = len(new_items)
 
-    return {"success": True, "added": added, "skipped": skipped}
+        if repair_updates:
+            await conn.executemany(
+                "UPDATE family_basket_items "
+                "SET product_id = $1, "
+                "    brand = COALESCE(NULLIF(brand, ''), $2), "
+                "    size_text = COALESCE(NULLIF(size_text, ''), $3), "
+                "    image_url = COALESCE(NULLIF(image_url, ''), $4) "
+                "WHERE id = $5 AND family_id = $6",
+                [
+                    (
+                        item.product_id, item.brand, item.size_text, item.image_url,
+                        row_id, family_id,
+                    )
+                    for row_id, item in repair_updates
+                ]
+            )
+            repaired = len(repair_updates)
+
+    return {
+        "success": True,
+        "added": added,
+        "skipped": skipped,
+        "repaired": repaired,
+        "rejected": rejected,
+        "rejected_items": rejected_items,
+    }
 
 
 @router.post("/family/basket")
@@ -370,6 +439,12 @@ async def add_to_family_basket(
     body: AddItemRequest,
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
+    if body.product_id is None:
+        raise HTTPException(
+            status_code=422,
+            detail="product_id on kohustuslik - toode peab tulema tootekataloogist.",
+        )
+
     pool = await _get_pool(request)
     async with pool.acquire() as conn:
         user_id = await _require_user_id(conn, authorization)
