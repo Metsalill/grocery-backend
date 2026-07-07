@@ -1,11 +1,86 @@
 # admin/routes.py
 import os, shutil, datetime
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from jose import jwt
 from settings import IMAGES_DIR, MAX_UPLOAD_MB, CDN_BASE_URL
 from .security import basic_guard
 
+# KONTROLLI SEE IMPORT ÜLE! Eeldan, et get_current_user asub projekti
+# juures failis auth.py (nt `from auth import get_current_user`). Kui
+# see asub mujal (nt routes/auth.py), muuda see rida vastavalt.
+from auth import get_current_user
+
 router = APIRouter()
+
+# ============================================================
+# Admin-sessiooni token (cookie-põhine, WebView jaoks)
+# ============================================================
+# Sama email, mida get_current_user (auth.py) kasutab superuser'i
+# jaoks. Sama JWT_SECRET, mida auth.py kasutab tavaliste kasutaja-
+# tokenite jaoks — admin-token on lihtsalt JWT scope="admin_access"
+# väljaga, eraldi saladust pole vaja.
+ADMIN_EMAIL = "marko@minetech.ee"
+_ADMIN_JWT_SECRET = os.getenv("JWT_SECRET")
+_ADMIN_JWT_ALGORITHM = "HS256"
+ADMIN_TOKEN_EXPIRE_MINUTES = 15
+
+
+@router.post("/admin/request-token")
+async def request_admin_token(request: Request, user=Depends(get_current_user)):
+    """Äpp kutsub seda oma tavalise Bearer tokeniga (mis kasutajal juba
+    olemas on sisselogimisest). Kui kasutaja email == admin email, saab
+    tagasi lühiajalise (15 min) tokeni, mis seejärel /admin/enter kaudu
+    cookie'ks pannakse. Ükski parool ei ole enam Flutter koodis kõvasti
+    sisse kirjutatud.
+    """
+    email = (user.get("email") or "").lower()
+    if email != ADMIN_EMAIL.lower():
+        raise HTTPException(status_code=403, detail="Not authorized as admin")
+
+    if not _ADMIN_JWT_SECRET:
+        raise HTTPException(status_code=503, detail="Admin auth not configured")
+
+    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ADMIN_TOKEN_EXPIRE_MINUTES)
+    token = jwt.encode(
+        {"sub": email, "scope": "admin_access", "exp": expire},
+        _ADMIN_JWT_SECRET,
+        algorithm=_ADMIN_JWT_ALGORITHM,
+    )
+    return {"admin_token": token, "expires_in_minutes": ADMIN_TOKEN_EXPIRE_MINUTES}
+
+
+@router.get("/admin/enter")
+async def admin_enter(admin_token: str = None):
+    """WebView laeb selle URL-i TÄPSELT ÜKS kord, koos tokeniga query
+    param'is. Kontrollime tokeni kehtivust, paneme selle httponly
+    cookie'ks (samamoodi nagu analytics_dashboard juba teeb
+    seivy_analytics_token'iga), ja suuname edasi "/" peale. Sealt edasi
+    kõik navigeerimine (sh "Halda partnereid" link) töötab automaatselt,
+    kuna cookie käib WebView'ga iga järgneva päringuga kaasa — pole enam
+    vaja onNavigationRequest header-hacki.
+    """
+    if not admin_token or not _ADMIN_JWT_SECRET:
+        return HTMLResponse("<h2>Ligipääs keelatud. Token puudub.</h2>", status_code=403)
+
+    try:
+        payload = jwt.decode(admin_token, _ADMIN_JWT_SECRET, algorithms=[_ADMIN_JWT_ALGORITHM])
+        if payload.get("scope") != "admin_access":
+            raise ValueError("Wrong token scope")
+    except Exception:
+        return HTMLResponse("<h2>Ligipääs keelatud. Token on vale või aegunud.</h2>", status_code=403)
+
+    response = RedirectResponse(url="/", status_code=302)
+    response.set_cookie(
+        key="seivy_admin_token",
+        value=admin_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=60 * ADMIN_TOKEN_EXPIRE_MINUTES,
+        path="/",
+    )
+    return response
 
 
 @router.get("/", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
