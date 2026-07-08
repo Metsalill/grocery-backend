@@ -5,14 +5,14 @@ on:
       limit:
         description: "Max products to process"
         required: false
-        default: "15000"
+        default: "30000"
 concurrency:
   group: barbora-image-backfill-r2
   cancel-in-progress: true
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 300
     env:
       ENV: production
       ENABLE_DOCS: "0"
