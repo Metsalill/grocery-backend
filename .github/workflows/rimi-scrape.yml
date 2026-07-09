@@ -55,6 +55,8 @@ jobs:
       STORE_ID: "440"
       MODE: "metadata"
       SOFT_TIME_BUDGET_MIN: "140"
+      # Shard-specific staging table name so parallel shards never touch each other's rows
+      STAGING_TABLE: staging_rimi_products_${{ matrix.shard }}
 
     steps:
       - name: Checkout
@@ -312,14 +314,30 @@ jobs:
           psql "$DATABASE_URL" -c "\conninfo" || true
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
+      # ---------------------------------------------------------------------
+      # NOTE ON THE FIX (deadlock in "products" between parallel shards):
+      #
+      # All 6 shards used to share ONE table: public.staging_rimi_products.
+      # They all INSERT into it, UPDATE products FROM it, then TRUNCATE it —
+      # at the same time, in parallel. One shard's TRUNCATE could wipe rows
+      # another shard was mid-read on, and the concurrent multi-row UPDATEs
+      # on public.products would then lock rows in different, unpredictable
+      # orders across shards -> "deadlock detected ... relation products".
+      #
+      # Fix: every shard now uses its OWN staging table
+      # (staging_rimi_products_${SHARD}) and its OWN index names, so the
+      # 6 parallel jobs never see or touch each other's rows. No shared
+      # mutable state between shards = no more cross-shard deadlock.
+      # ---------------------------------------------------------------------
+
       - name: Prepare DB (staging and helper tables)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
           BEGIN;
-          CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
+          CREATE TABLE IF NOT EXISTS public.${STAGING_TABLE} (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
             ean_raw       text,
@@ -335,8 +353,8 @@ jobs:
             collected_at  timestamptz DEFAULT now()
           );
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
-          CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
+          CREATE INDEX IF NOT EXISTS ix_rimi_ean_${SHARD}       ON public.${STAGING_TABLE} (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm_${SHARD} ON public.${STAGING_TABLE} USING gin (name gin_trgm_ops);
 
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Rimi ePood', 'Rimi', TRUE
@@ -387,7 +405,7 @@ jobs:
 
           \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
 
-          INSERT INTO public.staging_rimi_products
+          INSERT INTO public.__STAGING__
             (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,
              price,currency,category_path,category_leaf,collected_at)
           SELECT
@@ -401,11 +419,23 @@ jobs:
             NULLIF(btrim(category_path),''), NULLIF(btrim(category_leaf),''),
             now()
           FROM tmp_rimi_csv_full
-          WHERE COALESCE(ext_id,'') <> '' AND COALESCE(name,'') <> '';
+          WHERE COALESCE(ext_id,'') <> '' AND COALESCE(name,'') <> ''
+          ON CONFLICT (ext_id) DO UPDATE SET
+            name          = COALESCE(EXCLUDED.name,          public.__STAGING__.name),
+            ean_raw       = COALESCE(EXCLUDED.ean_raw,       public.__STAGING__.ean_raw),
+            sku_raw       = COALESCE(EXCLUDED.sku_raw,       public.__STAGING__.sku_raw),
+            size_text     = COALESCE(EXCLUDED.size_text,     public.__STAGING__.size_text),
+            brand         = COALESCE(EXCLUDED.brand,         public.__STAGING__.brand),
+            manufacturer  = COALESCE(EXCLUDED.manufacturer,  public.__STAGING__.manufacturer),
+            price         = COALESCE(EXCLUDED.price,         public.__STAGING__.price),
+            currency      = COALESCE(EXCLUDED.currency,      public.__STAGING__.currency),
+            category_path = COALESCE(EXCLUDED.category_path, public.__STAGING__.category_path),
+            category_leaf = COALESCE(EXCLUDED.category_leaf, public.__STAGING__.category_leaf),
+            collected_at  = now();
 
           COMMIT;
           SQL
-          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load_staging.sql
+          sed -i "s|__CSV__|$CSV_ABS|g; s|__STAGING__|$STAGING_TABLE|g" /tmp/rimi_load_staging.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load_staging.sql
 
       - name: Upsert metadata to products table
@@ -413,7 +443,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          cat > /tmp/rimi_upsert_metadata.sql <<'SQL'
           -- Uuenda ainult tühjad väljad — ei kirjuta üle olemasolevat
           UPDATE public.products p
           SET
@@ -421,7 +451,7 @@ jobs:
             manufacturer = COALESCE(NULLIF(BTRIM(p.manufacturer),''), NULLIF(BTRIM(s.manufacturer),''), p.manufacturer),
             size_text    = COALESCE(NULLIF(BTRIM(p.size_text),''),    NULLIF(BTRIM(s.size_text),''),    p.size_text),
             ean          = COALESCE(NULLIF(BTRIM(p.ean),''),          NULLIF(BTRIM(s.ean_norm),''),     p.ean)
-          FROM public.staging_rimi_products s
+          FROM public.__STAGING__ s
           WHERE p.source_url LIKE '%/p/' || s.ext_id
             AND (
               COALESCE(BTRIM(p.brand),'') = ''
@@ -429,16 +459,17 @@ jobs:
               OR COALESCE(BTRIM(p.size_text),'') = ''
             );
 
-          SELECT COUNT(*) AS updated_rows FROM staging_rimi_products;
-          TRUNCATE staging_rimi_products;
+          SELECT COUNT(*) AS updated_rows FROM public.__STAGING__;
           SQL
+          sed -i "s|__STAGING__|$STAGING_TABLE|g" /tmp/rimi_upsert_metadata.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_upsert_metadata.sql
 
       - name: Upsert to candidates + refresh
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          cat > /tmp/rimi_upsert_candidates.sql <<'SQL'
           CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext ON rimi_candidates(ext_id);
 
           WITH up AS (
@@ -455,7 +486,7 @@ jobs:
               s.price,                      NULLIF(BTRIM(s.currency),''),
               NULLIF(BTRIM(s.category_path),''), NULLIF(BTRIM(s.category_leaf),''),
               now(), now()
-            FROM staging_rimi_products s
+            FROM public.__STAGING__ s
             ON CONFLICT (ext_id) DO UPDATE SET
               name          = COALESCE(EXCLUDED.name,          c.name),
               size_text     = COALESCE(EXCLUDED.size_text,     c.size_text),
@@ -472,7 +503,10 @@ jobs:
           )
           SELECT COUNT(*) AS upsert_rows FROM up;
 
-          TRUNCATE staging_rimi_products;
+          -- Shard-specific staging table is only ever used by this shard —
+          -- safe to drop now that its rows are merged into rimi_candidates.
+          DROP TABLE IF EXISTS public.__STAGING__;
+
           ANALYZE rimi_candidates;
 
           DO $$
@@ -482,6 +516,8 @@ jobs:
             END IF;
           END$$;
           SQL
+          sed -i "s|__STAGING__|$STAGING_TABLE|g" /tmp/rimi_upsert_candidates.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_upsert_candidates.sql
 
       - name: Adopt Rimi candidates with EANs
         if: ${{ env.DATABASE_URL != '' }}
