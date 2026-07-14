@@ -10,8 +10,6 @@ from typing import Any, Dict, List, Optional, Tuple, Iterable
 import asyncpg
 from asyncpg import exceptions as pgerr
 
-from services.substitution_service import get_or_create_substitution
-
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
@@ -289,26 +287,6 @@ async def _expand_groups(
     return result
 
 
-async def _group_ids_for_pids(
-    conn: asyncpg.Connection,
-    basket_pids: List[int],
-) -> Dict[int, int]:
-    """basket_pid -> group_id (product_groups.id), vajalik asendustoodete jaoks."""
-    if not basket_pids:
-        return {}
-    try:
-        rows = await conn.fetch(
-            "SELECT product_id, group_id FROM product_group_members WHERE product_id = ANY($1::int[])",
-            basket_pids,
-        )
-    except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-        return {}
-    result: Dict[int, int] = {}
-    for r in rows:
-        result[int(r["product_id"])] = int(r["group_id"])
-    return result
-
-
 # ---------------- stores ----------------
 
 async def _candidate_stores(
@@ -486,7 +464,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
 
         metadata: Dict[int, asyncpg.Record] = {}
         group_members: Dict[int, List[int]] = {}
-        group_id_by_pid: Dict[int, int] = {}
         all_pids_for_prices: List[int] = []
 
         if qty_by_pid:
@@ -497,7 +474,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if pid not in metadata:
                     metadata[pid] = rec
             group_members = await _expand_groups(conn, basket_pids)
-            group_id_by_pid = await _group_ids_for_pids(conn, basket_pids)
             all_pids_for_prices = sorted({
                 mid for pid in basket_pids
                 for mid in group_members.get(pid, [pid])
@@ -524,54 +500,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 pid = int(_rv(r, "product_id"))
                 by_store.setdefault(sid, {})[pid] = float(_rv(r, "price"))
 
-        # --- Asendustooted (kui grupp puudub TÄIELIKULT mõnest ketist) ---
-        # Sama muster nagu retsepti koostisosadel: otsus tehakse keti tasemel,
-        # mitte üksiku poe tasemel, et vältida sama küsimuse kordamist iga
-        # poe kohta ja hoida Claude API kõned minimaalsed.
-        substitution_by_chain: Dict[str, Dict[int, Dict]] = {}
-        substitute_names: Dict[int, str] = {}
-
-        if qty_by_pid and group_id_by_pid:
-            store_chain_by_id = {int(_rv(s, "id")): (_rv(s, "chain") or "").lower() for s in stores}
-            chains_present = sorted(set(store_chain_by_id.values()))
-            store_ids_by_chain: Dict[str, List[int]] = {}
-            for sid, c in store_chain_by_id.items():
-                store_ids_by_chain.setdefault(c, []).append(sid)
-
-            missing_pairs = set()
-            for pid, gid in group_id_by_pid.items():
-                members = group_members.get(pid, [pid])
-                for chain_name in chains_present:
-                    sids = store_ids_by_chain.get(chain_name, [])
-                    has_price = any(
-                        by_store.get(sid, {}).get(mid) is not None
-                        for sid in sids
-                        for mid in members
-                    )
-                    if not has_price:
-                        missing_pairs.add((gid, chain_name))
-
-            for gid, chain_name in missing_pairs:
-                try:
-                    sub = await get_or_create_substitution(conn, gid, chain_name)
-                except Exception:
-                    sub = None
-                if sub:
-                    substitution_by_chain.setdefault(chain_name, {})[gid] = sub
-
-            substitute_ids = {
-                s["substitute_group_id"]
-                for chain_map in substitution_by_chain.values()
-                for s in chain_map.values()
-                if s.get("substitute_group_id")
-            }
-            if substitute_ids:
-                name_rows = await conn.fetch(
-                    "SELECT id, canonical_name FROM product_groups WHERE id = ANY($1::int[])",
-                    list(substitute_ids),
-                )
-                substitute_names = {int(r["id"]): r["canonical_name"] for r in name_rows}
-
         required_normal = len(qty_by_pid)
         required_recipe = len(recipe_items)
         required_total = required_normal + required_recipe
@@ -586,7 +514,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             total = 0.0
             lines_found = 0
             not_found = []
-            found_normal_pids: set = set()
 
             # Tavalised tooted
             for pid, qty in qty_by_pid.items():
@@ -598,35 +525,11 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     if p is not None and (best_price is None or p < best_price):
                         best_price = p
                         best_pid = mid
-
                 if best_price is None:
-                    gid = group_id_by_pid.get(pid)
-                    sub = substitution_by_chain.get(chain, {}).get(gid) if gid else None
-                    if sub and sub.get("substitute_group_id") and sub.get("price") is not None:
-                        lines_found += 1
-                        found_normal_pids.add(pid)
-                        total += sub["price"] * qty
-                        if include_lines:
-                            meta = metadata.get(pid)
-                            lines.append({
-                                "product_id": sub["substitute_group_id"],
-                                "product_name": substitute_names.get(
-                                    sub["substitute_group_id"], "Asendustoode"
-                                ),
-                                "qty": qty,
-                                "unit_price": _round2(sub["price"]),
-                                "line_total": _round2(sub["price"] * qty),
-                                "is_per_kg": False,
-                                "is_substitute": True,
-                                "original_product_name": _rv(meta, "name") if meta else None,
-                            })
-                        continue
                     meta = metadata.get(pid)
                     not_found.append(_rv(meta, "name") if meta else f"#{pid}")
                     continue
-
                 lines_found += 1
-                found_normal_pids.add(pid)
                 total += best_price * qty
                 if include_lines:
                     meta = metadata.get(best_pid) if best_pid else metadata.get(pid)
@@ -661,7 +564,10 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "is_per_kg": False,
                     })
 
-            normal_found = len(found_normal_pids)
+            normal_found = sum(1 for pid in qty_by_pid if any(
+                by_store.get(sid, {}).get(mid) is not None
+                for mid in group_members.get(pid, [pid])
+            ))
 
             if lines_found == 0:
                 total_price = None
