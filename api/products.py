@@ -20,6 +20,38 @@ _SIZE_IN_NAME_RE = re.compile(
 )
 
 
+# =====================================================================
+# Brandifilter -- otsus tehakse backendis (mitte Flutteris), et lava
+# saaks muuta ilma uut app-versiooni avaldamata.
+#
+# Kategooria naitab brandifiltrit ainult siis kui:
+#   - sub_code EI OLE blokkloendis (catch-all / lahtine varske kaalukaup)
+#   - >= MIN_ELIGIBLE_BRANDS branded, millest igauhel >= MIN_GROUPS_PER_BRAND
+#     NAHTAVAT gruppi (grupp millel on vahemalt uks elus hind)
+#   - branded nahtavad grupid / koik nahtavad grupid >= MIN_BRAND_COVERAGE
+#
+# Koik loendused kaivad NAHTAVATE unikaalsete gruppide jargi
+# (mv_group_chains.min_price IS NOT NULL), et valtida tupik-chip'e mis
+# annaksid valimisel tuhja tulemuse.
+# =====================================================================
+BRAND_FILTER_BLOCKED_SUBCODES = frozenset({
+    "hh_other",              # catch-all junk-drawer, ~17% branded
+    "fish_fresh",            # lahtine kaalu-varske kala, ~44%
+    "produce_apples_pears",
+    "produce_root_veg",
+    "produce_tropical",
+    "produce_mushrooms",
+    "produce_berries",
+    "produce_fruit_salads",
+    # produce_herbs_salads_sprouts -- EI blokita, lava otsustab (praegu ~43%)
+    # produce_smoothies_fresh_juices -- EI blokita (~92% branded)
+})
+
+MIN_ELIGIBLE_BRANDS = 2
+MIN_GROUPS_PER_BRAND = 3
+MIN_BRAND_COVERAGE = 0.60
+
+
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     chains = row.get("available_chains") or []
     size_text = (row.get("size_text") or "").strip()
@@ -336,6 +368,7 @@ async def list_products(
     limit: int = Query(20, ge=1, le=200),
     main_code: Optional[str] = Query(None),
     sub_code: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None, description="Filter by curated product_groups.brand (exact match)."),
     sort: Optional[str] = Query(None, description="Sort order: price_asc | price_desc"),
     authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
@@ -343,6 +376,7 @@ async def list_products(
     q = (q or "").strip()
     main_code = (main_code or "").strip() or None
     sub_code = (sub_code or "").strip() or None
+    brand = (brand or "").strip() or None
     sort = (sort or "").strip().lower() or None
 
     pool = await _get_pool(request)
@@ -352,10 +386,20 @@ async def list_products(
 
     if sub_code:
         params.append(sub_code)
-        where.append(f"p.sub_code = ${len(params)}")
+        # Kasuta kureeritud grupikategooriat (pg.sub_code) grupeeritud toodetel,
+        # grupeerimata toodetel p.sub_code. NULLIF(TRIM(...)) tagab, et tuhi
+        # string voi tuhikud grupi valjal langevad samuti tagasi p.sub_code peale.
+        # Nii pohineb /products sama kategooriaallikal kui /products/brands.
+        where.append(f"COALESCE(NULLIF(TRIM(pg.sub_code), ''), p.sub_code) = ${len(params)}")
     elif main_code:
         params.append(main_code)
         where.append(f"p.food_group = ${len(params)}")
+
+    # Brandifilter -- tapne vaste kureeritud product_groups.brand valjale.
+    # pg on skoobis base CTE-s (LEFT JOIN product_groups pg).
+    if brand:
+        params.append(brand)
+        where.append(f"TRIM(pg.brand) = ${len(params)}")
 
     q_norm = None
     if q:
@@ -430,12 +474,142 @@ async def list_products(
                 "q": q or None,
                 "main_code": main_code,
                 "sub_code": sub_code,
+                "brand": brand,
                 "sort": sort,
             },
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"List products error: {e}")
+
+
+@router.get("/products/brands")
+@throttle(limit=120, window=60)
+async def list_category_brands(
+    request: Request,
+    sub_code: str = Query(..., min_length=1, description="Category sub_code to list brands for."),
+) -> Dict[str, Any]:
+    """
+    Tagastab kategooria brandifiltri OTSUSE + brandid.
+
+    Flutter renderdab filtri ainult kui `available == true`. Kogu aariloogika
+    (blokkloend, lava, coverage) on siin backendis -- Flutter ei dubleeri seda.
+
+    Vastus:
+      {
+        "sub_code": "dairy_yogurt_kefir",
+        "available": true,
+        "reason": null,
+        "total_groups": 395,       # nahtavad unikaalsed grupid (elus hind)
+        "branded_groups": 393,
+        "coverage": 0.99,
+        "brands": [ {"value": "Alma", "label": "Alma", "group_count": 42}, ... ]
+      }
+
+    reason (kui available == false):
+      blocked_category | no_visible_groups | insufficient_brands | insufficient_coverage
+    """
+    sub_code = (sub_code or "").strip()
+    pool = await _get_pool(request)
+
+    # 1. Blokkloend -- kohene otsus, DB-d ei paisata
+    if sub_code in BRAND_FILTER_BLOCKED_SUBCODES:
+        return {
+            "sub_code": sub_code,
+            "available": False,
+            "reason": "blocked_category",
+            "total_groups": 0,
+            "branded_groups": 0,
+            "coverage": 0.0,
+            "total_brands": 0,
+            "eligible_brands": 0,
+            "brands": [],
+        }
+
+    # 2. Nahtavate gruppide + brandide loendus (ainult grupid elus hinnaga).
+    #    EXISTS valdib mv_group_chains JOIN-i keti-duplikaate; koik loendused
+    #    kaivad COUNT(DISTINCT pg.id) jargi.
+    try:
+        async with pool.acquire() as conn:
+            totals_row = await conn.fetchrow(
+                """
+                SELECT
+                    COUNT(DISTINCT pg.id) AS total_groups,
+                    COUNT(DISTINCT pg.id)
+                        FILTER (WHERE NULLIF(TRIM(pg.brand), '') IS NOT NULL)
+                        AS branded_groups
+                FROM product_groups pg
+                WHERE pg.sub_code = $1
+                  AND EXISTS (
+                        SELECT 1 FROM mv_group_chains mgc
+                        WHERE mgc.dedup_key = pg.id::text
+                          AND mgc.min_price IS NOT NULL
+                  )
+                """,
+                sub_code,
+            )
+
+            brand_rows = await conn.fetch(
+                """
+                SELECT TRIM(pg.brand) AS brand,
+                       COUNT(DISTINCT pg.id) AS group_count
+                FROM product_groups pg
+                WHERE pg.sub_code = $1
+                  AND NULLIF(TRIM(pg.brand), '') IS NOT NULL
+                  AND EXISTS (
+                        SELECT 1 FROM mv_group_chains mgc
+                        WHERE mgc.dedup_key = pg.id::text
+                          AND mgc.min_price IS NOT NULL
+                  )
+                GROUP BY TRIM(pg.brand)
+                ORDER BY group_count DESC, TRIM(pg.brand) ASC
+                """,
+                sub_code,
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Brands query error: {e}")
+
+    total_groups = int(totals_row["total_groups"] or 0)
+    branded_groups = int(totals_row["branded_groups"] or 0)
+
+    # Kureeritud brandid: value == label (product_groups.brand on juba
+    # normaliseeritud brandiauditis; case-variant duplikaate ei tohiks olla).
+    all_brands = [
+        {"value": r["brand"], "label": r["brand"], "group_count": int(r["group_count"])}
+        for r in brand_rows
+    ]
+    # Naitame ainult eligible brande (>= MIN_GROUPS_PER_BRAND nahtavat gruppi) --
+    # sama lavi, mis otsustab `available`. Muidu taituks "Veel" bottom sheet
+    # 1-2 tootega murabrandidega, mis valimisel annaksid peaaegu tuhja tulemuse.
+    eligible_brands = [b for b in all_brands if b["group_count"] >= MIN_GROUPS_PER_BRAND]
+
+    coverage = (branded_groups / total_groups) if total_groups > 0 else 0.0
+    coverage = round(coverage, 4)
+
+    # 3. Otsus
+    if total_groups == 0:
+        reason = "no_visible_groups"
+    elif len(eligible_brands) < MIN_ELIGIBLE_BRANDS:
+        reason = "insufficient_brands"
+    elif coverage < MIN_BRAND_COVERAGE:
+        reason = "insufficient_coverage"
+    else:
+        reason = None
+
+    return {
+        "sub_code": sub_code,
+        "available": reason is None,
+        "reason": reason,
+        "total_groups": total_groups,
+        "branded_groups": branded_groups,
+        "coverage": coverage,
+        "total_brands": len(all_brands),          # koik nahtavate gruppide erinevad mittetuhjad brandid
+        "eligible_brands": len(eligible_brands),  # brandid >= MIN_GROUPS_PER_BRAND nahtava grupiga
+        # `brands` = ainult eligible brandid (group_count >= 3), count DESC.
+        # Flutter piirab nahtavaid chip'e ise (nt 5 + "Veel"). Kui filter pole
+        # available, tagastame tuhja listi.
+        "brands": eligible_brands if reason is None else [],
+    }
 
 
 @router.get("/products/search")
@@ -465,7 +639,8 @@ async def search_products(
 
     if sub_code:
         params.append(sub_code.strip())
-        where_parts.append(f"p.sub_code = ${len(params)}")
+        # Sama kategooriaallikas kui /products ja /products/brands.
+        where_parts.append(f"COALESCE(NULLIF(TRIM(pg.sub_code), ''), p.sub_code) = ${len(params)}")
 
     where_sql = "WHERE " + " AND ".join(where_parts)
     dedup_sql = _build_dedup_sql(where_sql)
