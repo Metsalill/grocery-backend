@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Iterable
 import asyncpg
 from asyncpg import exceptions as pgerr
 
-from substitution_service import get_or_create_substitution
+from services.substitution_service import get_or_create_substitution
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
