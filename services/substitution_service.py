@@ -72,9 +72,22 @@ async def get_or_create_substitution(conn, group_id: int, chain: str) -> Optiona
     if not original:
         return None
 
+    original_sample_row = await conn.fetchrow(
+        """
+        SELECT p.name AS sample_product_name
+        FROM product_group_members m
+        JOIN products p ON p.id = m.product_id
+        WHERE m.group_id = $1
+        LIMIT 1
+        """,
+        group_id,
+    )
+    original_sample_name = original_sample_row["sample_product_name"] if original_sample_row else ""
+
     candidates = await conn.fetch(
         """
-        SELECT DISTINCT pg.id, pg.canonical_name, pg.brand
+        SELECT DISTINCT ON (pg.id)
+            pg.id, pg.canonical_name, pg.brand, p.name AS sample_product_name
         FROM product_groups pg
         JOIN product_group_members m ON m.group_id = pg.id
         JOIN products p ON p.id = m.product_id
@@ -83,6 +96,7 @@ async def get_or_create_substitution(conn, group_id: int, chain: str) -> Optiona
         WHERE pg.sub_code = $1
           AND LOWER(s.chain) = $2
           AND pg.id != $3
+        ORDER BY pg.id, p.id
         LIMIT 25
         """,
         original["sub_code"], chain, group_id,
@@ -101,7 +115,7 @@ async def get_or_create_substitution(conn, group_id: int, chain: str) -> Optiona
         return {"substitute_group_id": None, "price": None, "confidence": None}
 
     try:
-        result = await _ask_claude_for_substitute(original, candidates)
+        result = await _ask_claude_for_substitute(original, original_sample_name, candidates)
     except SubstitutionTimeout:
         logger.warning(f"Substitution timeout group_id={group_id} chain={chain}")
         return None
@@ -147,23 +161,28 @@ async def _get_group_price_in_chain(conn, group_id: int, chain: str) -> Optional
     return float(row["price"]) if row and row["price"] is not None else None
 
 
-async def _ask_claude_for_substitute(original, candidates) -> dict:
+async def _ask_claude_for_substitute(original, original_sample_name, candidates) -> dict:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY puudub keskkonnast")
 
     candidate_lines = "\n".join(
-        f'- id={c["id"]}, nimi="{c["canonical_name"]}", brand="{c["brand"] or ""}"'
+        f'- id={c["id"]}, grupi_nimi="{c["canonical_name"]}", '
+        f'brand="{c["brand"] or ""}", tootenimi="{c["sample_product_name"] or ""}"'
         for c in candidates
     )
 
     prompt = f"""Sa aitad leida asendustoodet Eesti toidupoe hinnavõrdlusrakenduses.
 
 ORIGINAALTOODE (mida kliendi valitud ketis pole saadaval):
-nimi="{original['canonical_name']}", brand="{original['brand'] or ''}"
+grupi_nimi="{original['canonical_name']}", brand="{original['brand'] or ''}", tootenimi="{original_sample_name}"
 
 KANDIDAADID (samas kategoorias, saadaval selles ketis):
 {candidate_lines}
+
+MÄRKUS: "brand" väli võib mõnel real olla tühi — sel juhul tuvasta bränd
+"tootenimi" väljast (tootenimi sisaldab tavaliselt brändi, nt "Piim 2,5%
+pure, ALMA, 1 L" tähendab bränd on Alma).
 
 Vali kandidaatide seast KÕIGE SARNASEM asendus samale originaaltootele:
 - sama kogus/pakendisuurus (lubatud erinevus kuni ~20%)
