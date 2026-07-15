@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import os
 import uuid
 import httpx
+import asyncpg
 
 # Google token verify
 from google.oauth2 import id_token as google_id_token
@@ -350,6 +351,21 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
 @router.post("/auth/login/apple", response_model=TokenOut)
 @throttle(limit=20, window=60)
 async def login_with_apple(payload: AppleLoginIn, request: Request):
+    """
+    Apple identity: apple_sub (JWT 'sub' claim) on stabiilne identifikaator
+    sama Apple kasutaja, sama developer team'i ja sama rakenduse identiteedi-
+    konteksti piires. E-post seevastu voib puududa mone hilisema logini identity token'is (nt kui kasutaja
+    muudab Settings > Apple ID > "Share My Email" seadistust parast esimest
+    loginit) -- vana kood kasutas e-posti identiteedina, mis tekitas
+    duplikaatkontosid kui e-post kadus voi muutus.
+
+    Otsingujarjekord:
+      1) apple_sub jargi (stabiilne -- see on peamine tee parast seda fix'i)
+      2) e-posti jargi (ainult legacy kontod, mis logisid sisse ENNE seda
+         parandust ja millel apple_sub veel puudub -- link'itakse esimesel
+         voimalusel)
+      3) uus rida (esimene login sellelt Apple kasutajalt uldse)
+    """
     try:
         claims = await verify_apple_identity_token(payload.identity_token)
 
@@ -360,31 +376,136 @@ async def login_with_apple(payload: AppleLoginIn, request: Request):
             raise ValueError("Apple subject identifier missing")
 
         email = (claims.get("email") or "").strip().lower()
-        if not email:
-            # Apple peidab e-posti -> kasuta sub-i unikaalse identiteedina
-            email = f"apple_{apple_sub}@privaterelay.appleid.com"
-
         first_name = payload.first_name or ""
         last_name = payload.last_name or ""
 
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
-                VALUES ($1, NULL, $2, $3, '', 'regular', 'apple', true)
-                ON CONFLICT (email)
-                DO UPDATE SET
-                    auth_provider  = 'apple',
-                    email_verified = true,
-                    first_name = CASE WHEN EXCLUDED.first_name != '' THEN EXCLUDED.first_name ELSE users.first_name END,
-                    last_name  = CASE WHEN EXCLUDED.last_name  != '' THEN EXCLUDED.last_name  ELSE users.last_name  END
-                """,
-                email, first_name, last_name,
-            )
+            async with conn.transaction():
+                # 1) Stabiilne identiteet -- kui see kasutaja on kunagi varem
+                #    apple_sub'iga login'inud, ei puutu tema email-veergu.
+                row = await conn.fetchrow(
+                    "SELECT id, email FROM users WHERE apple_sub = $1 AND deleted_at IS NULL",
+                    apple_sub,
+                )
+
+                if row:
+                    final_email = row["email"]
+                    await conn.execute(
+                        """
+                        UPDATE users
+                        SET auth_provider  = 'apple',
+                            email_verified = true,
+                            first_name = CASE WHEN $2 != '' THEN $2 ELSE first_name END,
+                            last_name  = CASE WHEN $3 != '' THEN $3 ELSE last_name END
+                        WHERE id = $1
+                        """,
+                        row["id"], first_name, last_name,
+                    )
+                else:
+                    # 2) apple_sub veel lingimata. Fallback-email on
+                    #    deterministlik apple_sub pohjal (mitte juhuslik), et
+                    #    see klapiks ka juba olemasoleva vana-stiilis reaga,
+                    #    mis loodi enne seda parandust sama loogika jargi.
+                    lookup_email = email or f"apple_{apple_sub}@privaterelay.appleid.com"
+
+                    existing = await conn.fetchrow(
+                        """
+                        SELECT id, email, apple_sub
+                        FROM users
+                        WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
+                        FOR UPDATE
+                        """,
+                        lookup_email,
+                    )
+
+                    if existing:
+                        existing_sub = (existing["apple_sub"] or "").strip()
+                        if existing_sub and existing_sub != apple_sub:
+                            # See email on juba seotud TEISE Apple kasutajaga
+                            # (apple_sub erineb) -- ei tohi seda identiteeti
+                            # pimesi ule kirjutada ega selle konto JWT-d
+                            # valjastada.
+                            raise ValueError(
+                                "This email is already linked to another Apple account"
+                            )
+
+                        final_email = existing["email"]
+                        await conn.execute(
+                            """
+                            UPDATE users
+                            SET apple_sub      = COALESCE(apple_sub, $2),
+                                auth_provider  = 'apple',
+                                email_verified = true,
+                                first_name = CASE WHEN $3 != '' THEN $3 ELSE first_name END,
+                                last_name  = CASE WHEN $4 != '' THEN $4 ELSE last_name END
+                            WHERE id = $1
+                            """,
+                            existing["id"], apple_sub, first_name, last_name,
+                        )
+                    else:
+                        try:
+                            async with conn.transaction():
+                                new_row = await conn.fetchrow(
+                                    """
+                                    INSERT INTO users
+                                        (email, password_hash, first_name, last_name, phone,
+                                         role, auth_provider, email_verified, apple_sub)
+                                    VALUES ($1, NULL, $2, $3, '', 'regular', 'apple', true, $4)
+                                    RETURNING email
+                                    """,
+                                    lookup_email, first_name, last_name, apple_sub,
+                                )
+                            final_email = new_row["email"]
+                        except asyncpg.exceptions.UniqueViolationError:
+                            # Vaga vaike risk: kaks samaaegset ESIMEST Apple-
+                            # loginit samalt kasutajalt voivad molemad missida
+                            # apple_sub JA email lookup'i (mõlemad reavabad
+                            # hetkel), siis molemad proovivad INSERT'ida --
+                            # uks voidab, teine saab unique violation'i.
+                            # Selle asemel et 500-ga krahhida, leiame voitja
+                            # rea ules (apple_sub on usaldusvaarsem, kuna
+                            # lookup_email voib kahe samaaegse paringu vahel
+                            # olla identne juba definitsiooni pärast) ja
+                            # lingime/uuendame selle asemel, et INSERT'ida.
+                            winner = await conn.fetchrow(
+                                "SELECT id, email, apple_sub FROM users WHERE apple_sub = $1 AND deleted_at IS NULL",
+                                apple_sub,
+                            )
+                            if not winner:
+                                winner = await conn.fetchrow(
+                                    """
+                                    SELECT id, email, apple_sub
+                                    FROM users
+                                    WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
+                                    """,
+                                    lookup_email,
+                                )
+                            if not winner:
+                                # Ei suutnud voitjat leida (nt kustutati
+                                # vahepeal) -- laseme algsel veal labi minna.
+                                raise
+
+                            winner_sub = (winner["apple_sub"] or "").strip()
+                            if winner_sub and winner_sub != apple_sub:
+                                raise ValueError(
+                                    "This email is already linked to another Apple account"
+                                )
+
+                            final_email = winner["email"]
+                            await conn.execute(
+                                """
+                                UPDATE users
+                                SET apple_sub      = COALESCE(apple_sub, $2),
+                                    auth_provider  = 'apple',
+                                    email_verified = true
+                                WHERE id = $1
+                                """,
+                                winner["id"], apple_sub,
+                            )
 
         access_token = create_access_token(
-            data={"sub": email},
+            data={"sub": final_email},
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         )
         return {"access_token": access_token}
@@ -559,6 +680,7 @@ async def delete_user(request: Request, user=Depends(get_current_user)):
                         password_hash  = NULL,
                         phone          = NULL,
                         google_sub     = NULL,
+                        apple_sub      = NULL,
                         picture_url    = NULL,
                         auth_provider  = NULL,
                         is_superuser   = FALSE,
