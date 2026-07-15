@@ -4,6 +4,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
+import uuid
 import httpx
 
 # Google token verify
@@ -211,15 +212,27 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
 async def read_users_me(request: Request, current_user=Depends(get_current_user)):
     return current_user
 
-@router.post("/register")
+@router.post("/register", response_model=TokenOut)
 @throttle(limit=5, window=60)
 async def register(user: UserIn, request: Request):
+    """
+    Loob konto JA logib kohe sisse (tagastab JWT tokeni).
+
+    Varem tagastas ainult {"status": "success"} ilma tokenita -> kasutaja jai
+    parast registreerimist guest-olekusse (token puudus) ja "Kustuta konto"
+    andis "Not authenticated". Nuud on kaks selget olekut:
+      guest = tokenit pole | registreeritud = token olemas
+
+    Olemasolu-kontroll filtreerib deleted_at IS NULL -- kustutatud konto e-post
+    anonumiseeritakse (deleted_..@deleted.invalid), seega originaal-aadress on
+    vaba ja sellega saab uuesti registreeruda.
+    """
     try:
         email = user.email.lower()
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
             existing = await conn.fetchrow(
-                "SELECT 1 FROM users WHERE LOWER(email) = LOWER($1)",
+                "SELECT 1 FROM users WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL",
                 email
             )
             if existing:
@@ -233,13 +246,19 @@ async def register(user: UserIn, request: Request):
                 """,
                 email, hashed_pw, user.first_name, user.last_name, user.phone
             )
-        return {"status": "success", "message": "User registered successfully"}
+
+        access_token = create_access_token(
+            data={"sub": email},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        return {"access_token": access_token}
 
     except HTTPException:
         raise
     except Exception as e:
         print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 @router.post("/login", response_model=TokenOut)
 @throttle(limit=10, window=60)
@@ -334,12 +353,15 @@ async def login_with_apple(payload: AppleLoginIn, request: Request):
     try:
         claims = await verify_apple_identity_token(payload.identity_token)
 
-        email = (claims.get("email") or "").lower()
+        # Apple'i token PEAB sisaldama valideeritud subject-identifikaatorit,
+        # soltumata sellest kas e-post on tokenis olemas.
+        apple_sub = (claims.get("sub") or "").strip()
+        if not apple_sub:
+            raise ValueError("Apple subject identifier missing")
 
-        # Apple võib peita emaili — kasuta sub-i varuna
-        apple_sub = claims.get("sub", "")
+        email = (claims.get("email") or "").strip().lower()
         if not email:
-            # Privaatne relay email puudub — kasuta apple_sub unikaalse ID-na
+            # Apple peidab e-posti -> kasuta sub-i unikaalse identiteedina
             email = f"apple_{apple_sub}@privaterelay.appleid.com"
 
         first_name = payload.first_name or ""
@@ -413,14 +435,149 @@ async def demote_user(email: EmailStr, request: Request, user=Depends(get_curren
 @router.delete("/delete-user")
 @throttle(limit=60, window=60)
 async def delete_user(request: Request, user=Depends(get_current_user)):
+    """
+    Konto kustutamine (Apple Guideline 5.1.1(v) + GDPR).
+
+    users rida ANONUMISEERITAKSE, mitte ei kustutata pariselt -- families.created_by
+    on ON DELETE CASCADE, seega hard delete kustutaks terve pere koos teiste
+    liikmete andmetega.
+
+    E-post vabastatakse (deleted_<id>_<uuid>@deleted.invalid):
+      - sama aadressiga saab uuesti registreeruda (local)
+      - sama Google/Apple kontoga saab uuesti sisse logida (ON CONFLICT ei leia
+        vana rida -> luuakse uus rida)
+      - valdib vana rea "ellu aratamist" OAuth ON CONFLICT DO UPDATE kaudu
+
+    analytics_events jaab TAIELIKULT puutumata (kontoseost pole: user_id on
+    taidetud 1 real 339-st; dashboard kasutab device_key'd).
+
+    JWT tuhistub automaatselt (get_current_user filtreerib deleted_at IS NULL) --
+    seega parast esimest edukat kustutamist ei laabi vana token enam siia.
+    Allolev "already deleted" haru kaitseb peamiselt samaaegse
+    kustutamisparingu (race condition) eest, mitte tavaparast korduskutset.
+    """
+    email = (user.get("email") or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid user")
+
+    if email == "marko@minetech.ee":
+        raise HTTPException(
+            status_code=400,
+            detail="System administrator account cannot be deleted here",
+        )
+
     try:
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            await conn.execute("UPDATE users SET deleted_at = NOW() WHERE LOWER(email) = LOWER($1)", user["email"].lower())
-        return {"status": "success", "message": f"User {user['email']} soft-deleted"}
+            async with conn.transaction():
+                row = await conn.fetchrow(
+                    """
+                    SELECT id FROM users
+                    WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
+                    FOR UPDATE
+                    """,
+                    email
+                )
+                if not row:
+                    return {"status": "success", "message": "Account already deleted"}
+
+                uid = row["id"]
+
+                # basket_history.user_id EI ole FK -- see on users.id-st tuletatud
+                # UUIDv5 (vt basket_history.py _coerce_to_uuid_str). Sama valem.
+                history_uuid = str(uuid.uuid5(uuid.NAMESPACE_URL, f"grocery-user:{uid}"))
+
+                # --- Pere: omand tuleb lahendada ENNE family_members kustutamist ---
+                fam_rows = await conn.fetch(
+                    "SELECT family_id FROM family_members WHERE user_id = $1", uid
+                )
+                for f in fam_rows:
+                    fid = f["family_id"]
+
+                    # Variant A: kustuta tema lisatud tooted. user_id tahendab
+                    # "kes lisas" -- uleandmine voltsiks UI-d ("X lisas piima",
+                    # kuigi tegelikult lisas kustutatud kasutaja).
+                    await conn.execute(
+                        "DELETE FROM family_basket_items WHERE family_id = $1 AND user_id = $2",
+                        fid, uid
+                    )
+                    await conn.execute(
+                        "DELETE FROM family_members WHERE family_id = $1 AND user_id = $2",
+                        fid, uid
+                    )
+
+                    remaining = await conn.fetchval(
+                        "SELECT COUNT(*) FROM family_members WHERE family_id = $1", fid
+                    )
+                    if remaining == 0:
+                        await conn.execute(
+                            "DELETE FROM family_basket_items WHERE family_id = $1", fid
+                        )
+                        await conn.execute("DELETE FROM families WHERE id = $1", fid)
+                    else:
+                        # Kui lahkuja oli omanik, anna omand vanimale allesjaanud
+                        # liikmele (family_members.id = liitumise jarjekord).
+                        owner = await conn.fetchval(
+                            "SELECT created_by FROM families WHERE id = $1", fid
+                        )
+                        if owner == uid:
+                            new_owner = await conn.fetchval(
+                                """
+                                SELECT user_id FROM family_members
+                                WHERE family_id = $1
+                                ORDER BY id ASC
+                                LIMIT 1
+                                """,
+                                fid
+                            )
+                            if new_owner is not None:
+                                await conn.execute(
+                                    "UPDATE families SET created_by = $1 WHERE id = $2",
+                                    new_owner, fid
+                                )
+
+                # --- Ulejaanud isikuandmed ---
+                await conn.execute(
+                    "DELETE FROM basket_history WHERE user_id = $1::uuid", history_uuid
+                )
+                await conn.execute("DELETE FROM baskets WHERE user_id = $1", uid)
+                await conn.execute("DELETE FROM favourite_products WHERE user_id = $1", uid)
+                await conn.execute("DELETE FROM user_product_selections WHERE user_id = $1", uid)
+
+                # --- Anonumiseeri users rida ---
+                # role = 'regular': role_check CHECK lubab AINULT
+                # ('regular','superuser') -- muu vaartus rikuks piirangut.
+                # deleted_at on timestamp WITHOUT time zone -> timezone('UTC', now()).
+                await conn.execute(
+                    """
+                    UPDATE users
+                    SET email = 'deleted_' || id::text || '_' ||
+                                replace(gen_random_uuid()::text, '-', '') ||
+                                '@deleted.invalid',
+                        first_name     = '',
+                        last_name      = NULL,
+                        password_hash  = NULL,
+                        phone          = NULL,
+                        google_sub     = NULL,
+                        picture_url    = NULL,
+                        auth_provider  = NULL,
+                        is_superuser   = FALSE,
+                        role           = 'regular',
+                        email_verified = FALSE,
+                        deleted_at     = timezone('UTC', now())
+                    WHERE id = $1 AND deleted_at IS NULL
+                    """,
+                    uid
+                )
+
+        return {"status": "success", "message": "Account deleted"}
+
+    except HTTPException:
+        raise
     except Exception as e:
         print("❌ DELETE ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Failed to delete user")
+
 
 @router.post("/request-password-reset")
 @throttle(limit=5, window=60)
