@@ -1,0 +1,37 @@
+name: Barbora FAST Prototype Test (manual, no DB writes)
+on:
+  workflow_dispatch:
+    inputs:
+      limit_cats:
+        description: "How many categories to test (0 = all in file)"
+        required: false
+        default: "3"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (requests only, no Playwright)
+        run: pip install requests
+      - name: Run fast prototype crawler
+        run: |
+          mkdir -p out
+          python scripts/barbora_fast_prototype.py \
+            --cats-file data/barbora_categories.txt \
+            --limit-cats ${{ github.event.inputs.limit_cats }} \
+            --output-csv out/barbora_fast_prototype.csv
+      - name: Upload CSV result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: barbora_fast_prototype_result
+          path: out/barbora_fast_prototype.csv
+          retention-days: 3
