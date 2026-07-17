@@ -1,0 +1,38 @@
+name: Barbora FAST Scrape + Ingest
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+concurrency:
+  group: barbora-fast-scrape
+  cancel-in-progress: false
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (requests + asyncpg, no Playwright)
+        run: pip install requests asyncpg
+      - name: Run Barbora fast crawler + ingest
+        run: |
+          mkdir -p out
+          python scripts/barbora_crawl_categories_fast.py \
+            --cats-file data/barbora_categories.txt \
+            --output-csv out/barbora_products.csv
+      - name: Upload CSV artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: barbora_products_fast
+          path: out/barbora_products.csv
+          retention-days: 7
