@@ -1,8 +1,10 @@
-name: Barbora DB Scrape + Ingest
+name: Barbora DB Scrape + Ingest (LEGACY - disabled, kept for rollback)
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 20 * * *"
+  # schedule trigger removed 2026-07-17 — replaced by barbora-fast-scrape.yml
+  # Uncomment below to re-enable if the fast version has issues:
+  # schedule:
+  #   - cron: "0 20 * * *"
 concurrency:
   group: barbora-scrape
   cancel-in-progress: false
