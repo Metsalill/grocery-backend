@@ -28,6 +28,11 @@ Known limitation (confirmed acceptable): Barbora does not expose EAN/GTIN
 anywhere — not on the listing, not on the PDP. The production scraper has
 always written ean_raw="" for every row.
 
+ext_id note: ext_id is derived from the PDP URL using the exact same regex
+as production's get_ext_id(), NOT from Barbora's internal numeric "id" field
+in the JSON. This is required so existing products in the DB keep matching
+correctly (source='barbora', ext_id=...) instead of looking "new".
+
 Usage
 -----
     python barbora_fast_prototype.py --cats-file data/barbora_categories.txt --limit-cats 3
@@ -64,6 +69,20 @@ HEADERS = {
 
 SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
 
+
+def get_ext_id(url: str) -> str:
+    """
+    MUST MATCH production barbora_crawl_categories_pw.py exactly, or every
+    product will look "new" to upsert_product_and_price() and orphan all
+    existing price history / product_group_members links for Barbora.
+    """
+    m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
+    if m:
+        return m.group(1)
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
+    return slug[-120:]
+
+
 CSV_HEADER = [
     "store_chain", "store_name", "store_channel",
     "ext_id", "ean_raw", "name", "size_text",
@@ -87,11 +106,17 @@ def set_page_param(url: str, page_num: int) -> str:
 
 
 def find_max_page(html: str) -> int:
+    """Scan pagination links like ?page=5 and return the highest page number seen."""
     nums = [int(n) for n in re.findall(r"\?page=(\d+)", html)]
     return max(nums) if nums else 1
 
 
 def extract_product_list(html: str) -> List[Dict]:
+    """
+    Find `window.b_productList = [ ... ];` and parse it with a real JSON
+    decoder (raw_decode) so nested braces/brackets inside product objects
+    don't break a naive regex match.
+    """
     marker = "window.b_productList = "
     idx = html.find(marker)
     if idx == -1:
@@ -122,7 +147,7 @@ def fetch(session: requests.Session, url: str, retries: int = 3) -> Optional[str
 
 
 def crawl_category(session: requests.Session, cat_url: str, req_delay: float) -> List[Dict]:
-    all_products: Dict[str, Dict] = {}
+    all_products: Dict[str, Dict] = {}  # ext_id -> row, dedupe across pages
 
     html = fetch(session, cat_url)
     if html is None:
@@ -145,8 +170,8 @@ def crawl_category(session: requests.Session, cat_url: str, req_delay: float) ->
             print(f"[cat] {cat_url} -> 0 products found on page 1 (blocked? layout change?)")
 
         for p in products:
-            ext_id = str(p.get("id") or "").strip()
-            if not ext_id:
+            barbora_internal_id = str(p.get("id") or "").strip()
+            if not barbora_internal_id:
                 continue
             name = p.get("title") or ""
             price = p.get("price")
@@ -157,12 +182,16 @@ def crawl_category(session: requests.Session, cat_url: str, req_delay: float) ->
             slug = p.get("Url") or ""
             source_url = f"{BASE}/toode/{slug}" if slug else cat_url
 
+            # ext_id must match production's URL-based logic, not Barbora's
+            # own internal numeric id — that internal id was never the DB key.
+            ext_id = get_ext_id(source_url)
+
             all_products[ext_id] = {
                 "store_chain": STORE_CHAIN,
                 "store_name": STORE_NAME,
                 "store_channel": STORE_CHANNEL,
                 "ext_id": ext_id,
-                "ean_raw": "",
+                "ean_raw": "",  # confirmed: Barbora never exposes EAN, PDP included
                 "name": name,
                 "size_text": extract_size_from_name(name) or "",
                 "brand": brand,
