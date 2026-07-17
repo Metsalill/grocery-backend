@@ -1,11 +1,19 @@
-name: Barbora FAST Prototype Test (manual, no DB writes)
+name: Barbora FAST Prototype Test
 on:
   workflow_dispatch:
     inputs:
       limit_cats:
-        description: "How many categories to test (0 = all in file)"
+        description: "How many categories to test from file (0 = all)"
         required: false
         default: "3"
+      test_url:
+        description: "Optional: single category URL to test directly"
+        required: false
+        default: ""
+      write_db:
+        description: "Also write to database? (true/false)"
+        required: false
+        default: "false"
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,15 +27,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install deps (requests only, no Playwright)
-        run: pip install requests
+      - name: Install deps
+        run: pip install requests asyncpg
       - name: Run fast prototype crawler
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           mkdir -p out
-          python scripts/barbora_fast_prototype.py \
-            --cats-file data/barbora_categories.txt \
-            --limit-cats ${{ github.event.inputs.limit_cats }} \
-            --output-csv out/barbora_fast_prototype.csv
+          WRITE_FLAG=""
+          if [ "${{ github.event.inputs.write_db }}" = "true" ]; then
+            WRITE_FLAG="--write-db"
+          fi
+          if [ -n "${{ github.event.inputs.test_url }}" ]; then
+            python scripts/barbora_fast_prototype.py \
+              --url "${{ github.event.inputs.test_url }}" \
+              --output-csv out/barbora_fast_prototype.csv \
+              $WRITE_FLAG
+          else
+            python scripts/barbora_fast_prototype.py \
+              --cats-file data/barbora_categories.txt \
+              --limit-cats ${{ github.event.inputs.limit_cats }} \
+              --output-csv out/barbora_fast_prototype.csv \
+              $WRITE_FLAG
+          fi
       - name: Upload CSV result
         if: always()
         uses: actions/upload-artifact@v4
