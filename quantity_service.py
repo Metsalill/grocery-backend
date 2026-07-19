@@ -146,6 +146,11 @@ QUANTITY_RULES: dict[str, dict[str, int]] = {
     # kellegi poolt teadlikult läbi vaadatud. Fail-closed UNKNOWN, kuni
     # keegi selle kategooria jaoks otsuse teeb.
     "dairy_eggs": {"auto_pct": 0, "suggested_pct": 40},
+    # ESIALGNE, vajab teadlikku ülevaatust (ChatGPT tabel viitas
+    # lihatoodete puhul rasvaprotsendi/lihaliigi olulisusele, aga
+    # täpne piir pole veel eraldi hinnatud) — kasutatud ainult
+    # animal_type identity-kontrolli testimiseks.
+    "meat_minced": {"auto_pct": 15, "suggested_pct": 30},
     "baby_porridge_cereal": {"auto_pct": 0, "suggested_pct": 0},
     "baby_diapers": {"auto_pct": 0, "suggested_pct": 0},
     "baby_care": {"auto_pct": 0, "suggested_pct": 0},
