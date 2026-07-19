@@ -1,0 +1,39 @@
+name: Dry Run - Asendustoodete test
+
+# Käivitatakse AINULT käsitsi ("Run workflow" nupp GitHub Actions
+# vahekaardil) — mitte automaatselt, mitte ajastatult. See on
+# read-only kuivtest (READ ONLY transaktsioon + dry_run=True),
+# ei kirjuta product_substitutions tabelisse midagi.
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install asyncpg httpx
+
+      - name: Run dry-run substitution test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python dry_run_test.py
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-results
+          path: dry_run_results.json
+          retention-days: 30
