@@ -200,6 +200,36 @@ def _meat_cut_type(text) -> Optional[str]:
     return None  # tundmatu lõige — ei blokeeri, jääb Claude'i hinnata
 
 
+# Maitseprofiil (marinaadid/kastmed) — see EI OLE hard_match nagu
+# ülejäänud (mis kandidaadi täielikult välja jätavad). ChatGPT
+# arhitektuur (neljas ülevaatus): erinevalt piimast/lihast on
+# maitseainetel legitiimselt palju maitsevariante — seega erinev
+# maitseprofiil ei tohi kandidaati välistada, vaid ALANDAB tier'i
+# AUTO'lt SUGGESTED'ile (leitud reaalse vea põhjal: "Klassikaline
+# kanamarinaad" sai vääralt auto_substitute "Magus tšillimarinaadiga").
+FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "classic": ("klassikaline",),
+    "sweet_chili": ("tšilli", "tsilli", "chili"),
+    "teriyaki": ("teriyaki",),
+    "bbq": ("bbq",),
+    "garlic": ("küüslaugu", "kuusklaugu"),
+    "lemon_herb": ("sidruni", "ürdi", "urdi"),
+    "smoky": ("suitsu",),
+    "spicy": ("terav", "vürtsikas", "vurtsikas"),
+    "mild": ("mahe",),
+}
+
+
+def _flavour_profile(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for profile, keywords in FLAVOUR_PROFILE_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return profile
+    return None
+
+
 # Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
 IDENTITY_CHECKS = {
     "flavour_state": _flavour_state,
@@ -209,8 +239,8 @@ IDENTITY_CHECKS = {
     "cut_type": _meat_cut_type,
 }
 
-# Kategooriapõhine profiil — milliseid check'e millise sub_code puhul
-# rakendada. Laiendatav ilma olemasolevaid kategooriaid mõjutamata.
+# hard_match: erinevus EEMALDAB kandidaadi täielikult (praegune
+# IDENTITY_RULES käitumine, muutmata).
 IDENTITY_RULES: dict[str, list[str]] = {
     "dairy_milk": ["flavour_state", "fat_class_milk"],
     "dairy_yogurt_kefir": ["flavour_state"],
@@ -222,6 +252,17 @@ IDENTITY_RULES: dict[str, list[str]] = {
     "coffee_beans_ground": ["caffeine_state"],
     "coffee_instant": ["caffeine_state"],
     "tea": ["caffeine_state"],
+}
+
+# downgrade: erinevus EI eemalda kandidaati, vaid langetab tier'i
+# AUTO'lt SUGGESTED'ile (included_in_total=False). ChatGPT: "erinev
+# maitsevariant -> maksimaalselt SUGGESTED, mitte reject".
+DOWNGRADE_CHECKS = {
+    "flavour_profile": _flavour_profile,
+}
+
+DOWNGRADE_RULES: dict[str, list[str]] = {
+    "spices_herbs_spice_mix": ["flavour_profile"],
 }
 
 
@@ -439,6 +480,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         return await _finish(result)
 
     is_baby_food = original["sub_code"] in BABY_FOOD_SUB_CODES
+    downgrade_checks = DOWNGRADE_RULES.get(original["sub_code"], [])
 
     quantity_eligible = []
     for c in candidates:
@@ -447,12 +489,24 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         )
         if qmatch.tier in (QuantityTier.INCOMPATIBLE, QuantityTier.UNKNOWN):
             continue
+
+        effective_tier = qmatch.tier
+        # downgrade: erinevus ei eemalda kandidaati, vaid langetab
+        # tier'i (nt marinaadi maitseprofiil) — EI TÕSTA kunagi üles.
+        for check_name in downgrade_checks:
+            check_fn = DOWNGRADE_CHECKS[check_name]
+            o_val = check_fn(original_sample_name)
+            c_val = check_fn(c["sample_product_name"])
+            if o_val is not None and c_val is not None and o_val != c_val:
+                if effective_tier == QuantityTier.AUTO:
+                    effective_tier = QuantityTier.SUGGESTED
+
         quantity_eligible.append({
             "id": c["id"],
             "canonical_name": c["canonical_name"],
             "brand": c["brand"],
             "sample_product_name": c["sample_product_name"],
-            "quantity_tier": qmatch.tier,
+            "quantity_tier": effective_tier,
             "quantity_diff_percent": qmatch.difference_percent,
         })
     trace["quantity_eligible_count"] = len(quantity_eligible)
