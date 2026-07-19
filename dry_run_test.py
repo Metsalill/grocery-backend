@@ -94,7 +94,13 @@ async def run_dry_run_tests():
             for group_id, chain, description in TEST_CASES:
                 print(f"\n{'='*70}\nTEST: group_id={group_id}, chain={chain}\n{description}\n{'='*70}")
                 try:
-                    result = await get_or_create_substitution(conn, group_id, chain, dry_run=True)
+                    # SAVEPOINT iga testi ümber — kui see test ebaõnnestub
+                    # (nt andmeviga), ROLLBACK toimub AINULT selle testi
+                    # tasandil, mitte kogu READ ONLY transaktsiooni jaoks.
+                    # Ilma selleta rikub üks Postgres-tasandi viga kõik
+                    # järgnevad testid ("current transaction is aborted").
+                    async with conn.transaction():
+                        result = await get_or_create_substitution(conn, group_id, chain, dry_run=True)
                 except Exception as e:
                     print(f"TEHNILINE VIGA: {e}")
                     result = {"error": str(e), "trace": {"original_group_id": group_id, "chain": chain}}
