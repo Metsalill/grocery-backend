@@ -51,17 +51,66 @@ REQUIRED_TRAITS: dict[str, tuple[str, ...]] = {
     "alcohol_free": ("alkoholivaba", "alcohol free", "alcohol-free"),
 }
 
+import re
+
 IDENTITY_TRAITS: dict[str, tuple[str, ...]] = {
     "plant_based": ("taimne", "vegan"),
 }
 
-BABY_FOOD_SUB_CODES = {
-    "baby_porridge_cereal", "baby_diapers", "baby_care", "baby_other", "baby_wipes",
-}
+# Maitsestatud vs maitsestamata — kahesuunaline identity-trait.
+# Leitud reaalse vea põhjal (juuli 2026): Cappuccino/Latte piim asendati
+# vääralt tavalise piimaga (auto_substitute). Bränd/kogus klappisid,
+# aga toote TÜÜP (maitsestatud jook vs tavaline piim) oli erinev —
+# see kontroll väldib seda mõlemas suunas.
+FLAVOR_KEYWORDS = (
+    "cappuccino", "latte", "šokolaadi", "shokolaadi", "vanilje",
+    "karamelli", "maasika", "banaani", "kookos",
+)
 
 
-class SubstitutionTimeout(Exception):
-    pass
+def _is_flavored(text) -> bool:
+    if not text:
+        return False
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in FLAVOR_KEYWORDS)
+
+
+# Piima rasvaprotsendi kategooria — DETERMINISTLIK, mitte Claude'i
+# otsustada. Leitud reaalse vea põhjal: sama originaaltoode (täispiim
+# 3,6-4,2%) sai Coopis vale asenduse (2,5% piim, auto_substitute), aga
+# Selveris õigesti tagasi lükatud — sama sisend, vastandlik tulemus.
+# Regex parsib protsendi tekstist (nt "3,6-4,2%" või "2,5%") ja
+# klassifitseerib kategooriasse.
+_FAT_RANGE_RE = re.compile(r"(\d+[.,]?\d*)\s*-\s*(\d+[.,]?\d*)\s*%")
+_FAT_SINGLE_RE = re.compile(r"(\d+[.,]?\d*)\s*%")
+
+
+def _milk_fat_bucket(text) -> Optional[str]:
+    if not text:
+        return None
+    normalized = text.replace(",", ".")
+    m = _FAT_RANGE_RE.search(normalized)
+    if m:
+        try:
+            pct = (float(m.group(1)) + float(m.group(2))) / 2
+        except ValueError:
+            return None
+    else:
+        m = _FAT_SINGLE_RE.search(normalized)
+        if not m:
+            return None
+        try:
+            pct = float(m.group(1))
+        except ValueError:
+            return None
+
+    if pct >= 3.2:
+        return "whole"        # täispiim
+    if pct >= 2.0:
+        return "standard"     # tavaline (2,5%)
+    if pct >= 0.5:
+        return "low_fat"      # kooritud/vähendatud (1,5%/1,8%)
+    return "fat_free"         # rasvatu
 
 
 def _detect_traits(text, trait_map):
@@ -75,16 +124,48 @@ def _detect_traits(text, trait_map):
     return found
 
 
-def _traits_compatible(original_name, candidate_name):
+def _traits_compatible(original_name, candidate_name, sub_code=None):
     original_required = _detect_traits(original_name, REQUIRED_TRAITS)
     candidate_required = _detect_traits(candidate_name, REQUIRED_TRAITS)
     if not original_required.issubset(candidate_required):
         return False
+
     original_identity = _detect_traits(original_name, IDENTITY_TRAITS)
     candidate_identity = _detect_traits(candidate_name, IDENTITY_TRAITS)
     if original_identity != candidate_identity:
         return False
+
+    # Maitsestatud vs maitsestamata (kahesuunaline) — kontrolli ENNE
+    # rasvaprotsendi kontrolli, kuna maitsestatud jookide "rasvaprotsent"
+    # ei vasta tavalise piima rasva-kategooriatele (nt Cappuccino "3,5%"
+    # ei tähenda sama, mis täispiima "3,5%").
+    original_is_flavored = _is_flavored(original_name)
+    candidate_is_flavored = _is_flavored(candidate_name)
+    if original_is_flavored != candidate_is_flavored:
+        return False
+
+    # Piima rasvaprotsendi kategooria (ainult dairy_milk JA ainult
+    # maitsestamata piim — maitsestatud jookide puhul jääb see Claude'i
+    # semantilise hinnangu kanda, vt ülal olev kommentaar)
+    if sub_code == "dairy_milk" and not original_is_flavored:
+        o_bucket = _milk_fat_bucket(original_name)
+        c_bucket = _milk_fat_bucket(candidate_name)
+        if o_bucket is not None:
+            if c_bucket is None:
+                return False  # kandidaadi rasvaprotsent teadmata -> turvaliselt keeldu
+            if o_bucket != c_bucket:
+                return False
+
     return True
+
+
+BABY_FOOD_SUB_CODES = {
+    "baby_porridge_cereal", "baby_diapers", "baby_care", "baby_other", "baby_wipes",
+}
+
+
+class SubstitutionTimeout(Exception):
+    pass
 
 
 async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
@@ -262,7 +343,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
 
     usable_candidates = [
         c for c in quantity_eligible
-        if _traits_compatible(original_sample_name, c["sample_product_name"])
+        if _traits_compatible(original_sample_name, c["sample_product_name"], original["sub_code"])
     ]
     trace["trait_eligible_count"] = len(usable_candidates)
 
