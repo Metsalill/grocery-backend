@@ -38,9 +38,24 @@ Confirmed facts (validated against production DB, July 2026):
   Smith (no promo) against live production DB after write.
 
 DB write: always on (this is the production script). Requires DATABASE_URL
-env var and the upsert_product_and_price() function to support the
-in_promo_price parameter (added July 2026, backward-compatible — verified
-against Rimi/Coop/Prisma's old-style calls still working unchanged).
+env var.
+
+IMPORTANT (fixed 2026-07-19): upsert_product_and_price() in production does
+NOT currently have an in_promo_price parameter (confirmed via
+`SELECT proname, pg_get_function_arguments(oid) FROM pg_proc WHERE proname
+= 'upsert_product_and_price'` — 13 params, no promo_price). The original
+version of this script called the function with a 12th in_promo_price
+argument that does not exist, so EVERY row failed with "function ... does
+not exist" from creation (2026-07-17) through 2026-07-19, while still
+hammering Postgres with a failing query per row for the full run. This
+version drops in_promo_price from the DB call (still collected in the CSV
+for later use) and adds a fail-fast circuit breaker so a future schema
+mismatch aborts after a handful of failures instead of repeating for the
+whole run.
+
+promo_price DB support can be added properly later the same way it was done
+for Selver: a separate UPDATE after the main upsert, once the column/plan
+is agreed.
 """
 
 from __future__ import annotations
@@ -65,6 +80,9 @@ STORE_NAME = "Barbora ePood"
 STORE_CHANNEL = "online"
 DB_SOURCE_LABEL = "barbora"
 STORE_ID = 441  # Barbora ePood, is_online=true
+
+# If this many consecutive DB writes fail, stop hammering Postgres and abort.
+MAX_CONSECUTIVE_DB_ERRORS = 5
 
 HEADERS = {
     "User-Agent": (
@@ -225,6 +243,7 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
     conn = await asyncpg.connect(dsn)
     ingested = 0
     skipped = 0
+    consecutive_errors = 0
     try:
         for r in rows:
             price_val = None
@@ -237,12 +256,11 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
                 skipped += 1
                 continue
 
-            promo_val = None
-            try:
-                if r.get("promo_price") not in (None, ""):
-                    promo_val = float(r["promo_price"])
-            except Exception:
-                promo_val = None
+            # NOTE: promo_price is still collected/written to the CSV above,
+            # but is intentionally NOT sent to upsert_product_and_price()
+            # below — that function does not have an in_promo_price
+            # parameter in production. Wiring it up requires a separate
+            # UPDATE step (same pattern as Selver) once we decide to add it.
 
             try:
                 await conn.execute(
@@ -251,19 +269,27 @@ async def _bulk_ingest_to_db(rows: List[Dict], store_id: int) -> None:
                         in_source => $1, in_ext_id => $2, in_name => $3,
                         in_brand => $4, in_size_text => $5, in_ean_raw => $6,
                         in_price => $7, in_currency => $8, in_store_id => $9,
-                        in_seen_at => $10, in_source_url => $11,
-                        in_promo_price => $12
+                        in_seen_at => $10, in_source_url => $11
                     );
                     """,
                     DB_SOURCE_LABEL, r["ext_id"], r["name"], r["brand"],
                     r["size_text"], "", price_val, r["currency"],
                     store_id, datetime.now(timezone.utc), r["source_url"],
-                    promo_val,
                 )
                 ingested += 1
+                consecutive_errors = 0
             except Exception as e:
                 print(f"[warn] DB error for {r['ext_id']}: {e}", file=sys.stderr)
                 skipped += 1
+                consecutive_errors += 1
+                if consecutive_errors >= MAX_CONSECUTIVE_DB_ERRORS:
+                    print(
+                        f"[fatal] {consecutive_errors} consecutive DB errors — "
+                        f"aborting ingest instead of hammering Postgres for the "
+                        f"rest of the run. Fix the underlying error and re-run.",
+                        file=sys.stderr,
+                    )
+                    break
     finally:
         await conn.close()
     print(f"[barbora] DB ingest: {ingested} ok, {skipped} skipped")
