@@ -27,6 +27,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PGSSLMODE: require
         run: |
           python dry_run_test.py
 
