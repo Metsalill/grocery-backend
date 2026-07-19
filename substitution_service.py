@@ -46,9 +46,20 @@ _TTL_BY_DECISION = {
 }
 
 REQUIRED_TRAITS: dict[str, tuple[str, ...]] = {
-    "lactose_free": ("laktoosivaba", "lactose free", "lactose-free"),
+    # "lakt.vaba" ja "lakt vaba" LISATUD (juuli 2026) — leitud reaalsetest
+    # andmetest (nt "Farmi koogikoor 15% lakt.vaba"), mis oleks muidu
+    # libisenud läbi laktoosivaba kaitsest, kuna esialgne regex otsis
+    # ainult täissõna "laktoosivaba".
+    "lactose_free": (
+        "laktoosivaba", "lactose free", "lactose-free",
+        "lakt.vaba", "lakt. vaba", "lakt vaba",
+    ),
     "gluten_free": ("gluteenivaba", "gluten free", "gluten-free"),
     "alcohol_free": ("alkoholivaba", "alcohol free", "alcohol-free"),
+    # LISATUD (juuli 2026) — leitud reaalsetest andmetest (Red Bull
+    # "Suhkruvaba"). Sama põhimõte: kui originaal on suhkruvaba,
+    # kandidaat PEAB olema ka.
+    "sugar_free": ("suhkruvaba", "sugar free", "sugar-free"),
 }
 
 import re
