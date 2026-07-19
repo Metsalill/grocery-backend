@@ -135,6 +135,41 @@ TEST_CASES = [
     (11612, "rimi", "Linnamäe hirveliha steik 240g puudub Rimist — 'hirv' pole animal_type sõnastikus, edge case"),
     (11441, "rimi", "Rakvere seahakkliha 400g puudub Rimist — animal_type=pork test"),
     (11441, "selver", "Rakvere seahakkliha 400g puudub Selverist"),
+
+    # --- Jogurt/keefir (fat_class_yogurt + yogurt_form kontroll) ---
+    (3193, "coop", "Maitsestamata jogurt 2,5% 1kg puudub Coopist"),
+    (3198, "rimi", "Joogijogurt banaani-maasika 1kg puudub Rimist — yogurt_form=drinkable test"),
+    (3214, "coop", "Kreeka jogurt maitsestamata 370g puudub Coopist — yogurt_form=greek test"),
+    (3271, "maxima", "Hellus keefir laktoosivaba 1kg puudub Maximast"),
+    (3284, "rimi", "Farmi keefir 2,5% 1kg puudub Rimist"),
+    (3315, "rimi", "Farmi Skyr maasika 300g puudub Rimist"),
+    (3333, "maxima", "Tere kreeka jogurt maitsestamata lakt.vaba 350g puudub Maximast"),
+    (3351, "maxima", "Profeel proteiinijogurtijook kirsi 275g puudub Maximast — yogurt_form=protein test"),
+    (3400, "coop", "Nopri hapupiim 2,5% 1L puudub Coopist"),
+    (3445, "selver", "Kreeka stiilis lakt.vaba jogurt 10% 500g puudub Selverist — fat_class_yogurt=greek_high_fat test"),
+
+    # --- Juust (cheese_type + cheese_form kontroll) ---
+    (4671, "maxima", "Granarolo Mozzarella 250g puudub Maximast — ChatGPT mozzarella näide"),
+    (4705, "coop", "President Brie 200g puudub Coopist"),
+    (4392, "maxima", "Atleet Cheddar riivjuust 200g puudub Maximast — cheese_form=grated test"),
+    (4410, "maxima", "Royal Gouda Red viilud 150g puudub Maximast — cheese_form=sliced test"),
+    (4454, "coop", "Suitsutatud Kadaka riivjuust 200g puudub Coopist"),
+    (4485, "maxima", "E-Piim Gouda viilud 300g puudub Maximast"),
+    (4986, "selver", "Parmigiano Reggiano 150g puudub Selverist"),
+    (5005, "rimi", "Coop Feta laktoosivaba 150g puudub Rimist — lactose_free + cheese_type test"),
+    (4963, "coop", "Wyke Farms Ivy Vintage Cheddar 200g puudub Coopist"),
+
+    # --- Kala (fish_species kontroll) ---
+    (11910, "maxima", "Coop lohefilee 2x150g puudub Maximast — fish_species=salmon test"),
+    (23695, "maxima", "Heeringafilee tükid juurviljadega 400g puudub Maximast — fish_species=herring test"),
+    (23767, "maxima", "Heeringafilee sibulaga koorekastmes puudub Maximast"),
+    (23986, "coop", "Xtra krevetid 330g puudub Coopist — fish_species=shrimp test"),
+    (24084, "maxima", "Krabimaitselised surimi pulgad 150g puudub Maximast — tundmatu liik, edge case"),
+
+    # --- Vein (AUTO_DISABLED kontroll — ei tohi kunagi olla auto_substitute) ---
+    (29386, "maxima", "Baron Rosen Vino Tinto 1L puudub Maximast — vein ei tohi olla AUTO"),
+    (30052, "maxima", "Maori Bay Sauvignon Blanc 75cl puudub Maximast — vein ei tohi olla AUTO"),
+    (31477, "maxima", "Roche Mazet Sauvignon Blanc 187ml puudub Maximast — väike pudel, vein AUTO-keeld"),
 ]
 
 
