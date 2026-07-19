@@ -70,6 +70,71 @@ TEST_CASES = [
     # --- Munad (tükikaubad, dairy_eggs) ---
     (2519, "rimi", "Whitepro munavalge 1kg puudub Rimist — mass-põhine tükitoode"),
     (2534, "coop", "Kotimaista Mahe munad M 6tk — ainult Prismas, testib laia kandidaatide otsingut"),
+
+    # --- Koor/hapukoor (dairy_cream_sourcream, sh 'lakt.vaba' lühendi test) ---
+    (2692, "coop", "Hapukoor 20% 250g puudub Coopist"),
+    (2692, "maxima", "Hapukoor 20% 250g puudub Maximast"),
+    (2694, "coop", "Hapukoor 10% 500g puudub Coopist"),
+    (2695, "maxima", "Kohvikoor 10% 200ml puudub Maximast"),
+    (2698, "rimi", "Vahukoor 35% 200ml puudub Rimist"),
+    (2706, "maxima", "Farmi koogikoor 15% lakt.vaba puudub Maximast — 'lakt.vaba' lühendi tuvastuse test"),
+    (2719, "maxima", "Tere hapukoor 20% lakt.vaba puudub Maximast — sama lühendi test"),
+    (2724, "coop", "Tere vahukoor 35% lakt.vaba puudub Coopist"),
+    (2728, "maxima", "Saare mahe hapukoor 20% lakt.vaba puudub Maximast"),
+
+    # --- Kohv (coffee_beans_ground, caffeine_state kontroll) ---
+    (25430, "coop", "Paulig Juhla Mokka kofeiinivaba 270g — ainult Prismas, kofeiinivaba trait test"),
+    (25493, "rimi", "Jacobs Kronung filtrikohv 500g puudub Rimist"),
+    (25493, "selver", "Jacobs Kronung filtrikohv 500g puudub Selverist"),
+    (25639, "maxima", "Merrild In-Cup tassikohv 400g puudub Maximast"),
+    (25639, "selver", "Merrild In-Cup tassikohv 400g puudub Selverist"),
+
+    # --- Maitseained (spices_herbs_spice_mix, rangem 10%/25% piir) ---
+    (11295, "maxima", "Klassikaline kanamarinaad 75g puudub Maximast"),
+    (11295, "rimi", "Klassikaline kanamarinaad 75g puudub Rimist"),
+    (24856, "maxima", "Hakklihamaitseaine Santa Maria 30g puudub Maximast"),
+    (24866, "maxima", "Kartulimaitseaine Santa Maria 30g puudub Maximast"),
+
+    # --- Joogid (drinks_energy, suhkruvaba trait test) ---
+    (17085, "maxima", "Energiajook Red Bull 4x250ml puudub Maximast"),
+    (17085, "rimi", "Energiajook Red Bull 4x250ml puudub Rimist"),
+    (17086, "coop", "Red Bull Suhkruvaba 250ml puudub Coopist — suhkruvaba trait test"),
+    (17086, "rimi", "Red Bull Suhkruvaba 250ml puudub Rimist — sama trait test"),
+    (17112, "maxima", "Monster Green Zero 500ml puudub Maximast"),
+    (17117, "coop", "Monster Mango Loco 500ml puudub Coopist"),
+    (17117, "maxima", "Monster Mango Loco 500ml puudub Maximast"),
+
+    # --- Õlid (oils_olive, katmata kategooria fail-closed test) ---
+    (14447, "maxima", "Borges ekstra neitsioliivioli fruity 500ml puudub Maximast — oils_olive pole QUANTITY_RULES-is"),
+    (14452, "maxima", "Borges Original ekstra vaarioliivioli 250ml puudub Maximast"),
+    (14454, "maxima", "Borges Original ekstra vaarioliivioli 1L puudub Maximast"),
+
+    # --- Leivad (bakery_bread_loaves, katmata kategooria) ---
+    (5394, "maxima", "Leibur Kuldne 5-vilja röstsai 525g puudub Maximast"),
+    (5394, "rimi", "Leibur Kuldne 5-vilja röstsai 525g puudub Rimist"),
+    (5404, "maxima", "Leibur Kaerasuda 380g puudub Maximast"),
+    (5434, "maxima", "Juuretise peenleib 500g puudub Maximast"),
+    (5448, "coop", "Tõistera Röst 250g puudub Coopist"),
+
+    # --- Küpsised (sweets_biscuits_cookies, katmata kategooria) ---
+    (40966, "maxima", "Šokolaadimaitseline küpsis 163g puudub Maximast"),
+    (40967, "maxima", "Vanillimaitseline küpsis 163g puudub Maximast"),
+    (40973, "maxima", "Mesikäpp Dops küpsis 210g vanilli puudub Maximast"),
+    (40984, "maxima", "Väike Võõnik kaeraküpsis rosinatega 250g puudub Maximast"),
+    (41004, "maxima", "Marmiton kodune kaerakook 400g puudub Maximast"),
+
+    # --- Liha (meat_beef_lamb_game/meat_minced, animal_type kontroll) ---
+    (11571, "maxima", "Rohumaaveise antrekoodi steik 240g puudub Maximast"),
+    (11571, "rimi", "Rohumaaveise antrekoodi steik 240g puudub Rimist"),
+    (11575, "coop", "Rohumaaveise Picanha steik 220g puudub Coopist"),
+    (11575, "maxima", "Rohumaaveise Picanha steik 220g puudub Maximast"),
+    (11578, "coop", "Rohumaaveise burgeripihv 170g puudub Coopist"),
+    (11580, "coop", "Lihaveise lihaloiked 390g puudub Coopist"),
+    (11580, "maxima", "Lihaveise lihaloiked 390g puudub Maximast"),
+    (11594, "coop", "Rakvere veiseklops vasardatud 400g puudub Coopist"),
+    (11612, "rimi", "Linnamäe hirveliha steik 240g puudub Rimist — 'hirv' pole animal_type sõnastikus, edge case"),
+    (11441, "rimi", "Rakvere seahakkliha 400g puudub Rimist — animal_type=pork test"),
+    (11441, "selver", "Rakvere seahakkliha 400g puudub Selverist"),
 ]
 
 
