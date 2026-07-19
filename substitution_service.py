@@ -57,35 +57,45 @@ IDENTITY_TRAITS: dict[str, tuple[str, ...]] = {
     "plant_based": ("taimne", "vegan"),
 }
 
-# Maitsestatud vs maitsestamata — kahesuunaline identity-trait.
-# Leitud reaalse vea põhjal (juuli 2026): Cappuccino/Latte piim asendati
-# vääralt tavalise piimaga (auto_substitute). Bränd/kogus klappisid,
-# aga toote TÜÜP (maitsestatud jook vs tavaline piim) oli erinev —
-# see kontroll väldib seda mõlemas suunas.
+# ---------------- kategooriapõhised identity-kontrollid ----------------
+#
+# ChatGPT arhitektuur (juuli 2026, kolmas ülevaatus): mitte üks globaalne
+# regex-plokk, vaid kategooriapõhine profiil. Iga check-funktsioon
+# tuvastab tekstist ühe omaduse väärtuse (või None, kui ei leitud).
+# _traits_compatible() nõuab, et originaali ja kandidaadi väärtus
+# klapiks AINULT nende check'ide jaoks, mis on IDENTITY_RULES's selle
+# sub_code kohta loetletud — nii ei rakendu nt piima rasvareegel
+# kogemata jogurtile või lihale.
+#
+# Reegel iga check'i kohta: kui originaali väärtus on teada, PEAB
+# kandidaadi väärtus olema teada JA sama (fail-closed). Kui originaali
+# väärtus pole tuvastatav, check ei blokeeri (jääb Claude'i hooleks).
+
 FLAVOR_KEYWORDS = (
     "cappuccino", "latte", "šokolaadi", "shokolaadi", "vanilje",
     "karamelli", "maasika", "banaani", "kookos",
 )
 
 
-def _is_flavored(text) -> bool:
+def _flavour_state(text) -> Optional[str]:
+    """Maitsestatud vs maitsestamata. Leitud reaalse vea põhjal (juuli
+    2026): Cappuccino/Latte piim asendati vääralt tavalise piimaga."""
     if not text:
-        return False
-    text_lower = text.lower()
-    return any(kw in text_lower for kw in FLAVOR_KEYWORDS)
+        return None
+    return "flavored" if any(kw in text.lower() for kw in FLAVOR_KEYWORDS) else "plain"
 
 
-# Piima rasvaprotsendi kategooria — DETERMINISTLIK, mitte Claude'i
-# otsustada. Leitud reaalse vea põhjal: sama originaaltoode (täispiim
-# 3,6-4,2%) sai Coopis vale asenduse (2,5% piim, auto_substitute), aga
-# Selveris õigesti tagasi lükatud — sama sisend, vastandlik tulemus.
-# Regex parsib protsendi tekstist (nt "3,6-4,2%" või "2,5%") ja
-# klassifitseerib kategooriasse.
 _FAT_RANGE_RE = re.compile(r"(\d+[.,]?\d*)\s*-\s*(\d+[.,]?\d*)\s*%")
 _FAT_SINGLE_RE = re.compile(r"(\d+[.,]?\d*)\s*%")
 
 
-def _milk_fat_bucket(text) -> Optional[str]:
+def _milk_fat_class(text) -> Optional[str]:
+    """Piima rasvaprotsendi kategooria. Leitud reaalse vea põhjal: sama
+    originaaltoode sai kahes ketis vastandliku otsuse (Coop lubas,
+    Selver keeldus samast kandidaadist), kuni see kontroll lisati.
+    EI kasutata maitsestatud jookide peal (vt IDENTITY_RULES allpool —
+    fat_class_milk on rakendatud ainult koos flavour_state kontrolliga,
+    mis juba eristab need eraldi)."""
     if not text:
         return None
     normalized = text.replace(",", ".")
@@ -105,12 +115,70 @@ def _milk_fat_bucket(text) -> Optional[str]:
             return None
 
     if pct >= 3.2:
-        return "whole"        # täispiim
+        return "whole"
     if pct >= 2.0:
-        return "standard"     # tavaline (2,5%)
+        return "standard"
     if pct >= 0.5:
-        return "low_fat"      # kooritud/vähendatud (1,5%/1,8%)
-    return "fat_free"         # rasvatu
+        return "low_fat"
+    return "fat_free"
+
+
+ANIMAL_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "beef": ("veise", "veiseliha", "härjaliha"),
+    "pork": ("sea", "sealiha", "seakarbonaad"),
+    "poultry": ("kana", "kalkuni", "kalkun", "linnuliha"),
+    "mixed": ("sea-veise", "veise-sea"),
+    "lamb": ("lamba", "lambaliha"),
+}
+
+
+def _animal_type(text) -> Optional[str]:
+    """Lihaliik (veis/siga/kana/segu). ChatGPT näide: 'veiseliha
+    hakkliha 5%' ei tohi asenduda 'sea-veise hakkliha 20%'-ga lihtsalt
+    kaalu klappimise tõttu."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    # "mixed" enne üksikuid liike, kuna "sea-veise" sisaldab ka "sea"
+    if any(kw in text_lower for kw in ANIMAL_TYPE_KEYWORDS["mixed"]):
+        return "mixed"
+    for animal, keywords in ANIMAL_TYPE_KEYWORDS.items():
+        if animal == "mixed":
+            continue
+        if any(kw in text_lower for kw in keywords):
+            return animal
+    return None
+
+
+def _caffeine_state(text) -> Optional[str]:
+    """Kofeiiniga vs kofeiinivaba (kohv/tee/joogid)."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    if any(kw in text_lower for kw in ("kofeiinivaba", "decaf", "koffeinfri")):
+        return "decaf"
+    return None  # "kofeiiniga" pole tavaliselt eraldi märgitud, jääb tuvastamata
+
+
+# Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
+IDENTITY_CHECKS = {
+    "flavour_state": _flavour_state,
+    "fat_class_milk": _milk_fat_class,
+    "animal_type": _animal_type,
+    "caffeine_state": _caffeine_state,
+}
+
+# Kategooriapõhine profiil — milliseid check'e millise sub_code puhul
+# rakendada. Laiendatav ilma olemasolevaid kategooriaid mõjutamata.
+IDENTITY_RULES: dict[str, list[str]] = {
+    "dairy_milk": ["flavour_state", "fat_class_milk"],
+    "dairy_yogurt_kefir": ["flavour_state"],
+    "meat_minced": ["animal_type"],
+    "meat_beef_lamb_game": ["animal_type"],
+    "coffee_beans_ground": ["caffeine_state"],
+    "coffee_instant": ["caffeine_state"],
+    "tea": ["caffeine_state"],
+}
 
 
 def _detect_traits(text, trait_map):
@@ -125,35 +193,39 @@ def _detect_traits(text, trait_map):
 
 
 def _traits_compatible(original_name, candidate_name, sub_code=None):
+    # Ohutus-trait'id (ühesuunaline): laktoosivaba/gluteenivaba/
+    # alkoholivaba — kui originaalil on, kandidaadil PEAB olema.
     original_required = _detect_traits(original_name, REQUIRED_TRAITS)
     candidate_required = _detect_traits(candidate_name, REQUIRED_TRAITS)
     if not original_required.issubset(candidate_required):
         return False
 
+    # Taimne vs loomne (kahesuunaline, kehtib kõikjal)
     original_identity = _detect_traits(original_name, IDENTITY_TRAITS)
     candidate_identity = _detect_traits(candidate_name, IDENTITY_TRAITS)
     if original_identity != candidate_identity:
         return False
 
-    # Maitsestatud vs maitsestamata (kahesuunaline) — kontrolli ENNE
-    # rasvaprotsendi kontrolli, kuna maitsestatud jookide "rasvaprotsent"
-    # ei vasta tavalise piima rasva-kategooriatele (nt Cappuccino "3,5%"
-    # ei tähenda sama, mis täispiima "3,5%").
-    original_is_flavored = _is_flavored(original_name)
-    candidate_is_flavored = _is_flavored(candidate_name)
-    if original_is_flavored != candidate_is_flavored:
-        return False
+    # Kategooriapõhised identity-kontrollid — AINULT need, mis on
+    # IDENTITY_RULES's selle sub_code kohta loetletud.
+    checks_to_run = list(IDENTITY_RULES.get(sub_code, []))
 
-    # Piima rasvaprotsendi kategooria (ainult dairy_milk JA ainult
-    # maitsestamata piim — maitsestatud jookide puhul jääb see Claude'i
-    # semantilise hinnangu kanda, vt ülal olev kommentaar)
-    if sub_code == "dairy_milk" and not original_is_flavored:
-        o_bucket = _milk_fat_bucket(original_name)
-        c_bucket = _milk_fat_bucket(candidate_name)
-        if o_bucket is not None:
-            if c_bucket is None:
-                return False  # kandidaadi rasvaprotsent teadmata -> turvaliselt keeldu
-            if o_bucket != c_bucket:
+    # Erand: kui toode on maitsestatud (nt Cappuccino/Latte), ei kehti
+    # tavalise piima rasvaprotsendi kategooriad selle peal — "3,5%"
+    # Cappuccino peal ei tähenda sama, mis "3,5%" täispiimal. Sellisel
+    # juhul jääb täpne maitse-tüübi vaste Claude'i semantilise otsuse
+    # kanda (flavour_state check ise juba tagab, et maitsestamata
+    # kandidaat ei läbi).
+    if "flavour_state" in checks_to_run and "fat_class_milk" in checks_to_run:
+        if _flavour_state(original_name) == "flavored":
+            checks_to_run.remove("fat_class_milk")
+
+    for check_name in checks_to_run:
+        check_fn = IDENTITY_CHECKS[check_name]
+        o_val = check_fn(original_name)
+        c_val = check_fn(candidate_name)
+        if o_val is not None:
+            if c_val is None or c_val != o_val:
                 return False
 
     return True
