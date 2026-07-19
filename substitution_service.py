@@ -221,8 +221,9 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
           AND LOWER(s.chain) = $2
           AND pg.id != $3
         ORDER BY
+            pg.id,
             CASE WHEN LOWER(BTRIM(p.net_unit)) = LOWER(BTRIM($5)) THEN 0 ELSE 1 END,
-            pg.id, p.id
+            p.id
         LIMIT $4
         """,
         original["sub_code"], chain, group_id, CANDIDATE_POOL_LIMIT, original_unit,
