@@ -171,12 +171,42 @@ def _caffeine_state(text) -> Optional[str]:
     return None  # "kofeiiniga" pole tavaliselt eraldi märgitud, jääb tuvastamata
 
 
+# Lihalõike tüüp — DETERMINISTLIK. Leitud reaalse vea põhjal (juuli
+# 2026): sama originaaltoode (Rohumaaveise antrekoodi steik) sai
+# vastandliku otsuse kahes ketis — Maxima kiitis heaks asenduse teise
+# lõikega ("erinevus on vaid lõikamisviisis"), Rimi lükkas SAMA
+# põhjendusega tagasi ("ei ole sama tüüp"). Täpselt sama muster mis
+# piima rasvaprotsendi puhul — vajab deterministlikku kontrolli.
+CUT_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "ground": ("hakkliha", "burgeripihv", "klops"),
+    "cubes": ("kuubikud", "lõiked", "loiked", "tükid", "tukid"),
+    "antrekoot": ("antrekoodi", "antrekoot"),
+    "picanha": ("picanha",),
+    "fillet": ("valisfilee", "filee"),
+    "romsteak": ("romsteek", "romsteegi"),
+    "grillsteik": ("grillsteik",),
+    "minute_steak": ("minutisteik",),
+    "karbonaad": ("karbonaad",),
+}
+
+
+def _meat_cut_type(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for cut, keywords in CUT_TYPE_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return cut
+    return None  # tundmatu lõige — ei blokeeri, jääb Claude'i hinnata
+
+
 # Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
 IDENTITY_CHECKS = {
     "flavour_state": _flavour_state,
     "fat_class_milk": _milk_fat_class,
     "animal_type": _animal_type,
     "caffeine_state": _caffeine_state,
+    "cut_type": _meat_cut_type,
 }
 
 # Kategooriapõhine profiil — milliseid check'e millise sub_code puhul
@@ -184,8 +214,11 @@ IDENTITY_CHECKS = {
 IDENTITY_RULES: dict[str, list[str]] = {
     "dairy_milk": ["flavour_state", "fat_class_milk"],
     "dairy_yogurt_kefir": ["flavour_state"],
+    "dairy_cream_sourcream": [],
     "meat_minced": ["animal_type"],
-    "meat_beef_lamb_game": ["animal_type"],
+    "meat_beef_lamb_game": ["animal_type", "cut_type"],
+    "meat_pork": ["animal_type", "cut_type"],
+    "meat_poultry": ["animal_type", "cut_type"],
     "coffee_beans_ground": ["caffeine_state"],
     "coffee_instant": ["caffeine_state"],
     "tea": ["caffeine_state"],
