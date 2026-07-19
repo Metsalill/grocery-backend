@@ -138,6 +138,7 @@ def _effective_qty(net_qty, pack_count) -> Optional[Decimal]:
 QUANTITY_RULES: dict[str, dict[str, int]] = {
     "dairy_milk": {"auto_pct": 20, "suggested_pct": 50},
     "dairy_yogurt_kefir": {"auto_pct": 20, "suggested_pct": 50},
+    "dairy_cream_sourcream": {"auto_pct": 20, "suggested_pct": 50},
     "drinks_soft_soda": {"auto_pct": 20, "suggested_pct": 50},
     "drinks_energy": {"auto_pct": 20, "suggested_pct": 50},
     "spices_herbs_spice_mix": {"auto_pct": 10, "suggested_pct": 25},
