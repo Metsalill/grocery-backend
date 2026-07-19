@@ -153,6 +153,8 @@ QUANTITY_RULES: dict[str, dict[str, int]] = {
     # animal_type identity-kontrolli testimiseks.
     "meat_minced": {"auto_pct": 15, "suggested_pct": 30},
     "meat_beef_lamb_game": {"auto_pct": 15, "suggested_pct": 30},
+    "cheese_regular": {"auto_pct": 15, "suggested_pct": 30},
+    "wine_white": {"auto_pct": 10, "suggested_pct": 20},
     "baby_porridge_cereal": {"auto_pct": 0, "suggested_pct": 0},
     "baby_diapers": {"auto_pct": 0, "suggested_pct": 0},
     "baby_care": {"auto_pct": 0, "suggested_pct": 0},
