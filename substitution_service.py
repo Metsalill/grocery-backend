@@ -100,6 +100,26 @@ _FAT_RANGE_RE = re.compile(r"(\d+[.,]?\d*)\s*-\s*(\d+[.,]?\d*)\s*%")
 _FAT_SINGLE_RE = re.compile(r"(\d+[.,]?\d*)\s*%")
 
 
+def _extract_percent(text) -> Optional[float]:
+    """Jagatud abifunktsioon protsendi eraldamiseks tekstist (nt '3,6-4,2%' -> 3.9)."""
+    if not text:
+        return None
+    normalized = text.replace(",", ".")
+    m = _FAT_RANGE_RE.search(normalized)
+    if m:
+        try:
+            return (float(m.group(1)) + float(m.group(2))) / 2
+        except ValueError:
+            return None
+    m = _FAT_SINGLE_RE.search(normalized)
+    if not m:
+        return None
+    try:
+        return float(m.group(1))
+    except ValueError:
+        return None
+
+
 def _milk_fat_class(text) -> Optional[str]:
     """Piima rasvaprotsendi kategooria. Leitud reaalse vea põhjal: sama
     originaaltoode sai kahes ketis vastandliku otsuse (Coop lubas,
@@ -107,24 +127,9 @@ def _milk_fat_class(text) -> Optional[str]:
     EI kasutata maitsestatud jookide peal (vt IDENTITY_RULES allpool —
     fat_class_milk on rakendatud ainult koos flavour_state kontrolliga,
     mis juba eristab need eraldi)."""
-    if not text:
+    pct = _extract_percent(text)
+    if pct is None:
         return None
-    normalized = text.replace(",", ".")
-    m = _FAT_RANGE_RE.search(normalized)
-    if m:
-        try:
-            pct = (float(m.group(1)) + float(m.group(2))) / 2
-        except ValueError:
-            return None
-    else:
-        m = _FAT_SINGLE_RE.search(normalized)
-        if not m:
-            return None
-        try:
-            pct = float(m.group(1))
-        except ValueError:
-            return None
-
     if pct >= 3.2:
         return "whole"
     if pct >= 2.0:
@@ -132,6 +137,100 @@ def _milk_fat_class(text) -> Optional[str]:
     if pct >= 0.5:
         return "low_fat"
     return "fat_free"
+
+
+def _yogurt_fat_class(text) -> Optional[str]:
+    """Jogurti rasvaprotsendi kategooria — laiemad vahemikud kui piimal,
+    kuna Kreeka jogurt (10%+) on tavaline. ChatGPT proaktiivne audit
+    (juuli 2026): '10% Kreeka jogurt -> 0% joogijogurt' ei tohi olla
+    AUTO — see kontroll väldib seda."""
+    pct = _extract_percent(text)
+    if pct is None:
+        return None
+    if pct >= 6.0:
+        return "greek_high_fat"
+    if pct >= 2.0:
+        return "standard"
+    if pct >= 0.5:
+        return "low_fat"
+    return "fat_free"
+
+
+def _yogurt_form(text) -> Optional[str]:
+    """Joogijogurt vs lusikaga söödav vs Kreeka tüüpi. ChatGPT:
+    'proteiinijogurt -> tavaline jogurt' ei tohi olla AUTO."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    if any(kw in text_lower for kw in ("joogijogurt", "joogi jogurt", "drinking yogurt")):
+        return "drinkable"
+    if any(kw in text_lower for kw in ("kreeka", "greek")):
+        return "greek"
+    if any(kw in text_lower for kw in ("proteiini", "protein")):
+        return "protein"
+    return "regular"
+
+
+CHEESE_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "gouda": ("gouda",),
+    "cheddar": ("cheddar",),
+    "mozzarella": ("mozzarella",),
+    "feta": ("feta",),
+    "halloumi": ("halloumi",),
+    "parmesan": ("parmesan",),
+    "brie": ("brie",),
+    "maasdam": ("maasdam",),
+    "suluguni": ("suluguni",),
+    "kohupiima": ("kohupiim",),
+}
+
+
+def _cheese_type(text) -> Optional[str]:
+    """Juustu tüüp. ChatGPT: 'mozzarella -> Gouda' ei tohi olla AUTO."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    for cheese, keywords in CHEESE_TYPE_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return cheese
+    return None
+
+
+def _cheese_form(text) -> Optional[str]:
+    """Juustu vorm (viilutatud/riivitud/plokk/määrdejuust). ChatGPT:
+    'riivjuust -> juustuplokk' ei tohi olla AUTO."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    if any(kw in text_lower for kw in ("riivitud", "riiv")):
+        return "grated"
+    if any(kw in text_lower for kw in ("viil", "sliced", "viilutatud")):
+        return "sliced"
+    if any(kw in text_lower for kw in ("määrde", "maarde", "spread")):
+        return "spread"
+    return "block"  # vaikimisi plokk, kui ükski erivorm pole mainitud
+
+
+FISH_SPECIES_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "salmon": ("lõhe", "lohe", "salmon"),
+    "cod": ("tursk", "cod"),
+    "herring": ("heeringas", "räim", "raim"),
+    "trout": ("forell", "trout"),
+    "pike": ("haug", "pike"),
+    "tuna": ("tuunikala", "tuna"),
+    "shrimp": ("krevet", "shrimp"),
+}
+
+
+def _fish_species(text) -> Optional[str]:
+    """Kalaliik. ChatGPT proaktiivne audit."""
+    if not text:
+        return None
+    text_lower = text.lower()
+    for species, keywords in FISH_SPECIES_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return species
+    return None
 
 
 ANIMAL_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
@@ -234,16 +333,20 @@ def _flavour_profile(text) -> Optional[str]:
 IDENTITY_CHECKS = {
     "flavour_state": _flavour_state,
     "fat_class_milk": _milk_fat_class,
+    "fat_class_yogurt": _yogurt_fat_class,
+    "yogurt_form": _yogurt_form,
     "animal_type": _animal_type,
     "caffeine_state": _caffeine_state,
     "cut_type": _meat_cut_type,
+    "cheese_type": _cheese_type,
+    "cheese_form": _cheese_form,
+    "fish_species": _fish_species,
 }
 
-# hard_match: erinevus EEMALDAB kandidaadi täielikult (praegune
-# IDENTITY_RULES käitumine, muutmata).
+# hard_match: erinevus EEMALDAB kandidaadi täielikult.
 IDENTITY_RULES: dict[str, list[str]] = {
     "dairy_milk": ["flavour_state", "fat_class_milk"],
-    "dairy_yogurt_kefir": ["flavour_state"],
+    "dairy_yogurt_kefir": ["flavour_state", "fat_class_yogurt", "yogurt_form"],
     "dairy_cream_sourcream": [],
     "meat_minced": ["animal_type"],
     "meat_beef_lamb_game": ["animal_type", "cut_type"],
@@ -252,6 +355,21 @@ IDENTITY_RULES: dict[str, list[str]] = {
     "coffee_beans_ground": ["caffeine_state"],
     "coffee_instant": ["caffeine_state"],
     "tea": ["caffeine_state"],
+    "cheese_regular": ["cheese_type", "cheese_form"],
+    "dairy_cheese_slices": ["cheese_type", "cheese_form"],
+    "cheese_delicatessen": ["cheese_type", "cheese_form"],
+    "fish_fresh": ["fish_species"],
+    "fish_salted_smoked": ["fish_species"],
+    "fish_processed": ["fish_species"],
+}
+
+# Kategooriad, kus AUTO on TÄIELIKULT keelatud, sõltumata kogusest või
+# muudest kontrollidest. ChatGPT proaktiivne audit (juuli 2026):
+# vein on kõrge riskiga (viinamarjasort, kuiv/magus, aastakäik jne
+# ei ole kõik struktureeritavad) — kuni eraldi reeglistik on valmis,
+# jäägu kõik veini asendused SUGGESTED tasemele.
+AUTO_DISABLED_SUB_CODES = {
+    "wine_red", "wine_white", "wine_rose", "wine_sparkling", "wine_sweet",
 }
 
 # downgrade: erinevus EI eemalda kandidaati, vaid langetab tier'i
@@ -500,6 +618,11 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
             if o_val is not None and c_val is not None and o_val != c_val:
                 if effective_tier == QuantityTier.AUTO:
                     effective_tier = QuantityTier.SUGGESTED
+
+        # Kategooriad, kus AUTO on täielikult keelatud (nt vein) —
+        # sõltumata kogusest, langeb alati vähemalt SUGGESTED tasemele.
+        if original["sub_code"] in AUTO_DISABLED_SUB_CODES and effective_tier == QuantityTier.AUTO:
+            effective_tier = QuantityTier.SUGGESTED
 
         quantity_eligible.append({
             "id": c["id"],
