@@ -433,9 +433,59 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
     return all_products
 
 
-def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
+CHUNK_SIZE = 25  # keep individual executemany() batches small so a mid-write
+                 # connection drop (e.g. during a Postgres checkpoint) only
+                 # costs one small chunk, not the whole category.
+
+
+def _reconnect(old_conn):
+    try:
+        old_conn.close()
+    except Exception:
+        pass
+    conn = psycopg2.connect(get_db_url())
+    conn.autocommit = False
+    return conn
+
+
+def _execute_chunk(conn, sql, chunk):
+    """Run one small executemany(); on connection loss, reconnect once and
+    retry the SAME chunk. Returns (conn, ok_count, err_count)."""
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(sql, chunk)
+        conn.commit()
+        return conn, len(chunk), 0
+    except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+        print(f"[warn] connection lost mid-chunk, reconnecting: {e}", file=sys.stderr)
+        conn = _reconnect(conn)
+        try:
+            with conn.cursor() as cur:
+                cur.executemany(sql, chunk)
+            conn.commit()
+            return conn, len(chunk), 0
+        except Exception as e2:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            print(f"[warn] chunk retry after reconnect also failed: {e2}", file=sys.stderr)
+            return conn, 0, len(chunk)
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"[warn] chunk upsert failed: {e}", file=sys.stderr)
+        return conn, 0, len(chunk)
+
+
+def upsert_batch(conn, rows: list[dict], store_id: int):
+    """Returns (conn, ok, errors) — conn may be a fresh connection object if
+    a reconnect happened, so the caller must use the returned conn going
+    forward."""
     if not rows:
-        return 0, 0
+        return conn, 0, 0
 
     ts_now = datetime.datetime.now(datetime.timezone.utc)
     sql = """
@@ -462,15 +512,15 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
         for row in rows
     ]
 
-    try:
-        with conn.cursor() as cur:
-            cur.executemany(sql, payload)
-        conn.commit()
-        return len(payload), 0
-    except Exception as e:
-        conn.rollback()
-        print(f"[warn] batch upsert failed: {e}", file=sys.stderr)
-        return 0, len(payload)
+    total_ok = 0
+    total_err = 0
+    for i in range(0, len(payload), CHUNK_SIZE):
+        chunk = payload[i:i + CHUNK_SIZE]
+        conn, ok, err = _execute_chunk(conn, sql, chunk)
+        total_ok += ok
+        total_err += err
+
+    return conn, total_ok, total_err
 
 
 def main():
@@ -500,7 +550,7 @@ def main():
         if not products:
             print(f"[warn] {cat} → 0 products", file=sys.stderr)
             continue
-        ok, errors = upsert_batch(conn, products, args.store_id)
+        conn, ok, errors = upsert_batch(conn, products, args.store_id)
         total_ok += ok
         total_errors += errors
         print(f"[done] {cat} → upserted {ok}, errors {errors}", file=sys.stderr)
