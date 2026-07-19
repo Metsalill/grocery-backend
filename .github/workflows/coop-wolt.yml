@@ -221,11 +221,6 @@ jobs:
           ts_now = datetime.datetime.now(datetime.timezone.utc)
 
           with psycopg.connect(db_url) as conn:
-              # Disable mirror trigger to prevent pipeline mode deadlocks.
-              # Each Wolt store ingested separately so mirroring not needed here.
-              conn.execute("ALTER TABLE prices DISABLE TRIGGER trg_prices_mirror_from_online")
-              conn.commit()
-              print("[ingest] mirror trigger disabled")
               try:
                   for csv_path in csvs:
                       print(f"[ingest] processing {csv_path}")
@@ -300,9 +295,7 @@ jobs:
                       total_errors += errors
 
               finally:
-                  conn.execute("ALTER TABLE prices ENABLE TRIGGER trg_prices_mirror_from_online")
-                  conn.commit()
-                  print("[ingest] mirror trigger re-enabled")
+                  pass
 
           print(f"\n[done] Total: {total_sent} rows upserted, {total_errors} errors")
           PYEOF
