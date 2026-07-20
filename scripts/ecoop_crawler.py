@@ -414,9 +414,6 @@ def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
 
     try:
         with psycopg.connect(dsn) as conn:
-            conn.execute("ALTER TABLE prices DISABLE TRIGGER trg_prices_mirror_from_online")
-            conn.commit()
-            print("[ecoop] mirror trigger disabled")
             try:
                 sent = 0
                 errors = 0
@@ -440,9 +437,7 @@ def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
                                 errors += len(batch)
                 print(f"[ecoop] done: {sent} upserted, {errors} errors")
             finally:
-                conn.execute("ALTER TABLE prices ENABLE TRIGGER trg_prices_mirror_from_online")
-                conn.commit()
-                print("[ecoop] mirror trigger re-enabled")
+                pass
     except Exception as e:
         print(f"[ecoop] DB connection failed: {e}")
 
