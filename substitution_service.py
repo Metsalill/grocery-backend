@@ -329,6 +329,47 @@ def _flavour_profile(text) -> Optional[str]:
     return None
 
 
+# Üldine maitsevariandi tuvastus (puuvili/maitse) — LAIEM kui
+# FLAVOUR_PROFILE_KEYWORDS (mis on marinaadi-spetsiifiline). Leitud
+# reaalse vea põhjal (juuli 2026): Monster Mango Loco sai auto_substitute
+# Monster Rio Punchiga, jogurti banaani-maasika maitse sai auto_substitute
+# maasika-pohla maitsega — sama "erinev maitsevariant" muster mis
+# marinaadidel, aga laiema sõnavaraga (puuviljad, mitte marinaadistiilid).
+# DOWNGRADE (mitte hard_match): erinev maitse ei eemalda kandidaati,
+# vaid langetab AUTO->SUGGESTED (ChatGPT juhis).
+FLAVOUR_VARIANT_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "strawberry": ("maasika",),
+    "wild_strawberry": ("metsmaasika",),
+    "banana": ("banaani",),
+    "blueberry": ("mustika",),
+    "peach": ("virsiku",),
+    "apricot": ("aprikoosi",),
+    "mango": ("mango",),
+    "cherry": ("kirsi",),
+    "orange": ("apelsini",),
+    "lemon": ("sidruni",),
+    "raspberry": ("vaarika",),
+    "pear": ("pirni",),
+    "coconut": ("kookos",),
+    "vanilla": ("vanilje",),
+    "chocolate": ("šokolaadi", "shokolaadi"),
+    "caramel": ("karamelli",),
+    "passion_fruit": ("passiooni",),
+    "kiwi": ("kiivi",),
+    "rhubarb": ("rabarberi",),
+}
+
+
+def _flavour_variant(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for variant, keywords in FLAVOUR_VARIANT_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return variant
+    return None  # maitsestamata VÕI tundmatu maitse — ei blokeeri
+
+
 # Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
 IDENTITY_CHECKS = {
     "flavour_state": _flavour_state,
@@ -377,10 +418,14 @@ AUTO_DISABLED_SUB_CODES = {
 # maitsevariant -> maksimaalselt SUGGESTED, mitte reject".
 DOWNGRADE_CHECKS = {
     "flavour_profile": _flavour_profile,
+    "flavour_variant": _flavour_variant,
 }
 
 DOWNGRADE_RULES: dict[str, list[str]] = {
     "spices_herbs_spice_mix": ["flavour_profile"],
+    "dairy_yogurt_kefir": ["flavour_variant"],
+    "drinks_energy": ["flavour_variant"],
+    "drinks_soft_soda": ["flavour_variant"],
 }
 
 
@@ -615,7 +660,15 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
             check_fn = DOWNGRADE_CHECKS[check_name]
             o_val = check_fn(original_sample_name)
             c_val = check_fn(c["sample_product_name"])
-            if o_val is not None and c_val is not None and o_val != c_val:
+            # Fail-safe: kui originaalil on tuvastatud konkreetne
+            # maitse/profiil, aga kandidaadil pole TÄPSELT sama (isegi
+            # kui kandidaadi maitse jäi tuvastamata, nt bränditud nimi
+            # nagu "Rio Punch" ei sisalda üldist puuviljasõna) — silla
+            # SEE loetakse erinevuseks, mitte vaikimisi sobivaks.
+            # Leitud reaalse vea põhjal: "Mango Loco" (tuvastati "mango")
+            # vs "Rio Punch" (ei tuvastatud midagi) läks vääralt läbi,
+            # kui nõuti, et MÕLEMAD peavad olema tuvastatud.
+            if o_val is not None and c_val != o_val:
                 if effective_tier == QuantityTier.AUTO:
                     effective_tier = QuantityTier.SUGGESTED
 
