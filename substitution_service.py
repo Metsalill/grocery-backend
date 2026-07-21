@@ -35,7 +35,16 @@ ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 API_TIMEOUT_SECONDS = 6.0
 
 MAX_SEMANTIC_CANDIDATES = 8
-CANDIDATE_POOL_LIMIT = 150
+# Turvapiir (mitte reaalne valikupiir!) — kaitseb ainult haruldase
+# extreemselt suure kategooria eest (nt tuhandeid tooteid). ChatGPT
+# leid (juuli 2026): kui see oli varem 150 ja rakendus ENNE Python
+# koguse-lähedus-sortimist, jäi parim kandidaat mõnikord valimist
+# välja (nägime sql_candidate_count=150 reaalses testis — limiit oli
+# tegelikult rakendunud, mitte ainult teoreetiline risk). Nüüd on
+# SQL-i ORDER BY ainult deterministlik (pg.id, p.id), TEGELIK
+# lähedus-sortimine toimub Pythonis KÕIGI toodud kandidaatide peal,
+# alles siis kärbitakse Claude'i jaoks (MAX_SEMANTIC_CANDIDATES).
+CANDIDATE_POOL_LIMIT = 2000
 
 _TTL_BY_DECISION = {
     "auto_substitute": timedelta(days=7),
@@ -299,75 +308,103 @@ def _meat_cut_type(text) -> Optional[str]:
     return None  # tundmatu lõige — ei blokeeri, jääb Claude'i hinnata
 
 
-# Maitseprofiil (marinaadid/kastmed) — see EI OLE hard_match nagu
-# ülejäänud (mis kandidaadi täielikult välja jätavad). ChatGPT
-# arhitektuur (neljas ülevaatus): erinevalt piimast/lihast on
-# maitseainetel legitiimselt palju maitsevariante — seega erinev
-# maitseprofiil ei tohi kandidaati välistada, vaid ALANDAB tier'i
-# AUTO'lt SUGGESTED'ile (leitud reaalse vea põhjal: "Klassikaline
-# kanamarinaad" sai vääralt auto_substitute "Magus tšillimarinaadiga").
+# --- DOWNGRADE check'id: erinevus EI eemalda kandidaati, vaid
+# langetab tier'i AUTO'lt SUGGESTED'ile. ChatGPT (viies ülevaatus):
+# kõik downgrade check'id tagastavad frozenset (MITTE üksik väärtus —
+# esimene versioon tagastas ainult esimese leitud sõna ja lõikas
+# valesti, nt "banaani-maasika" ja "maasika-pohla" oleksid mõlemad
+# tagastanud "strawberry", kuna funktsioon peatus esimesel leitud
+# sõnal). Võrdlus on SÜMMEETRILINE: kui kummalgi poolel on väärtusi
+# JA hulgad erinevad, langetatakse tier — mitte ainult siis, kui
+# originaalil on väärtus.
+
 FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "classic": ("klassikaline",),
-    "sweet_chili": ("tšilli", "tsilli", "chili"),
-    "teriyaki": ("teriyaki",),
-    "bbq": ("bbq",),
-    "garlic": ("küüslaugu", "kuusklaugu"),
-    "lemon_herb": ("sidruni", "ürdi", "urdi"),
-    "smoky": ("suitsu",),
-    "spicy": ("terav", "vürtsikas", "vurtsikas"),
-    "mild": ("mahe",),
+    "classic": (r"\bklassikali\w*",),
+    "sweet_chili": (r"\btšilli\w*", r"\btsilli\w*", r"\bchili\w*"),
+    "teriyaki": (r"\bteriyaki\b",),
+    "bbq": (r"\bbbq\b",),
+    "garlic": (r"\bküüslaugu\w*", r"\bkuusklaugu\w*"),
+    "lemon_herb": (r"\bsidruni\w*", r"\bürdi\w*", r"\burdi\w*"),
+    "smoky": (r"\bsuitsu\w*",),
+    "spicy": (r"\bterav\w*", r"\bvürtsika\w*", r"\bvurtsika\w*"),
+    "mild": (r"\bmahe\b",),
+}
+
+# Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
+# vältida valesid tabamusi liitsõnades (nt "maasika" ei tohi tabada
+# "metsmaasika" seest — negative lookbehind väldib seda).
+FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
+    "wild_strawberry": (r"\bmetsmaasika\w*",),
+    "strawberry": (r"(?<!mets)\bmaasika\w*",),
+    "banana": (r"\bbanaani\w*",),
+    "blueberry": (r"\bmustika\w*",),
+    "peach": (r"\bvirsiku\w*",),
+    "apricot": (r"\baprikoosi\w*",),
+    "mango": (r"\bmango\w*",),
+    "cherry": (r"\bkirsi\w*",),
+    "orange": (r"\bapelsini\w*",),
+    "lemon": (r"\bsidruni\w*",),
+    "raspberry": (r"\bvaarika\w*",),
+    "pear": (r"\bpirni\w*",),
+    "coconut": (r"\bkookos\w*",),
+    "vanilla": (r"\bvanilje\w*",),
+    "chocolate": (r"\bšokolaadi\w*", r"\bshokolaadi\w*"),
+    "caramel": (r"\bkaramelli\w*",),
+    "passion_fruit": (r"\bpassiooni\w*",),
+    "kiwi": (r"\bkiivi\w*",),
+    "rhubarb": (r"\brabarberi\w*",),
+    "pohla": (r"\bpohla\w*",),
+    "blackcurrant": (r"\bmustsõstra\w*", r"\bmustsostra\w*"),
+    "redcurrant": (r"\bpunas[eõ]stra\w*",),
+    "forest_berries": (r"\bmetsamarja\w*",),
+    "apple": (r"\bõuna\w*", r"\bouna\w*"),
+    "pineapple": (r"\banan[ae]ssi\w*",),
+    "grape": (r"\bviinamarja\w*",),
+    "watermelon": (r"\barbuusi\w*",),
+    "tropical": (r"\btroopili\w*",),
+}
+
+# Juustu modifikaatorid — ChatGPT viies ülevaatus: "Kadaka", "viskiga"
+# jms ei ole hard_match (ei eemalda kandidaati), vaid downgrade.
+CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
+    "whisky": (r"\bviski\w*", r"\bwhisky\b"),
+    "truffle": (r"\btrühvli\w*", r"\btruffel\w*"),
+    "juniper": (r"\bkadaka\w*",),
+    "jalapeno": (r"\bjalape[nñ]o\w*", r"\btšilli\w*", r"\btsilli\w*"),
+    "smoked": (r"\bsuitsu\w*",),
+    "herbs": (r"\bürdi\w*", r"\burdi\w*"),
+    "garlic": (r"\bküüslaugu\w*", r"\bkuusklaugu\w*"),
+    "pepper": (r"\bpipra\w*",),
+    "walnut": (r"\bpähkli\w*", r"\bpahkli\w*"),
+    "caraway": (r"\bköömne\w*", r"\bkoomne\w*"),
+    "wine": (r"\bveini\w*", r"\bportveini\w*"),
 }
 
 
-def _flavour_profile(text) -> Optional[str]:
+def _match_variants(text, patterns: dict[str, tuple[str, ...]]) -> frozenset:
+    """Tagastab KÕIK sobivad variandid (mitte ainult esimese)."""
     if not text:
-        return None
+        return frozenset()
     text_lower = text.lower()
-    for profile, keywords in FLAVOUR_PROFILE_KEYWORDS.items():
-        if any(kw in text_lower for kw in keywords):
-            return profile
-    return None
+    found = set()
+    for variant, regex_list in patterns.items():
+        for pattern in regex_list:
+            if re.search(pattern, text_lower):
+                found.add(variant)
+                break
+    return frozenset(found)
 
 
-# Üldine maitsevariandi tuvastus (puuvili/maitse) — LAIEM kui
-# FLAVOUR_PROFILE_KEYWORDS (mis on marinaadi-spetsiifiline). Leitud
-# reaalse vea põhjal (juuli 2026): Monster Mango Loco sai auto_substitute
-# Monster Rio Punchiga, jogurti banaani-maasika maitse sai auto_substitute
-# maasika-pohla maitsega — sama "erinev maitsevariant" muster mis
-# marinaadidel, aga laiema sõnavaraga (puuviljad, mitte marinaadistiilid).
-# DOWNGRADE (mitte hard_match): erinev maitse ei eemalda kandidaati,
-# vaid langetab AUTO->SUGGESTED (ChatGPT juhis).
-FLAVOUR_VARIANT_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "strawberry": ("maasika",),
-    "wild_strawberry": ("metsmaasika",),
-    "banana": ("banaani",),
-    "blueberry": ("mustika",),
-    "peach": ("virsiku",),
-    "apricot": ("aprikoosi",),
-    "mango": ("mango",),
-    "cherry": ("kirsi",),
-    "orange": ("apelsini",),
-    "lemon": ("sidruni",),
-    "raspberry": ("vaarika",),
-    "pear": ("pirni",),
-    "coconut": ("kookos",),
-    "vanilla": ("vanilje",),
-    "chocolate": ("šokolaadi", "shokolaadi"),
-    "caramel": ("karamelli",),
-    "passion_fruit": ("passiooni",),
-    "kiwi": ("kiivi",),
-    "rhubarb": ("rabarberi",),
-}
+def _flavour_profile_set(text) -> frozenset:
+    return _match_variants(text, {k: v for k, v in FLAVOUR_PROFILE_KEYWORDS.items()})
 
 
-def _flavour_variant(text) -> Optional[str]:
-    if not text:
-        return None
-    text_lower = text.lower()
-    for variant, keywords in FLAVOUR_VARIANT_KEYWORDS.items():
-        if any(kw in text_lower for kw in keywords):
-            return variant
-    return None  # maitsestamata VÕI tundmatu maitse — ei blokeeri
+def _flavour_variants(text) -> frozenset:
+    return _match_variants(text, FLAVOUR_VARIANT_PATTERNS)
+
+
+def _cheese_modifiers(text) -> frozenset:
+    return _match_variants(text, CHEESE_MODIFIER_PATTERNS)
 
 
 # Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
@@ -406,19 +443,16 @@ IDENTITY_RULES: dict[str, list[str]] = {
 
 # Kategooriad, kus AUTO on TÄIELIKULT keelatud, sõltumata kogusest või
 # muudest kontrollidest. ChatGPT proaktiivne audit (juuli 2026):
-# vein on kõrge riskiga (viinamarjasort, kuiv/magus, aastakäik jne
-# ei ole kõik struktureeritavad) — kuni eraldi reeglistik on valmis,
-# jäägu kõik veini asendused SUGGESTED tasemele.
+# vein on kõrge riskiga — kuni eraldi reeglistik on valmis, jäägu
+# kõik veini asendused SUGGESTED tasemele.
 AUTO_DISABLED_SUB_CODES = {
     "wine_red", "wine_white", "wine_rose", "wine_sparkling", "wine_sweet",
 }
 
-# downgrade: erinevus EI eemalda kandidaati, vaid langetab tier'i
-# AUTO'lt SUGGESTED'ile (included_in_total=False). ChatGPT: "erinev
-# maitsevariant -> maksimaalselt SUGGESTED, mitte reject".
 DOWNGRADE_CHECKS = {
-    "flavour_profile": _flavour_profile,
-    "flavour_variant": _flavour_variant,
+    "flavour_profile": _flavour_profile_set,
+    "flavour_variant": _flavour_variants,
+    "cheese_modifier": _cheese_modifiers,
 }
 
 DOWNGRADE_RULES: dict[str, list[str]] = {
@@ -426,6 +460,9 @@ DOWNGRADE_RULES: dict[str, list[str]] = {
     "dairy_yogurt_kefir": ["flavour_variant"],
     "drinks_energy": ["flavour_variant"],
     "drinks_soft_soda": ["flavour_variant"],
+    "cheese_regular": ["cheese_modifier"],
+    "dairy_cheese_slices": ["cheese_modifier"],
+    "cheese_delicatessen": ["cheese_modifier"],
 }
 
 
@@ -488,13 +525,20 @@ class SubstitutionTimeout(Exception):
     pass
 
 
-async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
+async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_cache=True):
     """
     Tagastab dict tulemuse + "trace" alamvõtme täieliku otsustusahelaga,
     või None tehnilise vea korral (timeout, vigane API vastus).
 
     dry_run=True: _save() EI kutsuta kunagi (KIHT 1 kaitsest). Kuivtesti
     skript peab lisaks avama read-only DB transaktsiooni (KIHT 2).
+
+    use_cache=False: cache't EI loeta ega kirjutata üldse — iga kutse
+    arvutab otsuse täiesti värskelt. KRIITILINE dry-run testimisel:
+    ilma selleta oleks dry_run=True ikkagi tagastanud VANA (nt v4/v5
+    koodiversiooniga arvutatud) cache'itud tulemuse, mitte reaalselt
+    uue koodiga ümber arvutatud otsuse — leitud ChatGPT ülevaatuse
+    käigus, juuli 2026.
     """
     chain = chain.lower()
     trace = {
@@ -507,6 +551,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         "trait_eligible_count": 0,
         "claude_candidate_count": 0,
         "dry_run": dry_run,
+        "cache_enabled": use_cache,
         "database_write_attempted": False,
         "cache_hit": False,
     }
@@ -514,22 +559,24 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
     async def _finish(result, save=True):
         if save:
             trace["database_write_attempted"] = True
-            if not dry_run:
+            if not dry_run and use_cache:
                 await _save(conn, group_id, chain, result)
         result["trace"] = trace
         return result
 
-    existing = await conn.fetchrow(
-        """
-        SELECT decision_type, substitute_group_id, included_in_total,
-               quantity_diff_percent, reasoning
-        FROM product_substitutions
-        WHERE original_group_id = $1 AND chain = $2
-          AND substitution_rules_version = $3
-          AND expires_at > NOW()
-        """,
-        group_id, chain, SUBSTITUTION_RULES_VERSION,
-    )
+    existing = None
+    if use_cache:
+        existing = await conn.fetchrow(
+            """
+            SELECT decision_type, substitute_group_id, included_in_total,
+                   quantity_diff_percent, reasoning
+            FROM product_substitutions
+            WHERE original_group_id = $1 AND chain = $2
+              AND substitution_rules_version = $3
+              AND expires_at > NOW()
+            """,
+            group_id, chain, SUBSTITUTION_RULES_VERSION,
+        )
 
     if existing:
         trace["cache_hit"] = True
@@ -568,6 +615,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         WHERE m.group_id = $1
           AND p.net_qty IS NOT NULL AND p.net_qty > 0
           AND p.net_unit IS NOT NULL AND BTRIM(p.net_unit) <> ''
+        ORDER BY p.id
         LIMIT 1
         """,
         group_id,
@@ -579,6 +627,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
             FROM product_group_members m
             JOIN products p ON p.id = m.product_id
             WHERE m.group_id = $1
+            ORDER BY p.id
             LIMIT 1
             """,
             group_id,
@@ -621,9 +670,11 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         WHERE pg.sub_code = $1
           AND LOWER(s.chain) = $2
           AND pg.id != $3
+          AND pr.price IS NOT NULL AND pr.price > 0
         ORDER BY
             pg.id,
             CASE WHEN LOWER(BTRIM(p.net_unit)) = LOWER(BTRIM($5)) THEN 0 ELSE 1 END,
+            CASE WHEN p.net_qty IS NOT NULL AND p.net_qty > 0 THEN 0 ELSE 1 END,
             p.id
         LIMIT $4
         """,
@@ -658,17 +709,15 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False):
         # tier'i (nt marinaadi maitseprofiil) — EI TÕSTA kunagi üles.
         for check_name in downgrade_checks:
             check_fn = DOWNGRADE_CHECKS[check_name]
-            o_val = check_fn(original_sample_name)
-            c_val = check_fn(c["sample_product_name"])
-            # Fail-safe: kui originaalil on tuvastatud konkreetne
-            # maitse/profiil, aga kandidaadil pole TÄPSELT sama (isegi
-            # kui kandidaadi maitse jäi tuvastamata, nt bränditud nimi
-            # nagu "Rio Punch" ei sisalda üldist puuviljasõna) — silla
-            # SEE loetakse erinevuseks, mitte vaikimisi sobivaks.
-            # Leitud reaalse vea põhjal: "Mango Loco" (tuvastati "mango")
-            # vs "Rio Punch" (ei tuvastatud midagi) läks vääralt läbi,
-            # kui nõuti, et MÕLEMAD peavad olema tuvastatud.
-            if o_val is not None and c_val != o_val:
+            o_values = check_fn(original_sample_name)
+            c_values = check_fn(c["sample_product_name"])
+            # Sümmeetriline võrdlus (ChatGPT viies ülevaatus): kui
+            # KUMMALGI poolel on tuvastatud väärtusi JA hulgad
+            # erinevad, langetatakse tier — mitte ainult siis, kui
+            # originaalil on väärtus. See püüab kinni ka "tavaline
+            # cheddar -> cheddar viskiga" suuna, mitte ainult
+            # vastupidise.
+            if o_values != c_values and (o_values or c_values):
                 if effective_tier == QuantityTier.AUTO:
                     effective_tier = QuantityTier.SUGGESTED
 
