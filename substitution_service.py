@@ -1,5 +1,5 @@
 """
-Seivy — asendustoodete teenus (v4, juuli 2026).
+Seivy — asendustoodete teenus (v4.2, juuli 2026).
 
 v4 muudatused (ChatGPT teine arvustus):
 - dry_run parameeter: kui True, ei kutsuta _save()-i KUNAGI (KIHT 1
@@ -15,6 +15,31 @@ v4.1 muudatus (KeyError parandus, juuli 2026): trace'ile lisatud
 puuduolev "save_path_reached" väli + database_write_attempted
 loogika parandatud nii, et see on True AINULT reaalse DB-kirjutuse
 korral (mitte iga kord kui salvestuskohani jõuti).
+
+v4.2 muudatused (juuli 2026, Claude'i enda ülevaatus ChatGPT tagasiside
+põhjal — igaüks eraldi hinnatud, mitte pimesi üle võetud):
+- CHEESE_MODIFIER_PATTERNS: ingliskeelsed märksõnad lisatud (wine,
+  whisky, truffle jne) — Wyke Farms "White Wine Cheddar" vs "Ivy
+  Vintage Cheddar" oleks varem mõlemad tagastanud frozenset() ja
+  downgrade poleks rakendunud. REAALNE viga, kinnitatud koodist.
+- _flavour_state: kasutab nüüd ka _flavour_variants sõnastikku, mitte
+  ainult kitsast FLAVOR_KEYWORDS loendit — "kirsi jogurt" oleks varem
+  vääralt "plain" saanud, kuna "kirsi" polnud FLAVOR_KEYWORDS's.
+  REAALNE viga, tuvastatud isegi käesoleva sessiooni enda testivalimis
+  (juhtum: Profeel proteiinijogurtijook kirsi 275g).
+- _product_identity_text(): uus abifunktsioon, ühendab canonical_name +
+  sample_product_name + brand. Kasutatakse nüüd nii hard_check'ides kui
+  downgrade_check'ides sample-nime asemel — turvaline suund (rohkem
+  teksti saab ainult RANGEMAKS teha, mitte lubavamaks).
+- AUTO_DISABLED_SUB_CODES laiendatud kogu alkoholile (õlu/siider/
+  kanged alkoholid), mitte ainult veinile — ühesuunaline turvapiirang.
+- BABY_FOOD_SUB_CODES laiendatud (baby_formula, baby_food_jars,
+  baby_food_pouches, baby_snacks lisatud) — sama põhimõte.
+- TEADLIKULT EI TEHTUD: CATEGORY_IDENTITY_PROFILES täielik policy-
+  raamistiku refaktor. Mõlemad leitud vead olid sõnavara-lüngad, mitte
+  struktuuriprobleemid — sama otsus, mis eelmises sessioonis juba
+  tehti. Suur refaktor praeguses faasis lisaks regressiooniriski ilma
+  käitumusliku kasuta.
 
 See fail on hetkel ISOLEERITUD — compare_service.py ei impordi seda.
 """
@@ -104,10 +129,23 @@ FLAVOR_KEYWORDS = (
 
 def _flavour_state(text) -> Optional[str]:
     """Maitsestatud vs maitsestamata. Leitud reaalse vea põhjal (juuli
-    2026): Cappuccino/Latte piim asendati vääralt tavalise piimaga."""
+    2026): Cappuccino/Latte piim asendati vääralt tavalise piimaga.
+
+    v4.2: kasutab nüüd LISAKS ka _flavour_variants sõnastikku (mets-
+    maasika/kirsi/banaani/virsiku jne), mitte ainult kitsast
+    FLAVOR_KEYWORDS loendit. Varem oleks nt 'Profeel proteiinijogurti-
+    jook kirsi 275g' tagastanud vääralt 'plain', kuna 'kirsi' polnud
+    FLAVOR_KEYWORDS's — ainult FLAVOUR_VARIANT_PATTERNS's. See on
+    reaalne, tuvastatud viga (mitte teoreetiline), nähtud käesoleva
+    sessiooni enda testivalimis."""
     if not text:
         return None
-    return "flavored" if any(kw in text.lower() for kw in FLAVOR_KEYWORDS) else "plain"
+    text_lower = text.lower()
+    if any(kw in text_lower for kw in FLAVOR_KEYWORDS):
+        return "flavored"
+    if _flavour_variants(text_lower):
+        return "flavored"
+    return "plain"
 
 
 _FAT_RANGE_RE = re.compile(r"(\d+[.,]?\d*)\s*-\s*(\d+[.,]?\d*)\s*%")
@@ -338,6 +376,9 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
 # Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
 # vältida valesid tabamusi liitsõnades (nt "maasika" ei tohi tabada
 # "metsmaasika" seest — negative lookbehind väldib seda).
+#
+# v4.2: pineapple ja redcurrant mustritele lisatud täiendavad
+# kirjapildivariandid (ChatGPT leid) — madal risk, laiendab katvust.
 FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
     "wild_strawberry": (r"\bmetsmaasika\w*",),
     "strawberry": (r"(?<!mets)\bmaasika\w*",),
@@ -360,10 +401,10 @@ FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
     "rhubarb": (r"\brabarberi\w*",),
     "pohla": (r"\bpohla\w*",),
     "blackcurrant": (r"\bmustsõstra\w*", r"\bmustsostra\w*"),
-    "redcurrant": (r"\bpunas[eõ]stra\w*",),
+    "redcurrant": (r"\bpunas[eõ]stra\w*", r"\bpunase\s+sõstra\w*", r"\bredcurrant\w*"),
     "forest_berries": (r"\bmetsamarja\w*",),
     "apple": (r"\bõuna\w*", r"\bouna\w*"),
-    "pineapple": (r"\banan[ae]ssi\w*",),
+    "pineapple": (r"\banan[ae]ssi\w*", r"\bananasi\w*", r"\bpineapple\w*"),
     "grape": (r"\bviinamarja\w*",),
     "watermelon": (r"\barbuusi\w*",),
     "tropical": (r"\btroopili\w*",),
@@ -371,18 +412,26 @@ FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
 
 # Juustu modifikaatorid — ChatGPT viies ülevaatus: "Kadaka", "viskiga"
 # jms ei ole hard_match (ei eemalda kandidaati), vaid downgrade.
+#
+# v4.2 PARANDUS: lisatud ingliskeelsed märksõnad (wine, whisky, truffle
+# jne). Varasem versioon tuvastas ainult eestikeelseid vorme ("veini",
+# "viski"), mistõttu "White Wine Cheddar" ja "Ivy Vintage Cheddar"
+# oleksid MÕLEMAD tagastanud tühja frozenset()-i — hulgad võrdsed,
+# downgrade ei rakendu. See on REAALNE viga (kinnitatud koodist, mitte
+# ainult ChatGPT väitel), mis eelmises sessioonis jäi lahendamata,
+# kuigi mälestustes märgiti see valesti juba parandatuks.
 CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
-    "whisky": (r"\bviski\w*", r"\bwhisky\b"),
-    "truffle": (r"\btrühvli\w*", r"\btruffel\w*"),
-    "juniper": (r"\bkadaka\w*",),
-    "jalapeno": (r"\bjalape[nñ]o\w*", r"\btšilli\w*", r"\btsilli\w*"),
-    "smoked": (r"\bsuitsu\w*",),
-    "herbs": (r"\bürdi\w*", r"\burdi\w*"),
-    "garlic": (r"\bküüslaugu\w*", r"\bkuusklaugu\w*"),
-    "pepper": (r"\bpipra\w*",),
-    "walnut": (r"\bpähkli\w*", r"\bpahkli\w*"),
-    "caraway": (r"\bköömne\w*", r"\bkoomne\w*"),
-    "wine": (r"\bveini\w*", r"\bportveini\w*"),
+    "whisky": (r"\bviski\w*", r"\bwhisky\b", r"\bwhiskey\b"),
+    "truffle": (r"\btrühvli\w*", r"\btruffel\w*", r"\btruffle\w*"),
+    "juniper": (r"\bkadaka\w*", r"\bjuniper\w*"),
+    "jalapeno": (r"\bjalape[nñ]o\w*", r"\btšilli\w*", r"\btsilli\w*", r"\bchili\w*"),
+    "smoked": (r"\bsuitsu\w*", r"\bsmoked\b"),
+    "herbs": (r"\bürdi\w*", r"\burdi\w*", r"\bherb\w*"),
+    "garlic": (r"\bküüslaugu\w*", r"\bkuusklaugu\w*", r"\bgarlic\w*"),
+    "pepper": (r"\bpipra\w*", r"\bpepper\w*"),
+    "walnut": (r"\bpähkli\w*", r"\bpahkli\w*", r"\bwalnut\w*"),
+    "caraway": (r"\bköömne\w*", r"\bkoomne\w*", r"\bcaraway\w*"),
+    "wine": (r"\bveini\w*", r"\bportveini\w*", r"\bwine\b", r"\bport wine\b"),
 }
 
 
@@ -410,6 +459,27 @@ def _flavour_variants(text) -> frozenset:
 
 def _cheese_modifiers(text) -> frozenset:
     return _match_variants(text, CHEESE_MODIFIER_PATTERNS)
+
+
+def _product_identity_text(canonical_name, sample_product_name, brand) -> str:
+    """Ühendab kõik saadaval identiteedisignaalid üheks tekstiks
+    (v4.2, uus). Kasutatakse hard_check ja downgrade_check funktsioonide
+    sisendina sample-nime asemel üksi.
+
+    Põhjendus: identiteeditunnus (nt 'suitsu', 'viski', lõiketüüp) võib
+    olla peidus canonical_name'is või brändis, mitte tingimata just
+    selles konkreetses tootenimes, mille SQL DISTINCT ON valis. Suund
+    on turvaline: rohkem teksti saab check-funktsioonide jaoks ainult
+    RANGEMAKS minna (rohkem võimalikke leide -> rohkem tagasilükkeid
+    või downgrade'e), mitte kunagi lubavamaks — check-funktsioonid
+    kasutavad ainult "kas märksõna on olemas" loogikat, mitte kunagi
+    "kas märksõna puudub, seega luba läbi".
+    """
+    return " ".join(
+        part.strip()
+        for part in (canonical_name, sample_product_name, brand)
+        if part and part.strip()
+    )
 
 
 # Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
@@ -450,8 +520,16 @@ IDENTITY_RULES: dict[str, list[str]] = {
 # muudest kontrollidest. ChatGPT proaktiivne audit (juuli 2026):
 # vein on kõrge riskiga — kuni eraldi reeglistik on valmis, jäägu
 # kõik veini asendused SUGGESTED tasemele.
+#
+# v4.2 LAIENDUS: kogu alkohol (õlu/siider/kanged alkoholid), mitte
+# ainult vein. Ühesuunaline turvapiirang — saab ainult AUTO->SUGGESTED
+# langetada, ei saa kunagi midagi lubada, mis muidu oleks blokeeritud.
+# Regressiooniriski pole; sama loogika, mis juba veinile kehtib.
 AUTO_DISABLED_SUB_CODES = {
     "wine_red", "wine_white", "wine_rose", "wine_sparkling", "wine_sweet",
+    "drinks_beer_cider", "drinks_spirits",
+    "spirits_vodka", "spirits_whisky", "spirits_gin", "spirits_rum",
+    "spirits_cognac", "spirits_liqueur", "spirits_other",
 }
 
 DOWNGRADE_CHECKS = {
@@ -521,8 +599,14 @@ def _traits_compatible(original_name, candidate_name, sub_code=None):
     return True
 
 
+# v4.2 LAIENDUS: baby_formula, baby_food_jars, baby_food_pouches,
+# baby_snacks lisatud. ChatGPT leid: eriti beebipiimasegu (formula)
+# puhul võivad erineda vanuseaste, allergiaspetsiifiline vajadus,
+# laktoosisisaldus — need ei tohiks kunagi AUTO tasemele minna, isegi
+# koguse klapitusel. Ühesuunaline turvapiirang, regressiooniriski pole.
 BABY_FOOD_SUB_CODES = {
     "baby_porridge_cereal", "baby_diapers", "baby_care", "baby_other", "baby_wipes",
+    "baby_formula", "baby_food_jars", "baby_food_pouches", "baby_snacks",
 }
 
 
@@ -644,6 +728,11 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
     original_qty = original_sample["net_qty"] if original_sample else None
     original_unit = original_sample["net_unit"] if original_sample else None
 
+    # v4.2: ühendatud identiteeditekst (canonical_name + sample_name + brand)
+    original_identity_text = _product_identity_text(
+        original["canonical_name"], original_sample_name, original["brand"]
+    )
+
     trace["original_quantity"] = (
         {"value": float(original_qty), "unit": original_unit, "status": "known"}
         if original_qty and original_unit
@@ -711,13 +800,18 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         if qmatch.tier in (QuantityTier.INCOMPATIBLE, QuantityTier.UNKNOWN):
             continue
 
+        # v4.2: kandidaadi ühendatud identiteeditekst
+        candidate_identity_text = _product_identity_text(
+            c["canonical_name"], c["sample_product_name"], c["brand"]
+        )
+
         effective_tier = qmatch.tier
         # downgrade: erinevus ei eemalda kandidaati, vaid langetab
         # tier'i (nt marinaadi maitseprofiil) — EI TÕSTA kunagi üles.
         for check_name in downgrade_checks:
             check_fn = DOWNGRADE_CHECKS[check_name]
-            o_values = check_fn(original_sample_name)
-            c_values = check_fn(c["sample_product_name"])
+            o_values = check_fn(original_identity_text)
+            c_values = check_fn(candidate_identity_text)
             # Sümmeetriline võrdlus (ChatGPT viies ülevaatus): kui
             # KUMMALGI poolel on tuvastatud väärtusi JA hulgad
             # erinevad, langetatakse tier — mitte ainult siis, kui
@@ -728,8 +822,9 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
                 if effective_tier == QuantityTier.AUTO:
                     effective_tier = QuantityTier.SUGGESTED
 
-        # Kategooriad, kus AUTO on täielikult keelatud (nt vein) —
-        # sõltumata kogusest, langeb alati vähemalt SUGGESTED tasemele.
+        # Kategooriad, kus AUTO on täielikult keelatud (nt vein/õlu/
+        # kanged alkoholid) — sõltumata kogusest, langeb alati vähemalt
+        # SUGGESTED tasemele.
         if original["sub_code"] in AUTO_DISABLED_SUB_CODES and effective_tier == QuantityTier.AUTO:
             effective_tier = QuantityTier.SUGGESTED
 
@@ -738,6 +833,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
             "canonical_name": c["canonical_name"],
             "brand": c["brand"],
             "sample_product_name": c["sample_product_name"],
+            "identity_text": candidate_identity_text,
             "quantity_tier": effective_tier,
             "quantity_diff_percent": qmatch.difference_percent,
         })
@@ -745,7 +841,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
 
     usable_candidates = [
         c for c in quantity_eligible
-        if _traits_compatible(original_sample_name, c["sample_product_name"], original["sub_code"])
+        if _traits_compatible(original_identity_text, c["identity_text"], original["sub_code"])
     ]
     trace["trait_eligible_count"] = len(usable_candidates)
 
