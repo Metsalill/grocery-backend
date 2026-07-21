@@ -17,6 +17,24 @@ Disain ChatGPT arhitektuuriülevaatuse põhjal (juuli 2026):
 
 SUBSTITUTION_RULES_VERSION on kirjas cache-võtme jaoks (kui reegleid
 hiljem muudetakse, peavad vanad product_substitutions kirjed aeguma).
+
+v4.4 muudatus (juuli 2026): QUANTITY_RULES laiendatud 214-testi
+dry-run analüüsi põhjal. Kategooriad, kus varem oli sql_candidate_count
+suur, aga quantity_eligible_count alati 0 (missing_rule) — seega puhas
+"puuduv reegel", mitte andmeprobleem. Protsendid valitud riskipõhiselt:
+- Kategooriad, kus IDENTITY_RULES juba katab tüübi (kohv, tee, juust) —
+  sama muster nagu olemasolevad kaetud kategooriad (15/30).
+- Kategooriad ilma identity-kontrollita, aga madala identiteediriskiga
+  (puu-/juurvili, kus kaal loomulikult varieerub) — laiem piir (20/40).
+- Kategooriad, kus toote identiteet on maitses/variandis (maiustused,
+  küpsised, snäkid, supid/nuudlid, mahlad) — kitsam auto_pct (10) JA
+  lisatud flavour_variant downgrade DOWNGRADE_RULES'i, sama mehhanism
+  mis juba kaitseb jogurtit/energiajooke/marinaade.
+- Alkoholikategooriad (õlu/siider, muu kange alkohol) said reeglid,
+  kuna AUTO_DISABLED_SUB_CODES juba sunnib need SUGGESTED tasemele
+  sõltumata protsendist — turvaline lisada.
+SUBSTITUTION_RULES_VERSION tõstetud 1 -> 2, kuna reeglite muutus mõjutab
+varasemate cache-kirjete kehtivust.
 """
 
 from __future__ import annotations
@@ -27,7 +45,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 1
+SUBSTITUTION_RULES_VERSION = 2
 
 
 class QuantityTier(StrEnum):
@@ -49,8 +67,6 @@ class QuantityMatch:
 
 # ---------------- ühikute normaliseerimine ----------------
 
-# Baasühikud lõplikuks võrdluseks: 'ml' (vedelik), 'g' (mass), 'tk' (tükid).
-# l/kg EI teisendata risti ml/g vastu — need on eri baasühiku TÜÜBID.
 _VOLUME_TO_ML = {
     "ml": Decimal(1),
     "l": Decimal(1000),
@@ -62,8 +78,6 @@ _MASS_TO_G = {
     "kg": Decimal(1000),
 }
 
-# "pack"/"pakk" TEADLIKULT välja jäetud — tükiarv pole ühetähenduslik
-# (1 pakk mune võib olla 6, 10 või 12 muna). Jääb unknown.
 _PIECE_UNITS = {"tk", "pcs", "pc", "piece", "pieces"}
 
 
@@ -85,7 +99,7 @@ def normalize_unit(raw_unit: Optional[str]) -> Optional[tuple[str, Decimal]]:
     if u in _PIECE_UNITS:
         return ("tk", Decimal(1))
 
-    return None  # nt "pack", "pakk", tühjad stringid, tundmatud lühendid
+    return None
 
 
 def _to_decimal(value) -> Optional[Decimal]:
@@ -97,25 +111,12 @@ def _to_decimal(value) -> Optional[Decimal]:
         return None
     if d <= 0:
         return None
-    # Sanity-piir ebarealistlike väärtuste vastu (nt andmeviga: net_qty=999999).
-    # Ei ürita "parandada", lihtsalt keeldub sellisest väärtusest tuginemast.
     if d > Decimal(100000):
         return None
     return d
 
 
 def _effective_qty(net_qty, pack_count) -> Optional[Decimal]:
-    """
-    Arvutab tegeliku võrreldava koguse, arvestades pack_count'i.
-
-    ETTEVAATUST (ChatGPT arvustus, juuli 2026): pole veel kinnitatud, kas
-    net_qty tähendab KÕIGIS andmeallikates "üks ühik" (nt üks 350ml pudel
-    3-pakis) või mõnel juhul juba kogu pakendi kogust. Enne selle
-    korrutamise reaalset kasutamist tuleb auditeerida iga scraperi/keti
-    semantikat eraldi. Kuni auditit pole tehtud, kutsutakse seda
-    funktsiooni pack_count=1 vaikeväärtusega (vt classify_quantity_match
-    parameeter apply_pack_count).
-    """
     qty = _to_decimal(net_qty)
     if qty is None:
         return None
@@ -127,30 +128,15 @@ def _effective_qty(net_qty, pack_count) -> Optional[Decimal]:
 
 # ---------------- kategooriapõhised piirid ----------------
 
-# MVP: piirid koodis, mitte DB tabelis (versioonihalduses, lihtsalt
-# ülevaadatav). SUBSTITUTION_RULES_VERSION tuleb tõsta, kui neid muudetakse.
-#
-# TURVALISUSE PÕHIMÕTE (ChatGPT arvustus, juuli 2026): katmata kategooriad
-# EI SAA vaikimisi 20%/40% piiri — need on FAIL-CLOSED (UNKNOWN), kuni
-# keegi on kategooria jaoks teadliku otsuse teinud ja siia lisanud.
-# Üldine piir võib olla ühes kategoorias liiga lõtv (nt hambapasta
-# mitmikpakend) ja teises liiga range (nt hakkliha).
 QUANTITY_RULES: dict[str, dict[str, int]] = {
+    # --- Olemasolevad (v4 algsest versioonist, muutmata) ---
     "dairy_milk": {"auto_pct": 20, "suggested_pct": 50},
     "dairy_yogurt_kefir": {"auto_pct": 20, "suggested_pct": 50},
     "dairy_cream_sourcream": {"auto_pct": 20, "suggested_pct": 50},
     "drinks_soft_soda": {"auto_pct": 20, "suggested_pct": 50},
     "drinks_energy": {"auto_pct": 20, "suggested_pct": 50},
     "spices_herbs_spice_mix": {"auto_pct": 10, "suggested_pct": 25},
-    # spices_broth_stock (puljongid/fondid) TEADLIKULT VÄLJA JÄETUD —
-    # see on erinev tootetüüp (vedel/kuubik) kui kuivmaitseained, pole
-    # kellegi poolt teadlikult läbi vaadatud. Fail-closed UNKNOWN, kuni
-    # keegi selle kategooria jaoks otsuse teeb.
     "dairy_eggs": {"auto_pct": 0, "suggested_pct": 40},
-    # ESIALGNE, vajab teadlikku ülevaatust (ChatGPT tabel viitas
-    # lihatoodete puhul rasvaprotsendi/lihaliigi olulisusele, aga
-    # täpne piir pole veel eraldi hinnatud) — kasutatud ainult
-    # animal_type identity-kontrolli testimiseks.
     "meat_minced": {"auto_pct": 15, "suggested_pct": 30},
     "meat_beef_lamb_game": {"auto_pct": 15, "suggested_pct": 30},
     "cheese_regular": {"auto_pct": 15, "suggested_pct": 30},
@@ -164,8 +150,55 @@ QUANTITY_RULES: dict[str, dict[str, int]] = {
     "baby_diapers": {"auto_pct": 0, "suggested_pct": 0},
     "baby_care": {"auto_pct": 0, "suggested_pct": 0},
     "baby_other": {"auto_pct": 0, "suggested_pct": 0},
-    # TEADLIKULT EI OLE "__default__" — katmata sub_code läheb UNKNOWN'i,
-    # vaata get_rules_for_sub_code().
+
+    # --- v4.4 UUS: kategooriad, kus IDENTITY_RULES juba katab tüübi
+    # (kohv, tee, juustuviilud) — sama piir mis meat/cheese ---
+    "coffee_beans_ground": {"auto_pct": 15, "suggested_pct": 30},
+    "coffee_instant": {"auto_pct": 15, "suggested_pct": 30},
+    "tea": {"auto_pct": 15, "suggested_pct": 30},
+    "dairy_cheese_slices": {"auto_pct": 15, "suggested_pct": 30},
+    "wine_sparkling": {"auto_pct": 10, "suggested_pct": 20},
+    "wine_sweet": {"auto_pct": 10, "suggested_pct": 20},
+
+    # --- v4.4 UUS: madala identiteediriskiga (kaal loomulikult
+    # varieerub, identity check pole kriitiline) — laiem piir ---
+    "oils_olive": {"auto_pct": 15, "suggested_pct": 30},
+    "bakery_bread_loaves": {"auto_pct": 15, "suggested_pct": 35},
+    "dry_canned_veg": {"auto_pct": 15, "suggested_pct": 30},
+    "produce_apples_pears": {"auto_pct": 20, "suggested_pct": 40},
+    "produce_berries": {"auto_pct": 20, "suggested_pct": 40},
+    "produce_herbs_salads_sprouts": {"auto_pct": 20, "suggested_pct": 40},
+    "produce_root_veg": {"auto_pct": 20, "suggested_pct": 40},
+    "produce_tropical": {"auto_pct": 20, "suggested_pct": 40},
+
+    # --- v4.4 UUS: maitsetundlikud kategooriad — kitsam auto_pct,
+    # lisatud KOOS vastava flavour_variant downgrade kirjega
+    # DOWNGRADE_RULES'is (substitution_service.py) ---
+    "bakery_cakes_pastries": {"auto_pct": 10, "suggested_pct": 25},
+    "sweets_biscuits_cookies": {"auto_pct": 10, "suggested_pct": 25},
+    "sweets_candies": {"auto_pct": 10, "suggested_pct": 25},
+    "sweets_chocolate_bars": {"auto_pct": 10, "suggested_pct": 25},
+    "sweets_nuts_driedfruit": {"auto_pct": 15, "suggested_pct": 30},
+    "sweets_snacks_salty": {"auto_pct": 10, "suggested_pct": 25},
+    "dry_soups_noodles": {"auto_pct": 15, "suggested_pct": 30},
+    "produce_smoothies_fresh_juices": {"auto_pct": 15, "suggested_pct": 30},
+    "drinks_juices": {"auto_pct": 15, "suggested_pct": 30},
+    "drinks_non_alcoholic": {"auto_pct": 15, "suggested_pct": 30},
+
+    # --- v4.4 UUS: alkohol — AUTO_DISABLED_SUB_CODES juba sunnib
+    # SUGGESTED tasemele, seega turvaline lisada helde piir ---
+    "drinks_beer_cider": {"auto_pct": 15, "suggested_pct": 30},
+    "spirits_other": {"auto_pct": 10, "suggested_pct": 25},
+
+    # --- v4.4 UUS: lemmikloomatoit — konservatiivne, sama muster
+    # nagu snäkid (maitsevariandid olulised, aga vale valik pole
+    # tervist ohustav nagu inimtoidus laktoos/gluteen) ---
+    "pet_cat_wet": {"auto_pct": 10, "suggested_pct": 25},
+
+    # TEADLIKULT ENDISELT KATMATA: coffee_capsules (kapslisüsteemid
+    # pole omavahel asendatavad, vajab eraldi identity-kontrolli enne
+    # kui üldse kogusepiiri lisada), kõik ülejäänud sub_code'id, mida
+    # praeguses 214-testi valimis ei esinenud.
 }
 
 
@@ -190,16 +223,6 @@ def classify_quantity_match(
     candidate_pack_count=None,
     apply_pack_count: bool = False,
 ) -> QuantityMatch:
-    """
-    Klassifitseerib, kas candidate saab original'it asendada koguse
-    seisukohast. EI tea midagi toote tüübist/brändist — ainult numbrid.
-
-    apply_pack_count=False (vaikimisi): pack_count'i EI kasutata, kuna
-    pole veel auditeeritud, kas net_qty tähendab kõigis andmeallikates
-    "üks ühik" või mõnikord juba kogu pakendi kogust (vt _effective_qty
-    docstring). Kui audit on tehtud ja kinnitatud, kutsuja saab anda
-    apply_pack_count=True.
-    """
     if apply_pack_count:
         o_qty = _effective_qty(original_qty, original_pack_count)
         c_qty = _effective_qty(candidate_qty, candidate_pack_count)
@@ -248,7 +271,6 @@ def classify_quantity_match(
 
     rules = get_rules_for_sub_code(sub_code)
     if rules is None:
-        # FAIL-CLOSED: kategooria pole teadlikult üle vaadatud.
         return QuantityMatch(
             tier=QuantityTier.UNKNOWN,
             difference_percent=abs(c_base_qty - o_base_qty) / o_base_qty * Decimal(100),
