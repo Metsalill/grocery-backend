@@ -200,7 +200,9 @@ async def run_dry_run_tests():
                     # Ilma selleta rikub üks Postgres-tasandi viga kõik
                     # järgnevad testid ("current transaction is aborted").
                     async with conn.transaction():
-                        result = await get_or_create_substitution(conn, group_id, chain, dry_run=True)
+                        result = await get_or_create_substitution(
+                            conn, group_id, chain, dry_run=True, use_cache=False
+                        )
                 except Exception as e:
                     print(f"TEHNILINE VIGA: {e}")
                     result = {"error": str(e), "trace": {"original_group_id": group_id, "chain": chain}}
