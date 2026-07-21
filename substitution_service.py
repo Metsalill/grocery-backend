@@ -1,5 +1,5 @@
 """
-Seivy — asendustoodete teenus (v4.2, juuli 2026).
+Seivy — asendustoodete teenus (v4.3, juuli 2026).
 
 v4 muudatused (ChatGPT teine arvustus):
 - dry_run parameeter: kui True, ei kutsuta _save()-i KUNAGI (KIHT 1
@@ -23,23 +23,42 @@ põhjal — igaüks eraldi hinnatud, mitte pimesi üle võetud):
   Vintage Cheddar" oleks varem mõlemad tagastanud frozenset() ja
   downgrade poleks rakendunud. REAALNE viga, kinnitatud koodist.
 - _flavour_state: kasutab nüüd ka _flavour_variants sõnastikku, mitte
-  ainult kitsast FLAVOR_KEYWORDS loendit — "kirsi jogurt" oleks varem
-  vääralt "plain" saanud, kuna "kirsi" polnud FLAVOR_KEYWORDS's.
-  REAALNE viga, tuvastatud isegi käesoleva sessiooni enda testivalimis
-  (juhtum: Profeel proteiinijogurtijook kirsi 275g).
+  ainult kitsast FLAVOR_KEYWORDS loendit.
 - _product_identity_text(): uus abifunktsioon, ühendab canonical_name +
   sample_product_name + brand. Kasutatakse nüüd nii hard_check'ides kui
-  downgrade_check'ides sample-nime asemel — turvaline suund (rohkem
-  teksti saab ainult RANGEMAKS teha, mitte lubavamaks).
-- AUTO_DISABLED_SUB_CODES laiendatud kogu alkoholile (õlu/siider/
-  kanged alkoholid), mitte ainult veinile — ühesuunaline turvapiirang.
-- BABY_FOOD_SUB_CODES laiendatud (baby_formula, baby_food_jars,
-  baby_food_pouches, baby_snacks lisatud) — sama põhimõte.
-- TEADLIKULT EI TEHTUD: CATEGORY_IDENTITY_PROFILES täielik policy-
-  raamistiku refaktor. Mõlemad leitud vead olid sõnavara-lüngad, mitte
-  struktuuriprobleemid — sama otsus, mis eelmises sessioonis juba
-  tehti. Suur refaktor praeguses faasis lisaks regressiooniriski ilma
-  käitumusliku kasuta.
+  downgrade_check'ides sample-nime asemel.
+- AUTO_DISABLED_SUB_CODES laiendatud kogu alkoholile.
+- BABY_FOOD_SUB_CODES laiendatud (baby_formula jne).
+
+v4.3 muudatused (juuli 2026, dry-run 214-testi jooksu analüüs):
+- FLAVOUR_VARIANT_PATTERNS: "pomelo" lisatud (greibi/pomelo/grapefruit).
+  REAALNE, KINNITATUD false-AUTO dry-run'ist: NOCCO BCAA Pomelo sai
+  auto_substitute teise NOCCO maitsevariandi vastu, kuna "pomelo" oli
+  FLAVOUR_VARIANT_PATTERNS's tuvastamata — mõlemad pooled tagastasid
+  tühja frozenset()-i, downgrade ei rakendunud. Sama sõnavara-lünga
+  muster nagu Wyke Farms/wine juures.
+- trace laiendatud kogusekihi läbipaistvusega: quantity_auto_count,
+  quantity_suggested_count, quantity_incompatible_count,
+  quantity_unknown_count, quantity_rule_found,
+  quantity_rejection_reasons (missing_rule/missing_candidate_quantity/
+  unit_mismatch/outside_allowed_range). Varem koondati kõik
+  kogusekihi läbikukkumised üheks nulliks (quantity_eligible_count=0),
+  mis segas kokku "sub_code puudub QUANTITY_RULES-ist" ja "andmed
+  puuduvad/ei klapi" juhtumid — 214-testi analüüs näitas, et see
+  eristus on kriitiline net_qty backfill prioriteedi otsustamiseks.
+- get_or_create_substitution EI tagasta enam None tehnilise vea korral
+  (timeout, HTTP viga, JSON parse viga) — tagastab struktureeritud
+  {"decision_type": "provider_error", "error_type": ..., "trace": ...}
+  koos kõigi enne erindit kogutud trace-väljadega. Varem läks kogu
+  diagnostiline kontekst kaduma (dry_run_test.py pidi ise minimaalse
+  trace'i taasehitama).
+- TEADLIKULT EI TEHTUD: uus "auto_policy" / CATEGORY_IDENTITY_PROFILES
+  raamistik energiajookidele (ChatGPT ettepanek). Sama otsus, mis
+  eelmises sessioonis juba tehti kaks korda — "tundmatu maitse vs
+  tundmatu maitse" auk kehtib kõigile DOWNGRADE_RULES kategooriatele,
+  mitte ainult drinks_energy'le; õigem on jätkata sõnavara täiendamist
+  samas mustris kui reaalseid lünki leitakse, mitte ehitada uut
+  abstraktsioonikihti reaktsioonina ühele juhtumile.
 
 See fail on hetkel ISOLEERITUD — compare_service.py ei impordi seda.
 """
@@ -54,6 +73,7 @@ import httpx
 
 from quantity_service import (
     classify_quantity_match,
+    get_rules_for_sub_code,
     QuantityTier,
     SUBSTITUTION_RULES_VERSION,
 )
@@ -65,15 +85,6 @@ ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 API_TIMEOUT_SECONDS = 6.0
 
 MAX_SEMANTIC_CANDIDATES = 8
-# Turvapiir (mitte reaalne valikupiir!) — kaitseb ainult haruldase
-# extreemselt suure kategooria eest (nt tuhandeid tooteid). ChatGPT
-# leid (juuli 2026): kui see oli varem 150 ja rakendus ENNE Python
-# koguse-lähedus-sortimist, jäi parim kandidaat mõnikord valimist
-# välja (nägime sql_candidate_count=150 reaalses testis — limiit oli
-# tegelikult rakendunud, mitte ainult teoreetiline risk). Nüüd on
-# SQL-i ORDER BY ainult deterministlik (pg.id, p.id), TEGELIK
-# lähedus-sortimine toimub Pythonis KÕIGI toodud kandidaatide peal,
-# alles siis kärbitakse Claude'i jaoks (MAX_SEMANTIC_CANDIDATES).
 CANDIDATE_POOL_LIMIT = 2000
 
 _TTL_BY_DECISION = {
@@ -85,19 +96,12 @@ _TTL_BY_DECISION = {
 }
 
 REQUIRED_TRAITS: dict[str, tuple[str, ...]] = {
-    # "lakt.vaba" ja "lakt vaba" LISATUD (juuli 2026) — leitud reaalsetest
-    # andmetest (nt "Farmi koogikoor 15% lakt.vaba"), mis oleks muidu
-    # libisenud läbi laktoosivaba kaitsest, kuna esialgne regex otsis
-    # ainult täissõna "laktoosivaba".
     "lactose_free": (
         "laktoosivaba", "lactose free", "lactose-free",
         "lakt.vaba", "lakt. vaba", "lakt vaba",
     ),
     "gluten_free": ("gluteenivaba", "gluten free", "gluten-free"),
     "alcohol_free": ("alkoholivaba", "alcohol free", "alcohol-free"),
-    # LISATUD (juuli 2026) — leitud reaalsetest andmetest (Red Bull
-    # "Suhkruvaba"). Sama põhimõte: kui originaal on suhkruvaba,
-    # kandidaat PEAB olema ka.
     "sugar_free": ("suhkruvaba", "sugar free", "sugar-free"),
 }
 
@@ -107,20 +111,6 @@ IDENTITY_TRAITS: dict[str, tuple[str, ...]] = {
     "plant_based": ("taimne", "vegan"),
 }
 
-# ---------------- kategooriapõhised identity-kontrollid ----------------
-#
-# ChatGPT arhitektuur (juuli 2026, kolmas ülevaatus): mitte üks globaalne
-# regex-plokk, vaid kategooriapõhine profiil. Iga check-funktsioon
-# tuvastab tekstist ühe omaduse väärtuse (või None, kui ei leitud).
-# _traits_compatible() nõuab, et originaali ja kandidaadi väärtus
-# klapiks AINULT nende check'ide jaoks, mis on IDENTITY_RULES's selle
-# sub_code kohta loetletud — nii ei rakendu nt piima rasvareegel
-# kogemata jogurtile või lihale.
-#
-# Reegel iga check'i kohta: kui originaali väärtus on teada, PEAB
-# kandidaadi väärtus olema teada JA sama (fail-closed). Kui originaali
-# väärtus pole tuvastatav, check ei blokeeri (jääb Claude'i hooleks).
-
 FLAVOR_KEYWORDS = (
     "cappuccino", "latte", "šokolaadi", "shokolaadi", "vanilje",
     "karamelli", "maasika", "banaani", "kookos",
@@ -128,16 +118,7 @@ FLAVOR_KEYWORDS = (
 
 
 def _flavour_state(text) -> Optional[str]:
-    """Maitsestatud vs maitsestamata. Leitud reaalse vea põhjal (juuli
-    2026): Cappuccino/Latte piim asendati vääralt tavalise piimaga.
-
-    v4.2: kasutab nüüd LISAKS ka _flavour_variants sõnastikku (mets-
-    maasika/kirsi/banaani/virsiku jne), mitte ainult kitsast
-    FLAVOR_KEYWORDS loendit. Varem oleks nt 'Profeel proteiinijogurti-
-    jook kirsi 275g' tagastanud vääralt 'plain', kuna 'kirsi' polnud
-    FLAVOR_KEYWORDS's — ainult FLAVOUR_VARIANT_PATTERNS's. See on
-    reaalne, tuvastatud viga (mitte teoreetiline), nähtud käesoleva
-    sessiooni enda testivalimis."""
+    """Maitsestatud vs maitsestamata."""
     if not text:
         return None
     text_lower = text.lower()
@@ -153,7 +134,6 @@ _FAT_SINGLE_RE = re.compile(r"(\d+[.,]?\d*)\s*%")
 
 
 def _extract_percent(text) -> Optional[float]:
-    """Jagatud abifunktsioon protsendi eraldamiseks tekstist (nt '3,6-4,2%' -> 3.9)."""
     if not text:
         return None
     normalized = text.replace(",", ".")
@@ -173,12 +153,6 @@ def _extract_percent(text) -> Optional[float]:
 
 
 def _milk_fat_class(text) -> Optional[str]:
-    """Piima rasvaprotsendi kategooria. Leitud reaalse vea põhjal: sama
-    originaaltoode sai kahes ketis vastandliku otsuse (Coop lubas,
-    Selver keeldus samast kandidaadist), kuni see kontroll lisati.
-    EI kasutata maitsestatud jookide peal (vt IDENTITY_RULES allpool —
-    fat_class_milk on rakendatud ainult koos flavour_state kontrolliga,
-    mis juba eristab need eraldi)."""
     pct = _extract_percent(text)
     if pct is None:
         return None
@@ -192,10 +166,6 @@ def _milk_fat_class(text) -> Optional[str]:
 
 
 def _yogurt_fat_class(text) -> Optional[str]:
-    """Jogurti rasvaprotsendi kategooria — laiemad vahemikud kui piimal,
-    kuna Kreeka jogurt (10%+) on tavaline. ChatGPT proaktiivne audit
-    (juuli 2026): '10% Kreeka jogurt -> 0% joogijogurt' ei tohi olla
-    AUTO — see kontroll väldib seda."""
     pct = _extract_percent(text)
     if pct is None:
         return None
@@ -209,8 +179,6 @@ def _yogurt_fat_class(text) -> Optional[str]:
 
 
 def _yogurt_form(text) -> Optional[str]:
-    """Joogijogurt vs lusikaga söödav vs Kreeka tüüpi. ChatGPT:
-    'proteiinijogurt -> tavaline jogurt' ei tohi olla AUTO."""
     if not text:
         return None
     text_lower = text.lower()
@@ -238,7 +206,6 @@ CHEESE_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
 
 
 def _cheese_type(text) -> Optional[str]:
-    """Juustu tüüp. ChatGPT: 'mozzarella -> Gouda' ei tohi olla AUTO."""
     if not text:
         return None
     text_lower = text.lower()
@@ -249,8 +216,6 @@ def _cheese_type(text) -> Optional[str]:
 
 
 def _cheese_form(text) -> Optional[str]:
-    """Juustu vorm (viilutatud/riivitud/plokk/määrdejuust). ChatGPT:
-    'riivjuust -> juustuplokk' ei tohi olla AUTO."""
     if not text:
         return None
     text_lower = text.lower()
@@ -260,7 +225,7 @@ def _cheese_form(text) -> Optional[str]:
         return "sliced"
     if any(kw in text_lower for kw in ("määrde", "maarde", "spread")):
         return "spread"
-    return "block"  # vaikimisi plokk, kui ükski erivorm pole mainitud
+    return "block"
 
 
 FISH_SPECIES_KEYWORDS: dict[str, tuple[str, ...]] = {
@@ -275,7 +240,6 @@ FISH_SPECIES_KEYWORDS: dict[str, tuple[str, ...]] = {
 
 
 def _fish_species(text) -> Optional[str]:
-    """Kalaliik. ChatGPT proaktiivne audit."""
     if not text:
         return None
     text_lower = text.lower()
@@ -295,13 +259,9 @@ ANIMAL_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
 
 
 def _animal_type(text) -> Optional[str]:
-    """Lihaliik (veis/siga/kana/segu). ChatGPT näide: 'veiseliha
-    hakkliha 5%' ei tohi asenduda 'sea-veise hakkliha 20%'-ga lihtsalt
-    kaalu klappimise tõttu."""
     if not text:
         return None
     text_lower = text.lower()
-    # "mixed" enne üksikuid liike, kuna "sea-veise" sisaldab ka "sea"
     if any(kw in text_lower for kw in ANIMAL_TYPE_KEYWORDS["mixed"]):
         return "mixed"
     for animal, keywords in ANIMAL_TYPE_KEYWORDS.items():
@@ -313,21 +273,14 @@ def _animal_type(text) -> Optional[str]:
 
 
 def _caffeine_state(text) -> Optional[str]:
-    """Kofeiiniga vs kofeiinivaba (kohv/tee/joogid)."""
     if not text:
         return None
     text_lower = text.lower()
     if any(kw in text_lower for kw in ("kofeiinivaba", "decaf", "koffeinfri")):
         return "decaf"
-    return None  # "kofeiiniga" pole tavaliselt eraldi märgitud, jääb tuvastamata
+    return None
 
 
-# Lihalõike tüüp — DETERMINISTLIK. Leitud reaalse vea põhjal (juuli
-# 2026): sama originaaltoode (Rohumaaveise antrekoodi steik) sai
-# vastandliku otsuse kahes ketis — Maxima kiitis heaks asenduse teise
-# lõikega ("erinevus on vaid lõikamisviisis"), Rimi lükkas SAMA
-# põhjendusega tagasi ("ei ole sama tüüp"). Täpselt sama muster mis
-# piima rasvaprotsendi puhul — vajab deterministlikku kontrolli.
 CUT_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "ground": ("hakkliha", "burgeripihv", "klops"),
     "cubes": ("kuubikud", "lõiked", "loiked", "tükid", "tukid"),
@@ -348,18 +301,8 @@ def _meat_cut_type(text) -> Optional[str]:
     for cut, keywords in CUT_TYPE_KEYWORDS.items():
         if any(kw in text_lower for kw in keywords):
             return cut
-    return None  # tundmatu lõige — ei blokeeri, jääb Claude'i hinnata
+    return None
 
-
-# --- DOWNGRADE check'id: erinevus EI eemalda kandidaati, vaid
-# langetab tier'i AUTO'lt SUGGESTED'ile. ChatGPT (viies ülevaatus):
-# kõik downgrade check'id tagastavad frozenset (MITTE üksik väärtus —
-# esimene versioon tagastas ainult esimese leitud sõna ja lõikas
-# valesti, nt "banaani-maasika" ja "maasika-pohla" oleksid mõlemad
-# tagastanud "strawberry", kuna funktsioon peatus esimesel leitud
-# sõnal). Võrdlus on SÜMMEETRILINE: kui kummalgi poolel on väärtusi
-# JA hulgad erinevad, langetatakse tier — mitte ainult siis, kui
-# originaalil on väärtus.
 
 FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "classic": (r"\bklassikali\w*",),
@@ -373,12 +316,10 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "mild": (r"\bmahe\b",),
 }
 
-# Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
-# vältida valesid tabamusi liitsõnades (nt "maasika" ei tohi tabada
-# "metsmaasika" seest — negative lookbehind väldib seda).
+# Maitsevariandid — regex-mustrid.
 #
-# v4.2: pineapple ja redcurrant mustritele lisatud täiendavad
-# kirjapildivariandid (ChatGPT leid) — madal risk, laiendab katvust.
+# v4.3 PARANDUS: "pomelo" lisatud (greibi/pomelo/grapefruit). Reaalne,
+# kinnitatud false-AUTO dry-run'ist (NOCCO BCAA Pomelo).
 FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
     "wild_strawberry": (r"\bmetsmaasika\w*",),
     "strawberry": (r"(?<!mets)\bmaasika\w*",),
@@ -408,18 +349,9 @@ FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
     "grape": (r"\bviinamarja\w*",),
     "watermelon": (r"\barbuusi\w*",),
     "tropical": (r"\btroopili\w*",),
+    "pomelo": (r"\bpomelo\w*", r"\bgreibi\w*", r"\bgrapefruit\w*"),
 }
 
-# Juustu modifikaatorid — ChatGPT viies ülevaatus: "Kadaka", "viskiga"
-# jms ei ole hard_match (ei eemalda kandidaati), vaid downgrade.
-#
-# v4.2 PARANDUS: lisatud ingliskeelsed märksõnad (wine, whisky, truffle
-# jne). Varasem versioon tuvastas ainult eestikeelseid vorme ("veini",
-# "viski"), mistõttu "White Wine Cheddar" ja "Ivy Vintage Cheddar"
-# oleksid MÕLEMAD tagastanud tühja frozenset()-i — hulgad võrdsed,
-# downgrade ei rakendu. See on REAALNE viga (kinnitatud koodist, mitte
-# ainult ChatGPT väitel), mis eelmises sessioonis jäi lahendamata,
-# kuigi mälestustes märgiti see valesti juba parandatuks.
 CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
     "whisky": (r"\bviski\w*", r"\bwhisky\b", r"\bwhiskey\b"),
     "truffle": (r"\btrühvli\w*", r"\btruffel\w*", r"\btruffle\w*"),
@@ -436,7 +368,6 @@ CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
 
 
 def _match_variants(text, patterns: dict[str, tuple[str, ...]]) -> frozenset:
-    """Tagastab KÕIK sobivad variandid (mitte ainult esimese)."""
     if not text:
         return frozenset()
     text_lower = text.lower()
@@ -462,19 +393,6 @@ def _cheese_modifiers(text) -> frozenset:
 
 
 def _product_identity_text(canonical_name, sample_product_name, brand) -> str:
-    """Ühendab kõik saadaval identiteedisignaalid üheks tekstiks
-    (v4.2, uus). Kasutatakse hard_check ja downgrade_check funktsioonide
-    sisendina sample-nime asemel üksi.
-
-    Põhjendus: identiteeditunnus (nt 'suitsu', 'viski', lõiketüüp) võib
-    olla peidus canonical_name'is või brändis, mitte tingimata just
-    selles konkreetses tootenimes, mille SQL DISTINCT ON valis. Suund
-    on turvaline: rohkem teksti saab check-funktsioonide jaoks ainult
-    RANGEMAKS minna (rohkem võimalikke leide -> rohkem tagasilükkeid
-    või downgrade'e), mitte kunagi lubavamaks — check-funktsioonid
-    kasutavad ainult "kas märksõna on olemas" loogikat, mitte kunagi
-    "kas märksõna puudub, seega luba läbi".
-    """
     return " ".join(
         part.strip()
         for part in (canonical_name, sample_product_name, brand)
@@ -482,7 +400,6 @@ def _product_identity_text(canonical_name, sample_product_name, brand) -> str:
     )
 
 
-# Iga check funktsioon nime järgi, et IDENTITY_RULES saaks neid viidata
 IDENTITY_CHECKS = {
     "flavour_state": _flavour_state,
     "fat_class_milk": _milk_fat_class,
@@ -496,7 +413,6 @@ IDENTITY_CHECKS = {
     "fish_species": _fish_species,
 }
 
-# hard_match: erinevus EEMALDAB kandidaadi täielikult.
 IDENTITY_RULES: dict[str, list[str]] = {
     "dairy_milk": ["flavour_state", "fat_class_milk"],
     "dairy_yogurt_kefir": ["flavour_state", "fat_class_yogurt", "yogurt_form"],
@@ -516,15 +432,6 @@ IDENTITY_RULES: dict[str, list[str]] = {
     "fish_processed": ["fish_species"],
 }
 
-# Kategooriad, kus AUTO on TÄIELIKULT keelatud, sõltumata kogusest või
-# muudest kontrollidest. ChatGPT proaktiivne audit (juuli 2026):
-# vein on kõrge riskiga — kuni eraldi reeglistik on valmis, jäägu
-# kõik veini asendused SUGGESTED tasemele.
-#
-# v4.2 LAIENDUS: kogu alkohol (õlu/siider/kanged alkoholid), mitte
-# ainult vein. Ühesuunaline turvapiirang — saab ainult AUTO->SUGGESTED
-# langetada, ei saa kunagi midagi lubada, mis muidu oleks blokeeritud.
-# Regressiooniriski pole; sama loogika, mis juba veinile kehtib.
 AUTO_DISABLED_SUB_CODES = {
     "wine_red", "wine_white", "wine_rose", "wine_sparkling", "wine_sweet",
     "drinks_beer_cider", "drinks_spirits",
@@ -561,29 +468,18 @@ def _detect_traits(text, trait_map):
 
 
 def _traits_compatible(original_name, candidate_name, sub_code=None):
-    # Ohutus-trait'id (ühesuunaline): laktoosivaba/gluteenivaba/
-    # alkoholivaba — kui originaalil on, kandidaadil PEAB olema.
     original_required = _detect_traits(original_name, REQUIRED_TRAITS)
     candidate_required = _detect_traits(candidate_name, REQUIRED_TRAITS)
     if not original_required.issubset(candidate_required):
         return False
 
-    # Taimne vs loomne (kahesuunaline, kehtib kõikjal)
     original_identity = _detect_traits(original_name, IDENTITY_TRAITS)
     candidate_identity = _detect_traits(candidate_name, IDENTITY_TRAITS)
     if original_identity != candidate_identity:
         return False
 
-    # Kategooriapõhised identity-kontrollid — AINULT need, mis on
-    # IDENTITY_RULES's selle sub_code kohta loetletud.
     checks_to_run = list(IDENTITY_RULES.get(sub_code, []))
 
-    # Erand: kui toode on maitsestatud (nt Cappuccino/Latte), ei kehti
-    # tavalise piima rasvaprotsendi kategooriad selle peal — "3,5%"
-    # Cappuccino peal ei tähenda sama, mis "3,5%" täispiimal. Sellisel
-    # juhul jääb täpne maitse-tüübi vaste Claude'i semantilise otsuse
-    # kanda (flavour_state check ise juba tagab, et maitsestamata
-    # kandidaat ei läbi).
     if "flavour_state" in checks_to_run and "fat_class_milk" in checks_to_run:
         if _flavour_state(original_name) == "flavored":
             checks_to_run.remove("fat_class_milk")
@@ -599,11 +495,6 @@ def _traits_compatible(original_name, candidate_name, sub_code=None):
     return True
 
 
-# v4.2 LAIENDUS: baby_formula, baby_food_jars, baby_food_pouches,
-# baby_snacks lisatud. ChatGPT leid: eriti beebipiimasegu (formula)
-# puhul võivad erineda vanuseaste, allergiaspetsiifiline vajadus,
-# laktoosisisaldus — need ei tohiks kunagi AUTO tasemele minna, isegi
-# koguse klapitusel. Ühesuunaline turvapiirang, regressiooniriski pole.
 BABY_FOOD_SUB_CODES = {
     "baby_porridge_cereal", "baby_diapers", "baby_care", "baby_other", "baby_wipes",
     "baby_formula", "baby_food_jars", "baby_food_pouches", "baby_snacks",
@@ -614,20 +505,23 @@ class SubstitutionTimeout(Exception):
     pass
 
 
+def _empty_quantity_rejection_reasons() -> dict[str, int]:
+    return {
+        "missing_rule": 0,
+        "missing_candidate_quantity": 0,
+        "unit_mismatch": 0,
+        "outside_allowed_range": 0,
+    }
+
+
 async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_cache=True):
     """
-    Tagastab dict tulemuse + "trace" alamvõtme täieliku otsustusahelaga,
-    või None tehnilise vea korral (timeout, vigane API vastus).
+    Tagastab dict tulemuse + "trace" alamvõtme täieliku otsustusahelaga.
 
-    dry_run=True: _save() EI kutsuta kunagi (KIHT 1 kaitsest). Kuivtesti
-    skript peab lisaks avama read-only DB transaktsiooni (KIHT 2).
-
-    use_cache=False: cache't EI loeta ega kirjutata üldse — iga kutse
-    arvutab otsuse täiesti värskelt. KRIITILINE dry-run testimisel:
-    ilma selleta oleks dry_run=True ikkagi tagastanud VANA (nt v4/v5
-    koodiversiooniga arvutatud) cache'itud tulemuse, mitte reaalselt
-    uue koodiga ümber arvutatud otsuse — leitud ChatGPT ülevaatuse
-    käigus, juuli 2026.
+    v4.3: tehnilise vea korral (timeout, HTTP viga, JSON parse viga) EI
+    tagastata enam None — tagastatakse struktureeritud
+    {"decision_type": "provider_error", "error_type": ..., "trace": ...}
+    koos kõigi enne erindit kogutud trace-väljadega.
     """
     chain = chain.lower()
     trace = {
@@ -639,6 +533,12 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         "quantity_eligible_count": 0,
         "trait_eligible_count": 0,
         "claude_candidate_count": 0,
+        "quantity_auto_count": 0,
+        "quantity_suggested_count": 0,
+        "quantity_incompatible_count": 0,
+        "quantity_unknown_count": 0,
+        "quantity_rule_found": None,
+        "quantity_rejection_reasons": _empty_quantity_rejection_reasons(),
         "dry_run": dry_run,
         "cache_enabled": use_cache,
         "database_write_attempted": False,
@@ -654,6 +554,18 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
                 await _save(conn, group_id, chain, result)
         result["trace"] = trace
         return result
+
+    def _provider_error_result(error_type, message):
+        return {
+            "decision_type": "provider_error",
+            "substitute_group_id": None,
+            "price": None,
+            "included_in_total": False,
+            "quantity_diff_percent": None,
+            "reasoning": message,
+            "error_type": error_type,
+            "trace": trace,
+        }
 
     existing = None
     if use_cache:
@@ -697,6 +609,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         return None
 
     trace["sub_code"] = original["sub_code"]
+    trace["quantity_rule_found"] = get_rules_for_sub_code(original["sub_code"]) is not None
 
     original_sample = await conn.fetchrow(
         """
@@ -728,7 +641,6 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
     original_qty = original_sample["net_qty"] if original_sample else None
     original_unit = original_sample["net_unit"] if original_sample else None
 
-    # v4.2: ühendatud identiteeditekst (canonical_name + sample_name + brand)
     original_identity_text = _product_identity_text(
         original["canonical_name"], original_sample_name, original["brand"]
     )
@@ -797,34 +709,42 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         qmatch = classify_quantity_match(
             original_qty, original_unit, c["net_qty"], c["net_unit"], original["sub_code"],
         )
+
+        # v4.3: kogusekihi läbipaistvus — loendame KÕIK tier'id, mitte
+        # ainult neid, mis läbivad. See eristab "sub_code puudub
+        # QUANTITY_RULES-ist" (missing_rule) muudest põhjustest.
+        if qmatch.tier == QuantityTier.AUTO:
+            trace["quantity_auto_count"] += 1
+        elif qmatch.tier == QuantityTier.SUGGESTED:
+            trace["quantity_suggested_count"] += 1
+        elif qmatch.tier == QuantityTier.INCOMPATIBLE:
+            trace["quantity_incompatible_count"] += 1
+            trace["quantity_rejection_reasons"]["outside_allowed_range"] += 1
+        elif qmatch.tier == QuantityTier.UNKNOWN:
+            trace["quantity_unknown_count"] += 1
+            if not trace["quantity_rule_found"]:
+                trace["quantity_rejection_reasons"]["missing_rule"] += 1
+            elif c["net_qty"] is None or c["net_unit"] is None or not str(c["net_unit"]).strip():
+                trace["quantity_rejection_reasons"]["missing_candidate_quantity"] += 1
+            else:
+                trace["quantity_rejection_reasons"]["unit_mismatch"] += 1
+
         if qmatch.tier in (QuantityTier.INCOMPATIBLE, QuantityTier.UNKNOWN):
             continue
 
-        # v4.2: kandidaadi ühendatud identiteeditekst
         candidate_identity_text = _product_identity_text(
             c["canonical_name"], c["sample_product_name"], c["brand"]
         )
 
         effective_tier = qmatch.tier
-        # downgrade: erinevus ei eemalda kandidaati, vaid langetab
-        # tier'i (nt marinaadi maitseprofiil) — EI TÕSTA kunagi üles.
         for check_name in downgrade_checks:
             check_fn = DOWNGRADE_CHECKS[check_name]
             o_values = check_fn(original_identity_text)
             c_values = check_fn(candidate_identity_text)
-            # Sümmeetriline võrdlus (ChatGPT viies ülevaatus): kui
-            # KUMMALGI poolel on tuvastatud väärtusi JA hulgad
-            # erinevad, langetatakse tier — mitte ainult siis, kui
-            # originaalil on väärtus. See püüab kinni ka "tavaline
-            # cheddar -> cheddar viskiga" suuna, mitte ainult
-            # vastupidise.
             if o_values != c_values and (o_values or c_values):
                 if effective_tier == QuantityTier.AUTO:
                     effective_tier = QuantityTier.SUGGESTED
 
-        # Kategooriad, kus AUTO on täielikult keelatud (nt vein/õlu/
-        # kanged alkoholid) — sõltumata kogusest, langeb alati vähemalt
-        # SUGGESTED tasemele.
         if original["sub_code"] in AUTO_DISABLED_SUB_CODES and effective_tier == QuantityTier.AUTO:
             effective_tier = QuantityTier.SUGGESTED
 
@@ -885,13 +805,18 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         )
     except SubstitutionTimeout:
         logger.warning(f"Substitution timeout group_id={group_id} chain={chain}")
-        return None
+        return _provider_error_result("timeout", "Claude API kutse aegus")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"Substitution HTTP error group_id={group_id} chain={chain}: {e}")
+        return _provider_error_result("http_error", f"Claude API HTTP viga: {e}")
     except Exception as e:
         logger.error(f"Substitution error group_id={group_id} chain={chain}: {e}")
-        return None
+        return _provider_error_result("unknown_error", f"Ootamatu viga: {e}")
 
     if claude_result is None:
-        return None
+        # _ask_claude_for_semantic_match tagastas None (JSON parse ebaõnnestus
+        # või vastus polnud dict) — see on juba logitud funktsiooni sees.
+        return _provider_error_result("json_parse_error", "Claude vastas mitte-JSON formaadis")
 
     selected_id = claude_result.get("selected_group_id")
     semantic_match = bool(claude_result.get("semantic_match"))
