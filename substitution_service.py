@@ -11,6 +11,11 @@ v4 muudatused (ChatGPT teine arvustus):
 - spices_broth_stock EEMALDATUD QUANTITY_RULES-ist — oli omavoliline
   lisandus, mitte teadlikult läbi vaadatud kategooria.
 
+v4.1 muudatus (KeyError parandus, juuli 2026): trace'ile lisatud
+puuduolev "save_path_reached" väli + database_write_attempted
+loogika parandatud nii, et see on True AINULT reaalse DB-kirjutuse
+korral (mitte iga kord kui salvestuskohani jõuti).
+
 See fail on hetkel ISOLEERITUD — compare_service.py ei impordi seda.
 """
 
@@ -553,13 +558,15 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         "dry_run": dry_run,
         "cache_enabled": use_cache,
         "database_write_attempted": False,
+        "save_path_reached": False,
         "cache_hit": False,
     }
 
     async def _finish(result, save=True):
         if save:
-            trace["database_write_attempted"] = True
+            trace["save_path_reached"] = True
             if not dry_run and use_cache:
+                trace["database_write_attempted"] = True
                 await _save(conn, group_id, chain, result)
         result["trace"] = trace
         return result
