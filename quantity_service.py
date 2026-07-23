@@ -35,6 +35,23 @@ suur, aga quantity_eligible_count alati 0 (missing_rule) — seega puhas
   sõltumata protsendist — turvaline lisada.
 SUBSTITUTION_RULES_VERSION tõstetud 1 -> 2, kuna reeglite muutus mõjutab
 varasemate cache-kirjete kehtivust.
+
+v4.5 muudatus (juuli 2026, 214-testi v4.4 jooksu analüüs + ChatGPT
+audit): 5 sub_code'i lisatud, mis olid seni QUANTITY_RULES-ist puudu
+(quantity_rule_found=False kõigil, kinnitatud dry-run trace'idest).
+Kõigil viiel on meat_/fish_ mustriga sarnane madal identiteediriski
+piir (15/30), sest need on juba (osaliselt) kaetud animal_type/
+cut_type/fish_species hard identity kontrollidega
+substitution_service.py's — vt sealt IDENTITY_RULES täiendus.
+SUBSTITUTION_RULES_VERSION tõstetud 2 -> 3.
+
+v4.5.1-v4.5.2 muudatus (ChatGPT sõltumatu ülevaatus, otsust mõjutav
+loogika substitution_service.py's: animal_type regex + kana/kalkuni
+eristus, AUTO_DISABLED_SUB_CODES laiendus 3 kategooriale, heeringa/
+räime eristus, meat_form laiendus): kõik need muudavad potentsiaalselt
+salvestatavat asendusotsust, seega SUBSTITUTION_RULES_VERSION tõstetud
+3 -> 4, et vanad (versioon 3 all salvestatud) cache-kirjed aeguksid
+korrektselt, mitte ei jääks kehtima kuni TTL-i lõpuni.
 """
 
 from __future__ import annotations
@@ -45,7 +62,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 2
+SUBSTITUTION_RULES_VERSION = 4
 
 
 class QuantityTier(StrEnum):
@@ -53,6 +70,28 @@ class QuantityTier(StrEnum):
     SUGGESTED = "suggested"
     INCOMPATIBLE = "incompatible"
     UNKNOWN = "unknown"
+
+
+class QuantityRejectionReason(StrEnum):
+    """v4.5.1 UUS (ChatGPT leid): eristab INCOMPATIBLE tier'i KAHTE
+    erinevat põhjust, mida substitution_service.py trace varem ei
+    eristanud — kõik INCOMPATIBLE tulemused (nii "baasühikud ei klapi"
+    kui ka "kogus liiga erinev") loeti kokku 'outside_allowed_range'
+    alla, mistõttu 'unit_mismatch' oli trace's alati 0, isegi kui
+    ühikud tegelikult ei klappinud (nt g vs ml).
+
+    v4.5.3 LISATUD (ChatGPT teine leid): UNKNOWN_UNIT eraldi
+    UNIT_MISMATCH'ist. UNIT_MISMATCH tähendab, et originaali ja
+    kandidaadi BAASÜHIKUD on tuvastatud, aga erinevad (g vs ml) —
+    see tuleb alati INCOMPATIBLE tier'ist. UNKNOWN_UNIT tähendab, et
+    net_unit väärtus ise on tundmatu/ebaselge kuju (nt "pack" ilma
+    tükiarvuta) — see tuleb UNKNOWN tier'ist ega ole päris "mismatch",
+    vaid puuduv/parsimatu andmestik."""
+    MISSING_QUANTITY = "missing_candidate_quantity"
+    MISSING_RULE = "missing_rule"
+    UNIT_MISMATCH = "unit_mismatch"
+    UNKNOWN_UNIT = "unknown_unit"
+    OUTSIDE_ALLOWED_RANGE = "outside_allowed_range"
 
 
 @dataclass(frozen=True)
@@ -63,6 +102,7 @@ class QuantityMatch:
     candidate_base_qty: Optional[Decimal]
     base_unit: Optional[str]
     reason: str
+    rejection_reason: Optional[QuantityRejectionReason] = None
 
 
 # ---------------- ühikute normaliseerimine ----------------
@@ -195,6 +235,17 @@ QUANTITY_RULES: dict[str, dict[str, int]] = {
     # tervist ohustav nagu inimtoidus laktoos/gluteen) ---
     "pet_cat_wet": {"auto_pct": 10, "suggested_pct": 25},
 
+    # --- v4.5 UUS: lihakategooriad, mis dry-run analüüsis olid
+    # quantity_rule_found=False (missing_rule). Sama piir mis
+    # meat_beef_lamb_game/fish_fresh/fish_processed, kuna neil on
+    # (nüüdsest, vt substitution_service.py IDENTITY_RULES) juba
+    # animal_type/cut_type/fish_species hard identity kontroll ---
+    "meat_pork": {"auto_pct": 15, "suggested_pct": 30},
+    "meat_poultry": {"auto_pct": 15, "suggested_pct": 30},
+    "meat_sausages": {"auto_pct": 15, "suggested_pct": 30},
+    "meat_grill_blood_sausages": {"auto_pct": 15, "suggested_pct": 30},
+    "fish_salted_smoked": {"auto_pct": 15, "suggested_pct": 30},
+
     # TEADLIKULT ENDISELT KATMATA: coffee_capsules (kapslisüsteemid
     # pole omavahel asendatavad, vajab eraldi identity-kontrolli enne
     # kui üldse kogusepiiri lisada), kõik ülejäänud sub_code'id, mida
@@ -264,6 +315,7 @@ def classify_quantity_match(
             candidate_base_qty=c_qty * c_factor,
             base_unit=None,
             reason=f"baasühikud ei klapi ({o_base_unit} vs {c_base_unit})",
+            rejection_reason=QuantityRejectionReason.UNIT_MISMATCH,
         )
 
     o_base_qty = o_qty * o_factor
@@ -287,12 +339,15 @@ def classify_quantity_match(
     if diff_percent <= auto_pct:
         tier = QuantityTier.AUTO
         reason = f"kogusevahe {diff_percent:.1f}% <= auto-piir {auto_pct}% ({sub_code})"
+        rejection_reason = None
     elif diff_percent <= suggested_pct:
         tier = QuantityTier.SUGGESTED
         reason = f"kogusevahe {diff_percent:.1f}% <= soovituse piir {suggested_pct}% ({sub_code})"
+        rejection_reason = None
     else:
         tier = QuantityTier.INCOMPATIBLE
         reason = f"kogusevahe {diff_percent:.1f}% > soovituse piir {suggested_pct}% ({sub_code})"
+        rejection_reason = QuantityRejectionReason.OUTSIDE_ALLOWED_RANGE
 
     return QuantityMatch(
         tier=tier,
@@ -301,4 +356,5 @@ def classify_quantity_match(
         candidate_base_qty=c_base_qty,
         base_unit=o_base_unit,
         reason=reason,
+        rejection_reason=rejection_reason,
     )
