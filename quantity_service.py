@@ -1,360 +1,385 @@
-"""
-Seivy — koguse/ühiku sobivuse deterministlik klassifikatsioon.
-
-See moodul EI kutsu Claude API't ega puuduta andmebaasi. Ainus vastutus:
-otsustada, kas kahe toote kogused (net_qty + net_unit) on piisavalt
-sarnased, et üks saaks teist automaatselt asendada, olla soovitusena
-näidatud, või on need lihtsalt sobimatud/teadmata.
-
-Disain ChatGPT arhitektuuriülevaatuse põhjal (juuli 2026):
-- Kogus/ühik ON DETERMINISTLIK ARVUTUS, mitte Claude'i hinnang.
-- "unknown" (net_qty/net_unit puudub) EI TOHI kunagi minna automaatsesse
-  asendusse — see on fail-closed vaikeväärtus.
-- "pakk"/"pack" ei teisendata automaatselt tükkideks, kui tükiarv pole
-  eraldi teada — jääb unknown.
-- l/kg EI teisendata automaatselt ml/g vastu risti (st erinevad
-  baasühikute TÜÜBID, mitte lihtsalt eri kordajad).
-
-SUBSTITUTION_RULES_VERSION on kirjas cache-võtme jaoks (kui reegleid
-hiljem muudetakse, peavad vanad product_substitutions kirjed aeguma).
-
-v4.4 muudatus (juuli 2026): QUANTITY_RULES laiendatud 214-testi
-dry-run analüüsi põhjal. Kategooriad, kus varem oli sql_candidate_count
-suur, aga quantity_eligible_count alati 0 (missing_rule) — seega puhas
-"puuduv reegel", mitte andmeprobleem. Protsendid valitud riskipõhiselt:
-- Kategooriad, kus IDENTITY_RULES juba katab tüübi (kohv, tee, juust) —
-  sama muster nagu olemasolevad kaetud kategooriad (15/30).
-- Kategooriad ilma identity-kontrollita, aga madala identiteediriskiga
-  (puu-/juurvili, kus kaal loomulikult varieerub) — laiem piir (20/40).
-- Kategooriad, kus toote identiteet on maitses/variandis (maiustused,
-  küpsised, snäkid, supid/nuudlid, mahlad) — kitsam auto_pct (10) JA
-  lisatud flavour_variant downgrade DOWNGRADE_RULES'i, sama mehhanism
-  mis juba kaitseb jogurtit/energiajooke/marinaade.
-- Alkoholikategooriad (õlu/siider, muu kange alkohol) said reeglid,
-  kuna AUTO_DISABLED_SUB_CODES juba sunnib need SUGGESTED tasemele
-  sõltumata protsendist — turvaline lisada.
-SUBSTITUTION_RULES_VERSION tõstetud 1 -> 2, kuna reeglite muutus mõjutab
-varasemate cache-kirjete kehtivust.
-
-v4.5 muudatus (juuli 2026, 214-testi v4.4 jooksu analüüs + ChatGPT
-audit): 5 sub_code'i lisatud, mis olid seni QUANTITY_RULES-ist puudu
-(quantity_rule_found=False kõigil, kinnitatud dry-run trace'idest).
-Kõigil viiel on meat_/fish_ mustriga sarnane madal identiteediriski
-piir (15/30), sest need on juba (osaliselt) kaetud animal_type/
-cut_type/fish_species hard identity kontrollidega
-substitution_service.py's — vt sealt IDENTITY_RULES täiendus.
-SUBSTITUTION_RULES_VERSION tõstetud 2 -> 3.
-
-v4.5.1-v4.5.2 muudatus (ChatGPT sõltumatu ülevaatus, otsust mõjutav
-loogika substitution_service.py's: animal_type regex + kana/kalkuni
-eristus, AUTO_DISABLED_SUB_CODES laiendus 3 kategooriale, heeringa/
-räime eristus, meat_form laiendus): kõik need muudavad potentsiaalselt
-salvestatavat asendusotsust, seega SUBSTITUTION_RULES_VERSION tõstetud
-3 -> 4, et vanad (versioon 3 all salvestatud) cache-kirjed aeguksid
-korrektselt, mitte ei jääks kehtima kuni TTL-i lõpuni.
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
-from enum import StrEnum
-from typing import Optional
-
-
-SUBSTITUTION_RULES_VERSION = 4
-
-
-class QuantityTier(StrEnum):
-    AUTO = "auto"
-    SUGGESTED = "suggested"
-    INCOMPATIBLE = "incompatible"
-    UNKNOWN = "unknown"
-
-
-class QuantityRejectionReason(StrEnum):
-    """v4.5.1 UUS (ChatGPT leid): eristab INCOMPATIBLE tier'i KAHTE
-    erinevat põhjust, mida substitution_service.py trace varem ei
-    eristanud — kõik INCOMPATIBLE tulemused (nii "baasühikud ei klapi"
-    kui ka "kogus liiga erinev") loeti kokku 'outside_allowed_range'
-    alla, mistõttu 'unit_mismatch' oli trace's alati 0, isegi kui
-    ühikud tegelikult ei klappinud (nt g vs ml).
-
-    v4.5.3 LISATUD (ChatGPT teine leid): UNKNOWN_UNIT eraldi
-    UNIT_MISMATCH'ist. UNIT_MISMATCH tähendab, et originaali ja
-    kandidaadi BAASÜHIKUD on tuvastatud, aga erinevad (g vs ml) —
-    see tuleb alati INCOMPATIBLE tier'ist. UNKNOWN_UNIT tähendab, et
-    net_unit väärtus ise on tundmatu/ebaselge kuju (nt "pack" ilma
-    tükiarvuta) — see tuleb UNKNOWN tier'ist ega ole päris "mismatch",
-    vaid puuduv/parsimatu andmestik."""
-    MISSING_QUANTITY = "missing_candidate_quantity"
-    MISSING_RULE = "missing_rule"
-    UNIT_MISMATCH = "unit_mismatch"
-    UNKNOWN_UNIT = "unknown_unit"
-    OUTSIDE_ALLOWED_RANGE = "outside_allowed_range"
-
-
-@dataclass(frozen=True)
-class QuantityMatch:
-    tier: QuantityTier
-    difference_percent: Optional[Decimal]
-    original_base_qty: Optional[Decimal]
-    candidate_base_qty: Optional[Decimal]
-    base_unit: Optional[str]
-    reason: str
-    rejection_reason: Optional[QuantityRejectionReason] = None
-
-
-# ---------------- ühikute normaliseerimine ----------------
-
-_VOLUME_TO_ML = {
-    "ml": Decimal(1),
-    "l": Decimal(1000),
-    "cl": Decimal(10),
-}
-
-_MASS_TO_G = {
-    "g": Decimal(1),
-    "kg": Decimal(1000),
-}
-
-_PIECE_UNITS = {"tk", "pcs", "pc", "piece", "pieces"}
-
-
-def normalize_unit(raw_unit: Optional[str]) -> Optional[tuple[str, Decimal]]:
-    """
-    Tagastab (baasühik, kordaja) või None kui ühik on tundmatu/ebaselge.
-    Kordajaga korrutades saab väärtuse baasühikusse teisendada.
-    """
-    if not raw_unit:
-        return None
-    u = raw_unit.strip().lower()
-    if not u:
-        return None
-
-    if u in _VOLUME_TO_ML:
-        return ("ml", _VOLUME_TO_ML[u])
-    if u in _MASS_TO_G:
-        return ("g", _MASS_TO_G[u])
-    if u in _PIECE_UNITS:
-        return ("tk", Decimal(1))
-
-    return None
-
-
-def _to_decimal(value) -> Optional[Decimal]:
-    if value is None:
-        return None
-    try:
-        d = Decimal(str(value))
-    except (InvalidOperation, ValueError):
-        return None
-    if d <= 0:
-        return None
-    if d > Decimal(100000):
-        return None
-    return d
-
-
-def _effective_qty(net_qty, pack_count) -> Optional[Decimal]:
-    qty = _to_decimal(net_qty)
-    if qty is None:
-        return None
-    pc = _to_decimal(pack_count) if pack_count is not None else None
-    if pc is None or pc <= 0:
-        pc = Decimal(1)
-    return qty * pc
-
-
-# ---------------- kategooriapõhised piirid ----------------
-
-QUANTITY_RULES: dict[str, dict[str, int]] = {
-    # --- Olemasolevad (v4 algsest versioonist, muutmata) ---
-    "dairy_milk": {"auto_pct": 20, "suggested_pct": 50},
-    "dairy_yogurt_kefir": {"auto_pct": 20, "suggested_pct": 50},
-    "dairy_cream_sourcream": {"auto_pct": 20, "suggested_pct": 50},
-    "drinks_soft_soda": {"auto_pct": 20, "suggested_pct": 50},
-    "drinks_energy": {"auto_pct": 20, "suggested_pct": 50},
-    "spices_herbs_spice_mix": {"auto_pct": 10, "suggested_pct": 25},
-    "dairy_eggs": {"auto_pct": 0, "suggested_pct": 40},
-    "meat_minced": {"auto_pct": 15, "suggested_pct": 30},
-    "meat_beef_lamb_game": {"auto_pct": 15, "suggested_pct": 30},
-    "cheese_regular": {"auto_pct": 15, "suggested_pct": 30},
-    "cheese_delicatessen": {"auto_pct": 15, "suggested_pct": 30},
-    "fish_fresh": {"auto_pct": 15, "suggested_pct": 30},
-    "fish_processed": {"auto_pct": 15, "suggested_pct": 30},
-    "wine_white": {"auto_pct": 10, "suggested_pct": 20},
-    "wine_red": {"auto_pct": 10, "suggested_pct": 20},
-    "wine_rose": {"auto_pct": 10, "suggested_pct": 20},
-    "baby_porridge_cereal": {"auto_pct": 0, "suggested_pct": 0},
-    "baby_diapers": {"auto_pct": 0, "suggested_pct": 0},
-    "baby_care": {"auto_pct": 0, "suggested_pct": 0},
-    "baby_other": {"auto_pct": 0, "suggested_pct": 0},
-
-    # --- v4.4 UUS: kategooriad, kus IDENTITY_RULES juba katab tüübi
-    # (kohv, tee, juustuviilud) — sama piir mis meat/cheese ---
-    "coffee_beans_ground": {"auto_pct": 15, "suggested_pct": 30},
-    "coffee_instant": {"auto_pct": 15, "suggested_pct": 30},
-    "tea": {"auto_pct": 15, "suggested_pct": 30},
-    "dairy_cheese_slices": {"auto_pct": 15, "suggested_pct": 30},
-    "wine_sparkling": {"auto_pct": 10, "suggested_pct": 20},
-    "wine_sweet": {"auto_pct": 10, "suggested_pct": 20},
-
-    # --- v4.4 UUS: madala identiteediriskiga (kaal loomulikult
-    # varieerub, identity check pole kriitiline) — laiem piir ---
-    "oils_olive": {"auto_pct": 15, "suggested_pct": 30},
-    "bakery_bread_loaves": {"auto_pct": 15, "suggested_pct": 35},
-    "dry_canned_veg": {"auto_pct": 15, "suggested_pct": 30},
-    "produce_apples_pears": {"auto_pct": 20, "suggested_pct": 40},
-    "produce_berries": {"auto_pct": 20, "suggested_pct": 40},
-    "produce_herbs_salads_sprouts": {"auto_pct": 20, "suggested_pct": 40},
-    "produce_root_veg": {"auto_pct": 20, "suggested_pct": 40},
-    "produce_tropical": {"auto_pct": 20, "suggested_pct": 40},
-
-    # --- v4.4 UUS: maitsetundlikud kategooriad — kitsam auto_pct,
-    # lisatud KOOS vastava flavour_variant downgrade kirjega
-    # DOWNGRADE_RULES'is (substitution_service.py) ---
-    "bakery_cakes_pastries": {"auto_pct": 10, "suggested_pct": 25},
-    "sweets_biscuits_cookies": {"auto_pct": 10, "suggested_pct": 25},
-    "sweets_candies": {"auto_pct": 10, "suggested_pct": 25},
-    "sweets_chocolate_bars": {"auto_pct": 10, "suggested_pct": 25},
-    "sweets_nuts_driedfruit": {"auto_pct": 15, "suggested_pct": 30},
-    "sweets_snacks_salty": {"auto_pct": 10, "suggested_pct": 25},
-    "dry_soups_noodles": {"auto_pct": 15, "suggested_pct": 30},
-    "produce_smoothies_fresh_juices": {"auto_pct": 15, "suggested_pct": 30},
-    "drinks_juices": {"auto_pct": 15, "suggested_pct": 30},
-    "drinks_non_alcoholic": {"auto_pct": 15, "suggested_pct": 30},
-
-    # --- v4.4 UUS: alkohol — AUTO_DISABLED_SUB_CODES juba sunnib
-    # SUGGESTED tasemele, seega turvaline lisada helde piir ---
-    "drinks_beer_cider": {"auto_pct": 15, "suggested_pct": 30},
-    "spirits_other": {"auto_pct": 10, "suggested_pct": 25},
-
-    # --- v4.4 UUS: lemmikloomatoit — konservatiivne, sama muster
-    # nagu snäkid (maitsevariandid olulised, aga vale valik pole
-    # tervist ohustav nagu inimtoidus laktoos/gluteen) ---
-    "pet_cat_wet": {"auto_pct": 10, "suggested_pct": 25},
-
-    # --- v4.5 UUS: lihakategooriad, mis dry-run analüüsis olid
-    # quantity_rule_found=False (missing_rule). Sama piir mis
-    # meat_beef_lamb_game/fish_fresh/fish_processed, kuna neil on
-    # (nüüdsest, vt substitution_service.py IDENTITY_RULES) juba
-    # animal_type/cut_type/fish_species hard identity kontroll ---
-    "meat_pork": {"auto_pct": 15, "suggested_pct": 30},
-    "meat_poultry": {"auto_pct": 15, "suggested_pct": 30},
-    "meat_sausages": {"auto_pct": 15, "suggested_pct": 30},
-    "meat_grill_blood_sausages": {"auto_pct": 15, "suggested_pct": 30},
-    "fish_salted_smoked": {"auto_pct": 15, "suggested_pct": 30},
-
-    # TEADLIKULT ENDISELT KATMATA: coffee_capsules (kapslisüsteemid
-    # pole omavahel asendatavad, vajab eraldi identity-kontrolli enne
-    # kui üldse kogusepiiri lisada), kõik ülejäänud sub_code'id, mida
-    # praeguses 214-testi valimis ei esinenud.
-}
-
-
-def get_rules_for_sub_code(sub_code: str) -> Optional[dict[str, int]]:
-    """
-    Tagastab None, kui kategooria pole veel teadlikult üle vaadatud —
-    caller peab sel juhul tagastama QuantityTier.UNKNOWN (fail-closed),
-    mitte kasutama mingit üldist piiri.
-    """
-    return QUANTITY_RULES.get(sub_code)
-
-
-# ---------------- peafunktsioon ----------------
-
-def classify_quantity_match(
-    original_qty,
-    original_unit: Optional[str],
-    candidate_qty,
-    candidate_unit: Optional[str],
-    sub_code: str,
-    original_pack_count=None,
-    candidate_pack_count=None,
-    apply_pack_count: bool = False,
-) -> QuantityMatch:
-    if apply_pack_count:
-        o_qty = _effective_qty(original_qty, original_pack_count)
-        c_qty = _effective_qty(candidate_qty, candidate_pack_count)
-    else:
-        o_qty = _to_decimal(original_qty)
-        c_qty = _to_decimal(candidate_qty)
-
-    if o_qty is None or c_qty is None:
-        return QuantityMatch(
-            tier=QuantityTier.UNKNOWN,
-            difference_percent=None,
-            original_base_qty=None,
-            candidate_base_qty=None,
-            base_unit=None,
-            reason="net_qty puudub või on vigane (0/negatiivne/ebarealistlik/tühi)",
-        )
-
-    o_norm = normalize_unit(original_unit)
-    c_norm = normalize_unit(candidate_unit)
-
-    if o_norm is None or c_norm is None:
-        return QuantityMatch(
-            tier=QuantityTier.UNKNOWN,
-            difference_percent=None,
-            original_base_qty=None,
-            candidate_base_qty=None,
-            base_unit=None,
-            reason="net_unit puudub või on ebaselge (nt 'pack'/'pakk' ilma tükiarvuta)",
-        )
-
-    o_base_unit, o_factor = o_norm
-    c_base_unit, c_factor = c_norm
-
-    if o_base_unit != c_base_unit:
-        return QuantityMatch(
-            tier=QuantityTier.INCOMPATIBLE,
-            difference_percent=None,
-            original_base_qty=o_qty * o_factor,
-            candidate_base_qty=c_qty * c_factor,
-            base_unit=None,
-            reason=f"baasühikud ei klapi ({o_base_unit} vs {c_base_unit})",
-            rejection_reason=QuantityRejectionReason.UNIT_MISMATCH,
-        )
-
-    o_base_qty = o_qty * o_factor
-    c_base_qty = c_qty * c_factor
-
-    rules = get_rules_for_sub_code(sub_code)
-    if rules is None:
-        return QuantityMatch(
-            tier=QuantityTier.UNKNOWN,
-            difference_percent=abs(c_base_qty - o_base_qty) / o_base_qty * Decimal(100),
-            original_base_qty=o_base_qty,
-            candidate_base_qty=c_base_qty,
-            base_unit=o_base_unit,
-            reason=f"sub_code '{sub_code}' pole QUANTITY_RULES-is — fail-closed UNKNOWN",
-        )
-
-    diff_percent = abs(c_base_qty - o_base_qty) / o_base_qty * Decimal(100)
-    auto_pct = Decimal(rules["auto_pct"])
-    suggested_pct = Decimal(rules["suggested_pct"])
-
-    if diff_percent <= auto_pct:
-        tier = QuantityTier.AUTO
-        reason = f"kogusevahe {diff_percent:.1f}% <= auto-piir {auto_pct}% ({sub_code})"
-        rejection_reason = None
-    elif diff_percent <= suggested_pct:
-        tier = QuantityTier.SUGGESTED
-        reason = f"kogusevahe {diff_percent:.1f}% <= soovituse piir {suggested_pct}% ({sub_code})"
-        rejection_reason = None
-    else:
-        tier = QuantityTier.INCOMPATIBLE
-        reason = f"kogusevahe {diff_percent:.1f}% > soovituse piir {suggested_pct}% ({sub_code})"
-        rejection_reason = QuantityRejectionReason.OUTSIDE_ALLOWED_RANGE
-
-    return QuantityMatch(
-        tier=tier,
-        difference_percent=diff_percent,
-        original_base_qty=o_base_qty,
-        candidate_base_qty=c_base_qty,
-        base_unit=o_base_unit,
-        reason=reason,
-        rejection_reason=rejection_reason,
-    )
+railway=# SET client_encoding = 'UTF8';
+SET
+railway=#
+railway=# SELECT 'meat_grill_blood_sausages/ribs' AS test_bucket, pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain) AS chains_with_price
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code = 'meat_grill_blood_sausages'
+railway-#   AND (p.name ILIKE '%ribi%' OR p.name ILIKE '%steik%' OR p.name ILIKE '%toorvorst%'
+railway(#        OR p.name ILIKE '%praevorst%' OR p.name ILIKE '%verik%')
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# SELECT 'meat_poultry/turkey_duck', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code = 'meat_poultry'
+railway-#   AND (p.name ILIKE '%kalkun%' OR p.name ILIKE '%part%' OR p.name ILIKE '%pardi%')
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# SELECT 'meat_sausages/cross_species', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code = 'meat_sausages'
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-# LIMIT 15
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# SELECT 'coffee_beans_ground/brand_diversity', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code = 'coffee_beans_ground'
+railway-#   AND pg.brand NOT IN ('Jacobs', 'Paulig', 'Lavazza')
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-# LIMIT 10
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# SELECT 'oils_olive/brand_diversity', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code = 'oils_olive'
+railway-#   AND pg.brand NOT IN ('Borges')
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-# LIMIT 10
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# SELECT 'never_tested_subcodes', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway-#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway-# FROM product_groups pg
+railway-# JOIN product_group_members m ON m.group_id = pg.id
+railway-# JOIN products p ON p.id = m.product_id
+railway-# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway-# JOIN stores s ON s.id = pr.store_id
+railway-# WHERE pg.sub_code IN ('drinks_soft_soda', 'spices_herbs_spice_mix', 'baby_porridge_cereal',
+railway(#                        'pet_cat_wet', 'hh_paper', 'wine_red', 'fish_fresh')
+railway-# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway-# HAVING COUNT(DISTINCT s.chain) < 5
+railway-# ORDER BY 1
+railway-# LIMIT 30;
+ERROR:  syntax error at or near "UNION"
+LINE 37: UNION ALL
+         ^
+railway=# SET client_encoding = 'UTF8';
+SET
+railway=#
+railway=# (SELECT 'meat_grill_blood_sausages_ribs' AS test_bucket, pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain) AS chains_with_price
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code = 'meat_grill_blood_sausages'
+railway(#   AND (p.name ILIKE '%ribi%' OR p.name ILIKE '%steik%' OR p.name ILIKE '%toorvorst%'
+railway(#        OR p.name ILIKE '%praevorst%' OR p.name ILIKE '%verik%')
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5)
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# (SELECT 'meat_poultry_turkey_duck', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code = 'meat_poultry'
+railway(#   AND (p.name ILIKE '%kalkun%' OR p.name ILIKE '%part%' OR p.name ILIKE '%pardi%')
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5)
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# (SELECT 'meat_sausages_cross_species', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code = 'meat_sausages'
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5
+railway(# LIMIT 15)
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# (SELECT 'coffee_beans_ground_brand_diversity', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code = 'coffee_beans_ground'
+railway(#   AND pg.brand NOT IN ('Jacobs', 'Paulig', 'Lavazza')
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5
+railway(# LIMIT 10)
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# (SELECT 'oils_olive_brand_diversity', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code = 'oils_olive'
+railway(#   AND pg.brand NOT IN ('Borges')
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5
+railway(# LIMIT 10)
+railway-#
+railway-# UNION ALL
+railway-#
+railway-# (SELECT 'never_tested_subcodes', pg.id, pg.canonical_name, pg.brand, pg.sub_code,
+railway(#        array_agg(DISTINCT s.chain ORDER BY s.chain)
+railway(# FROM product_groups pg
+railway(# JOIN product_group_members m ON m.group_id = pg.id
+railway(# JOIN products p ON p.id = m.product_id
+railway(# JOIN prices pr ON pr.product_id = p.id AND pr.price IS NOT NULL AND pr.price > 0
+railway(# JOIN stores s ON s.id = pr.store_id
+railway(# WHERE pg.sub_code IN ('drinks_soft_soda', 'spices_herbs_spice_mix', 'baby_porridge_cereal',
+railway(#                        'pet_cat_wet', 'hh_paper', 'wine_red', 'fish_fresh')
+railway(# GROUP BY pg.id, pg.canonical_name, pg.brand, pg.sub_code
+railway(# HAVING COUNT(DISTINCT s.chain) < 5
+railway(# ORDER BY 2
+railway(# LIMIT 30)
+railway-#
+railway-# ORDER BY 1;
+             test_bucket             |  id   |                         canonical_name                         |     brand      |         sub_code          |      chains_with_price
+-------------------------------------+-------+----------------------------------------------------------------+----------------+---------------------------+-----------------------------
+ coffee_beans_ground_brand_diversity | 25616 | Starbucks Blonde Espresso kohvioad 450g                        | Starbucks      | coffee_beans_ground       | {Maxima,Rimi,Selver}
+ coffee_beans_ground_brand_diversity | 25615 | Starbucks Pike Place r├Âst 450g                                 | Starbucks      | coffee_beans_ground       | {Prisma,Rimi}
+ coffee_beans_ground_brand_diversity | 25643 | Merrild Crema Dolce kohvioad 1kg                               | Merrild        | coffee_beans_ground       | {Rimi,Selver}
+ coffee_beans_ground_brand_diversity | 25640 | Merrild In-Cup 500g jahvatatud kohv                            | Merrild        | coffee_beans_ground       | {Maxima,Rimi}
+ coffee_beans_ground_brand_diversity | 25639 | Merrild In-Cup tassikohv 400g                                  | Merrild        | coffee_beans_ground       | {Coop,Prisma,Rimi,Selver}
+ coffee_beans_ground_brand_diversity | 25638 | Merrild 103 Mellemristet filtrikohv 500g                       | Merrild        | coffee_beans_ground       | {Coop,Prisma,Selver}
+ coffee_beans_ground_brand_diversity | 25637 | LOR Classic kohvioad 1kg                                       | LOR            | coffee_beans_ground       | {Selver}
+ coffee_beans_ground_brand_diversity | 25636 | LOR Forza kohvioad 1kg                                         | LOR            | coffee_beans_ground       | {Coop,Maxima}
+ coffee_beans_ground_brand_diversity | 25635 | LOR Classique kohvioad 1kg                                     | LOR            | coffee_beans_ground       | {Coop,Maxima,Selver}
+ coffee_beans_ground_brand_diversity | 25617 | Starbucks Pike Place kohvioad 450g                             | Starbucks      | coffee_beans_ground       | {Maxima,Rimi}
+ meat_grill_blood_sausages_ribs      | 16239 | Karni j├Áhvika toorvorstid 400g                                 | Karni          | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 16242 | Karni saslokitoorvorstid 400g                                  | Karni          | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16245 | Karni Chill-Dill toorvorstid 400g                              | Karni          | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16246 | Karni ├Áuna toorvorstid 400g                                    | Karni          | meat_grill_blood_sausages | {Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16256 | Matsimoka toorvorstid paprika ja tsilliga lambasooles 300g     | Matsimoka      | meat_grill_blood_sausages | {Coop,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16257 | Matsimoka toorvorstid sibula ja ├ñ├ñdikal 300g                   | Matsimoka      | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16264 | Noo sasloki toorvorstid 400g                                   | N├ÁO            | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16267 | Noo laste toorvorstid juustuga 400g                            | N├ÁO            | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16268 | Noo toorvorstid sealihast Nomps 400g                           | N├ÁO            | meat_grill_blood_sausages | {Maxima,Rimi}
+ meat_grill_blood_sausages_ribs      | 16274 | Linnam├ñe juustused toorvorstid 900g                            | Linnam├ñe       | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16275 | Linnam├ñe toorvorstid musta k├╝├╝slauguga 350g                    | Linnam├ñe       | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16276 | Linnam├ñe klassikalised sibula-├ñ├ñdika toorvorstid 900g          | Linnam├ñe       | meat_grill_blood_sausages | {Coop,Selver}
+ meat_grill_blood_sausages_ribs      | 16291 | Toored broileri toorvorstid urtidega 400g                      | Well Done      | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 16292 | Peened toorvorstid sealihast 400g                              | Well Done      | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 16294 | Rannam├Áisa toorvorstid broilerilihast tomati-sulajuustuga 300g | Rannam├Áisa     | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16295 | Rannam├Áisa toorvorstid kalkuni kintsulihast 300g               | Rannam├Áisa     | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16302 | Oskar suviste v├╝rtsidega toorvorst 450g                        | Oskar          | meat_grill_blood_sausages | {Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16167 | Selver Grillsteik sea kaelakarbonaadist kg                     |                | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16311 | Linnam├ñe BBQ grillribi 600g                                    | Linnam├ñe       | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 16312 | Rakvere Grill-Ribi kg                                          | Rakvere        | meat_grill_blood_sausages | {Coop,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16313 | Rakvere American BBQ grill-ribi 900g                           | Rakvere        | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 16314 | Rakvere Mustika Grill-Ribi 1kg                                 | Rakvere        | meat_grill_blood_sausages | {Maxima,Prisma,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16315 | Rakvere mustikamarinaadis ribi 900g                            | Rakvere        | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 16316 | Rakvere aasiaparne kauakupsenud grillribi 900g                 | Rakvere        | meat_grill_blood_sausages | {Prisma,Rimi}
+ meat_grill_blood_sausages_ribs      | 16317 | Rannarootsi Teriyaki grillribid 900g eelkupsetatud             | Rannarootsi    | meat_grill_blood_sausages | {Coop,Prisma,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16318 | Rannarootsi kuldne grillribi 900g eelkupsetatud                | Rannarootsi    | meat_grill_blood_sausages | {Prisma,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16319 | Smokey BBQ grill-ribi Maks&Moorits kg                          | Maks & Moorits | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 16322 | Rakvere verikakk viilutatud 300g                               | Rakvere        | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 16323 | Klassikaline verikakk viilutatud M&M 340g                      | Maks & Moorits | meat_grill_blood_sausages | {Coop,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16325 | Miniverikakk Rannarootsi 250g                                  | Rannarootsi    | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 16343 | Toorvorstikesed LEMMIK kg                                      | Lemmik         | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 44333 | Grillvorst MM saksa praevorst 400g                             | Maks & Moorits | meat_grill_blood_sausages | {Coop,Selver}
+ meat_grill_blood_sausages_ribs      | 44335 | Grillvorst MM shashlakivorstid 400g                            | Maks & Moorits | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_grill_blood_sausages_ribs      | 44342 | Grillvorst NoO kimchi toorvorstid 400g                         | N├ÁO            | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 44354 | Grillvorst RR klassikalised 400g seasooles                     | Rannarootsi    | meat_grill_blood_sausages | {Coop,Prisma,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 44358 | Grillvorst Kotimaista toorvorst 400g                           | Kotimaista     | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 44360 | Grillvorst Tallegg merevaigu toorvorst 400g                    | Tallegg        | meat_grill_blood_sausages | {Coop,Maxima,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 44365 | Grillvorst Linnam├ñe juustused toorvorstid 900g                 | Linnam├ñe       | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 44372 | Grillvorst Rakvere Pere toorvorstid 400g                       | Rakvere        | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_grill_blood_sausages_ribs      | 44373 | Grillvorst Rimi broileri toorvorstid 400g                      | Rimi           | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 44374 | Grillvorst Rimi sealihast toorvorstid 400g                     | Rimi           | meat_grill_blood_sausages | {Rimi}
+ meat_grill_blood_sausages_ribs      | 44377 | Grillvorst RM laste toorvorstid broileri 300g                  | Rannam├Áisa     | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 44378 | Grillvorst Karni Cheddari toorvorstid 400g                     | Karni          | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_grill_blood_sausages_ribs      | 44379 | Grillvorst Karni tailihast toorvorstid 400g                    | Karni          | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 44380 | Grillvorst Karni shashlaki toorvorstid 400g                    | Karni          | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_grill_blood_sausages_ribs      | 44381 | Grillvorst Karni teravad toorvorstid 400g                      | Karni          | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 44386 | Grillvorst RLK merevaigu toorvorstid 400g                      | Rakvere        | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_grill_blood_sausages_ribs      | 44632 | Grillvorstid Treski Kimmoos NoO 365g                           | N├ÁO            | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 50573 | Sasloki toorvorstid MjaM 400g                                  | Maks & Moorits | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 50634 | Noo Fitlap toorvorstid broileriliha 400g                       | N├ÁO            | meat_grill_blood_sausages | {Coop,Maxima,Selver}
+ meat_grill_blood_sausages_ribs      | 50641 | Grillsteik suvises marinaadis Matsimoka 500g                   | Matsimoka      | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 50647 | Linnam├ñe R├Âstleiva mekiga grillribid 600g                      | Linnam├ñe       | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 50649 | Noo Fitlap grillsteik suitsuse kirsiga 460g                    | N├ÁO            | meat_grill_blood_sausages | {Coop,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 50651 | Noo Meistrite grillribid 1.2kg                                 | N├ÁO            | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 50657 | Rakvere Piprane babyback searibi 700g                          | Rakvere        | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 51661 | Grillitud searibi SELVER kg                                    | Selver         | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 51669 | Teravad toorvorstid TULD! KARNI 400g                           | Karni          | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 51670 | Toorvorstid Cheddar juustuga KARNI 400g                        | Karni          | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 51671 | Toorvorstid kukeseentega OSKAR 450g                            | Oskar          | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 55609 | Eelkups.jaagriribid metssealih. Rannarootsi 600g               | Rannarootsi    | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 56707 | Maks ja Moorits grillsnakk ribiribad 1 3kg                     | Maks & Moorits | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 56712 | ST.Louis ribi tsillines BBQ kg                                 | Selver         | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 56715 | Verikakk 440g                                                  | Rakvere        | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 58894 | Armeenia searibid 600g                                         | N├òO            | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 58941 | Suve├Áhtu toorvorst 450g                                        | Oskar          | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 58943 | Searibi kuivmarinaadis kg                                      | Armeenia Grill | meat_grill_blood_sausages | {Maxima}
+ meat_grill_blood_sausages_ribs      | 16169 | Selver Suitsune sartsakas grillribi kg                         |                | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16191 | Rakvere mustika toorvorstid 400g                               | Rakvere        | meat_grill_blood_sausages | {Maxima,Prisma,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16192 | Rakvere laste toorvorstid ploomidega 400g                      | Rakvere        | meat_grill_blood_sausages | {Coop,Maxima,Prisma}
+ meat_grill_blood_sausages_ribs      | 16194 | Rannarootsi EHE klassikalised toorvorstid 400g                 | Rannarootsi    | meat_grill_blood_sausages | {Coop,Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16195 | Rannarootsi sulajuustuga toorvorstid 400g                      | Rannarootsi    | meat_grill_blood_sausages | {Coop,Maxima,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16196 | Rannarootsi Gruusia toorvorstid 400g                           | Rannarootsi    | meat_grill_blood_sausages | {Coop,Maxima,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16197 | Rannarootsi Tzatziki toorvorstid 400g                          | Rannarootsi    | meat_grill_blood_sausages | {Coop,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16198 | Rannarootsi laste toorvorstikesed 400g                         | Rannarootsi    | meat_grill_blood_sausages | {Coop,Maxima,Selver}
+ meat_grill_blood_sausages_ribs      | 16204 | Rannarootsi rohelise sibulaga toorvorstid 400g                 | Rannarootsi    | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16206 | Rannarootsi miniribi kg                                        | Rannarootsi    | meat_grill_blood_sausages | {Prisma}
+ meat_grill_blood_sausages_ribs      | 16205 | Rannarootsi triibuliha toorvorstid 400g                        | Rannarootsi    | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16214 | M&M Maitselt mahedad toorvorstikesed 450g                      | Maks & Moorits | meat_grill_blood_sausages | {Coop}
+ meat_grill_blood_sausages_ribs      | 16218 | M&M Fetajuustu-spinati toorvorstikesed 400g                    | Maks & Moorits | meat_grill_blood_sausages | {Rimi,Selver}
+ meat_grill_blood_sausages_ribs      | 16219 | M&M Forte juustu toorvorstikesed 400g                          | Maks & Moorits | meat_grill_blood_sausages | {Maxima,Selver}
+ meat_grill_blood_sausages_ribs      | 16220 | M&M Kreekap br lihast toorvorstikesed 400g                     | Maks & Moorits | meat_grill_blood_sausages | {Coop,Rimi}
+ meat_grill_blood_sausages_ribs      | 16221 | M&M Puhajarve toorvorstikesed 400g                             | Maks & Moorits | meat_grill_blood_sausages | {Maxima,Selver}
+ meat_grill_blood_sausages_ribs      | 16224 | M&M Toorvorst paikesekuivatatud tomati ja juustuga 400g        | Maks & Moorits | meat_grill_blood_sausages | {Selver}
+ meat_grill_blood_sausages_ribs      | 16227 | M&M Grillribi punases marinaadis ~1.3kg                        | Maks & Moorits | meat_grill_blood_sausages | {Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16230 | M&M Kolme sibula toorvorstikesed 400g                          | Maks & Moorits | meat_grill_blood_sausages | {Coop,Prisma,Selver}
+ meat_grill_blood_sausages_ribs      | 16238 | Karni Jaagri toorvorstid lepasuitsuga 400g                     | Karni          | meat_grill_blood_sausages | {Coop,Prisma}
+ meat_poultry_turkey_duck            | 23449 | Hrk peakoka pardirinnafilee Linnam├ñe kg                        | Linnam├Áe       | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23298 | Rannam├Áisa Broiler jahutatud kg                                | Rannam├Áisa     | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23353 | Kalkuni-suvikarvitsakotlet Selveri kook 240g                   | Selver K├Â├Âk    | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23396 | Kalkuni ┼ía┼íl├Ákk Armeenia Grill kg URL                          | Armeenia Grill | meat_poultry              | {Maxima,Prisma,Rimi}
+ meat_poultry_turkey_duck            | 23408 | Kalkunifilee Rannam├Áisa kg                                     | Rannam├Áisa     | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23409 | Kalkunifilee viilud Coop 300g                                  | Coop           | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23410 | Kalkunirull Coop 700g                                          | Coop           | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23411 | Kalkuniguljass Rimi 450g                                       | Rimi           | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 23412 | Kalkuniguljass jahutatud WELL DONE 400g                        | Well Done      | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 23414 | Kalkunikintsuliha Rannam├Áisa kg                                | Rannam├Áisa     | meat_poultry              | {Maxima,Prisma,Selver}
+ meat_poultry_turkey_duck            | 23415 | Kalkunikintsuliha r├Âstitud k├╝├╝slauguga Kikas 600g              | Kikas          | meat_poultry              | {Coop,Selver}
+ meat_poultry_turkey_duck            | 23416 | Kalkunikintsuliha r├Âstitud paprika Kikas 600g                  | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23417 | Kalkunikintsuliha aasiap. Kikas 600g                           | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23418 | Kalkunikintsuliha BBQ apelsini marinaadis Kikas                | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23419 | Kalkunikintsuliha kanepi-mee marinaadis Kikas                  | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23420 | Kalkunikintsuliha rosmariini Kikas 700g                        | Kikas          | meat_poultry              | {Coop}
+ meat_poultry_turkey_duck            | 23421 | Kalkunikintsuliha sinepi-olle marinaadis Kikas 700g            | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23422 | Kalkun r├Âstitud k├╝├╝slaugu marinaadis Kikas 600g                | Kikas          | meat_poultry              | {Coop,Prisma}
+ meat_poultry_turkey_duck            | 23424 | Kalkuni rinnafilee vurske Rimi kg                              | Rimi           | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 23425 | Kalkuni rinnafilee grill-liha Rannarootsi 400g                 | Rannarootsi    | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23426 | Kalkuniguljass Rannam├Áisa 400g                                 | Rannam├Áisa     | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23428 | Kalkuni rinnafilee Rannam├Áisa kg duubl                         | Rannam├Áisa     | meat_poultry              | {Prisma,Selver}
+ meat_poultry_turkey_duck            | 23430 | Kalkuni rinnafilee lougud WELL DONE 400g                       | Well Done      | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 23431 | Rannarootsi Roheliste Oliividega Kalkunipraad 600g             | Rannarootsi    | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23432 | RM kalkunifilee 850g                                           | Rannam├Áisa     | meat_poultry              | {Coop}
+ meat_poultry_turkey_duck            | 23433 | RM kalkunikintsuliha 1kg                                       | Rannam├Áisa     | meat_poultry              | {Coop}
+ meat_poultry_turkey_duck            | 23434 | Jahutatud pardikoib Rannam├Áisa kg                              | Rannam├Áisa     | meat_poultry              | {Prisma,Selver}
+ meat_poultry_turkey_duck            | 23435 | Jahutatud pardikoivad A-klass kg                               | Coop           | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 23438 | Pardi-confit Rannam├Áisa 500g                                   | Rannam├Áisa     | meat_poultry              | {Prisma,Rimi,Selver}
+ meat_poultry_turkey_duck            | 23439 | Pardifilee v├╝rtsidega Kitchen Me 170g                          | Kitchen Me     | meat_poultry              | {Maxima,Rimi}
+ meat_poultry_turkey_duck            | 23440 | Pardikoib Aasiap. Linnam├ñe 500g                                | Linnam├Áe       | meat_poultry              | {Rimi,Selver}
+ meat_poultry_turkey_duck            | 23441 | Pardikoivad marineeritud WELL DONE kg                          | Well Done      | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 23442 | Pardikoivad vurske Reinuvaderi Pidusook kg                     | Reinuvaderi    | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 23443 | Pardi rinnafilee marineeritud WELL DONE kg                     | Well Done      | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 23444 | Pardirinnafilee nahaga vurske Reinuvaderi kg                   | Reinuvaderi    | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 23445 | Pardi rinnafilee Rannam├Áisa kg                                 | Rannam├Áisa     | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23447 | Pardi rinnafilee nahaga MARKUS MAREK kg                        | Markus Marek   | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 23448 | Pekingi part 1/2 kondita r├Âstitud 600g                         | Coop           | meat_poultry              | {Coop}
+ meat_poultry_turkey_duck            | 23450 | Linnam├ñe hrk peakoka pardirinnafilee 400g                      | Linnam├Áe       | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 23451 | Krobe meepart Rannam├Áisa kg                                    | Rannam├Áisa     | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 23454 | Rannam├Áisa pardi rinnafilee nahaga kg                          | Rannam├Áisa     | meat_poultry              | {Coop,Prisma,Selver}
+ meat_poultry_turkey_duck            | 28211 | RM Part kg jahutatud                                           | Rannam├Áisa     | meat_poultry              | {Coop}
+ meat_poultry_turkey_duck            | 50299 | Kana- ja kalkunikotletid praetud Salling 125g                  | Salling        | meat_poultry              | {Rimi}
+ meat_poultry_turkey_duck            | 50305 | Kikas Kalkunikintsuliha itaaliapaarane marinaadis 600g         | Kikas          | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 50316 | Pardifilee marinaadis Linnamoe kg                              | Linnam├Áe       | meat_poultry              | {Selver}
+ meat_poultry_turkey_duck            | 51987 | Rannam├Áisa Kalkuni rinnafileest grill-liha 400g                | Rannam├Áisa     | meat_poultry              | {Prisma}
+ meat_poultry_turkey_duck            | 55795 | Kergsuitsu kalkunirinnafilee Rannam├Áisa kg                     | Rannam├Áisa     | meat_poultry              | {Maxima}
+ meat_poultry_turkey_duck            | 55804 | Pekingi part WELL DONE kg                                      | Well Done      | meat_poultry              | {Maxima}
+ meat_sausages_cross_species         | 44078 | Doktorivorst Well Done juustuga 300g                           | Well Done      | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 44079 | Doktorivorst M&M suitsutatud 500g                              | Maks & Moorits | meat_sausages             | {Coop,Maxima,Prisma,Selver}
+ meat_sausages_cross_species         | 44080 | Doktorivorst M&M 600g                                          | Maks & Moorits | meat_sausages             | {Coop,Maxima,Prisma,Selver}
+ meat_sausages_cross_species         | 44085 | Lastevorst Rakvere kg-lett                                     | Rakvere        | meat_sausages             | {Maxima,Selver}
+ meat_sausages_cross_species         | 44087 | Lastevorst Rakvere Lihakas 170g viil                           | Rakvere        | meat_sausages             | {Coop,Maxima,Prisma,Selver}
+ meat_sausages_cross_species         | 44077 | Doktorivorst Well Done 300g                                    | Well Done      | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 44076 | Doktorivorst Pormet 400g                                       | Pormet         | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 44075 | Doktorivorst Pormet 300g                                       | Pormet         | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 44073 | Doktorivorst UVIC kg                                           | UVIC           | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 44072 | Doktorivorst NoO kg-lett                                       | N├ÁO            | meat_sausages             | {Maxima,Selver}
+ meat_sausages_cross_species         | 44071 | Doktorivorst Rakvere Lihakas 360g                              | Rakvere        | meat_sausages             | {Prisma,Selver}
+ meat_sausages_cross_species         | 44070 | Doktorivorst Rakvere Lihakas 170g viil                         | Rakvere        | meat_sausages             | {Coop,Selver}
+ meat_sausages_cross_species         | 44069 | Doktorivorst Rakvere 190g viil                                 | Rakvere        | meat_sausages             | {Coop,Maxima,Prisma,Rimi}
+ meat_sausages_cross_species         | 44068 | Doktorivorst Rakvere kg-lett                                   | Rakvere        | meat_sausages             | {Maxima}
+ meat_sausages_cross_species         | 12792 | Antu Gurmee mahekana viiner 350g                               | Antu Gurmee    | meat_sausages             | {Prisma}
+ never_tested_subcodes               |  7627 | Semper pirni-aprikoosi puder 6k 120g                           | Semper         | baby_porridge_cereal      | {Coop,Prisma,Rimi}
+ never_tested_subcodes               |  7617 | Ponn mitmeviljapuder ├Áuna-kaneeli oko 6k 110g                  | Ponn           | baby_porridge_cereal      | {Coop,Rimi,Selver}
+ never_tested_subcodes               |  7618 | Ponn t├ñisterapuder banaani-mustsastraga oko 6k 200g            | Ponn           | baby_porridge_cereal      | {Coop,Prisma,Selver}
+ never_tested_subcodes               |  7619 | Ponn teraviljapuder piima-puuviljadega HEAD UND oko 6k 110g    | Ponn           | baby_porridge_cereal      | {Coop,Rimi,Selver}
+ never_tested_subcodes               |  7620 | Ponn hirsi-kaerapuder kollase ploomi-mangoga oko 6k 110g       | Ponn           | baby_porridge_cereal      | {Coop,Rimi,Selver}
+ never_tested_subcodes               |  7621 | Semper kaerapuder ├Áuna-kaneeli 6k 120g                         | Semper         | baby_porridge_cereal      | {Coop}
+ never_tested_subcodes               |  7622 | Semper mitmeviljapuder ├Áuna-maasika-mustika 8k 120g            | Semper         | baby_porridge_cereal      | {Coop,Maxima}
+ never_tested_subcodes               |  7623 | Semper mitmeviljapuder ├Áuna-virsiku-aprikoos 8k 120g           | Semper         | baby_porridge_cereal      | {Coop}
+ never_tested_subcodes               |  7624 | Semper maasika-banaanipuder 6k 120g                            | Semper         | baby_porridge_cereal      | {Coop,Prisma}
+ never_tested_subcodes               |  7625 | Semper mustika-├Áunapuder 6k 120g                               | Semper         | baby_porridge_cereal      | {Prisma,Rimi}
+ never_tested_subcodes               |  7626 | Semper ├Áuna-virsiku puder 6k 120g                              | Semper         | baby_porridge_cereal      | {Coop,Prisma}
+ never_tested_subcodes               |  7597 | Kaerapudrupulber BIO 4k 200g                                   | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi}
+ never_tested_subcodes               |  7598 | Riisipudrupulber BIO 4k 200g                                   | Hipp           | baby_porridge_cereal      | {Prisma,Rimi}
+ never_tested_subcodes               |  7599 | Tatra piimapudrupulber 4k 250g                                 | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Selver}
+ never_tested_subcodes               |  7600 | Head Ood piimapuder banaaniga 4k 190g                          | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7601 | Head Ood piimapuder puuviljadega 4k 190g                       | Hipp           | baby_porridge_cereal      | {Coop,Selver}
+ never_tested_subcodes               |  7602 | Head Ood piimapuder k├╝psistega 4k 190g                         | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7603 | Head Ood banaan-kuiviku piimapudrupulber 4k 250g               | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7604 | Head Ood k├╝psistega piimapudrupulber 6k 250g                   | Hipp           | baby_porridge_cereal      | {Coop,Selver}
+ never_tested_subcodes               |  7605 | Head Ood kaera-├Áuna piimapudrupulber 6k 250g                   | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7606 | 5-vilja piimapuder ploomiga 6k 250g                            | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Rimi}
+ never_tested_subcodes               |  7607 | Maisi-puuviljapudrupulber 6k 250g                              | Hipp           | baby_porridge_cereal      | {Coop,Prisma}
+ never_tested_subcodes               |  7608 | 8K piimapuder prebiootikumidega puuviljadega 250g              | Hipp           | baby_porridge_cereal      | {Coop}
+ never_tested_subcodes               |  7609 | Puuviljad jogurtiga piimapudrupulber BIO 8k 250g               | Hipp           | baby_porridge_cereal      | {Prisma,Rimi}
+ never_tested_subcodes               |  7610 | Mitmeviljapuder oko 6k 200g                                    | Hipp           | baby_porridge_cereal      | {Coop,Prisma,Selver}
+ never_tested_subcodes               |  7611 | Ponn kaerapuder aprikoosiga oko 6k 200g                        | Ponn           | baby_porridge_cereal      | {Coop,Prisma,Selver}
+ never_tested_subcodes               |  7612 | Ponn kaerapuder mustikaga oko 6k 190g                          | Ponn           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7613 | Ponn kaerapuder ploomi-mustsosta-kookosega oko 6k 110g         | Ponn           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7614 | Ponn neljaviljapuder banaani-mustikaga oko 6k 110g             | Ponn           | baby_porridge_cereal      | {Coop,Prisma,Rimi,Selver}
+ never_tested_subcodes               |  7616 | Ponn neljaviljapuder vaarikaga oko 6k 200g                     | Ponn           | baby_porridge_cereal      | {Coop,Rimi,Selver}
+ oils_olive_brand_diversity          | 14192 | Ekstra vaarioliivioli elinikon kalam 500ml                     | Elinikon       | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14211 | Herkku Organic vaarioliivioli 250ml                            | Herkku         | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14212 | Herkku Organic vaarioliivioli 500ml                            | Herkku         | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14215 | La Espaniola EVO olipress 500ml                                | La Espanola    | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14218 | Luglio ekstra vaarioliivioli Kreeka 500ml                      | Luglio         | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14232 | OLIVITAL oliivijaagoli 1L                                      | OLIVITAL       | oils_olive                | {Maxima}
+ oils_olive_brand_diversity          | 14233 | Colavita oliivoli essential 500ml                              | Colavita       | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14234 | Colavita oliivoli extra virgin Kreeka 750ml                    | Colavita       | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14235 | Colavita oliivoli extra virgin premium 750ml                   | Colavita       | oils_olive                | {Prisma}
+ oils_olive_brand_diversity          | 14189 | Sidrunimaitsega oliivoli 250ml                                 | Coop           | oils_olive                | {Prisma}
+(199 rows)
