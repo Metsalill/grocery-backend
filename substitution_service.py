@@ -52,6 +52,67 @@ v4.4 muudatus (juuli 2026, QUANTITY_RULES laiendus):
   quantity_service.py QUANTITY_RULES laiendusega samade sub_code'ide
   jaoks (vt seal SUBSTITUTION_RULES_VERSION tõus 1 -> 2).
 
+v4.5 muudatused (juuli 2026, 214-testi v4.4 jooksu manuaalne audit +
+ChatGPT sõltumatu ülevaatus — 8 kinnitatud false-AUTO juhtumit):
+- IDENTITY_RULES UUS hard-check: sweets_nuts_driedfruit (nut_seed_type
+  — kreeka pähkel != metspähkel, need on erinevad toidud, mitte
+  maitsevariandid), drinks_non_alcoholic (beverage_type — alkoholivaba
+  õlu/siider/mocktail/Fassbrause on erinevad tootetüübid, mitte
+  omavahel asendatavad lihtsalt sellepärast, et mõlemad on alkoholi-
+  vabad), meat_sausages ja meat_grill_blood_sausages (animal_type +
+  meat_form — verivorst != šašlõkk, kana != sea).
+- DOWNGRADE_RULES UUS: tea (flavour_variant — Earl Grey != mustsõstar,
+  muster oli juba olemas FLAVOUR_VARIANT_PATTERNS'is, ainult tea polnud
+  DOWNGRADE_RULES's registreeritud), oils_olive (flavour_profile +
+  oil_grade — basiilikumaitse pole "kvaliteetne asendus", rafineeritud
+  != ekstra vääris; MÄRKUS: "ekstra vääris" ja "ekstra neitsi" on SAMA
+  EL-i kategooria (extra virgin), ametlik eestikeelne termin muutus
+  2022 — _oil_grade normaliseerib need mõlemad "extra_virgin" alla,
+  et vältida valet downgrade't), meat_minced (protein_enriched —
+  proteiinihakkliha != tavahakk, sama muster mis Wyke Farms cheddar),
+  bakery_bread_loaves (grain_type — täistera/rukki/mitmevilja erinevus
+  pole "sama kategooria röstleib"), coffee_beans_ground + coffee_instant
+  (coffee_brew_form — In-Cup != presskann, jahvatusaste erineb).
+- Kaasneb quantity_service.py QUANTITY_RULES laiendusega 5 uue
+  lihakategooria jaoks (vt seal, SUBSTITUTION_RULES_VERSION 2 -> 3).
+
+v4.5.1 muudatused (juuli 2026, ChatGPT sõltumatu koodiülevaatus v4.5
+peal, KÕIK kolm leidu kinnitatud otse koodist enne parandamist):
+- unit_mismatch trace oli katki: QuantityTier.INCOMPATIBLE loeti ALATI
+  "outside_allowed_range" alla, ka siis kui tegu oli päris baasühiku-
+  mittevastavusega (g vs ml). Lisatud QuantityRejectionReason enum +
+  QuantityMatch.rejection_reason väli (quantity_service.py), mis
+  kannab põhjuse otse edasi.
+- animal_type kasutas puhast substring-kontrolli ("sea" in text) —
+  asendatud \\b sõnapiiriga regex-mustritega. Kana ja kalkun olid
+  varem KOKKU "poultry" all (kalkunihakkliha oleks läbinud hard-check'i
+  broilerihakkliha vastu) — eraldatud chicken/turkey/duck/
+  generic_poultry'ks. Lisatud "deer".
+- AUTO_DISABLED_SUB_CODES laiendatud ajutiselt: tea, sweets_candies,
+  drinks_non_alcoholic — nende olemasolev tüübisõnastik ei kata
+  piisavalt reaalset variatsiooni (bränditud kombinimed, tee TÜÜP
+  mitte ainult puuviljamaitse, alkoholivaba joogi tüübi ühesuunaline
+  kontroll). Eemaldatavad alles pärast täielikumat identiteedimudelit.
+
+v4.5.2 muudatused (ChatGPT teine ülevaatus, samad kolm leidu edasi
+laiendatud): meat_form 4 -> 10 vormi (ribi, steik, toorvorst,
+praevorst, verikäkk, marineeritud lõige lisatud). fish_species:
+heeringas ja räim eraldi liigid (varem samas "herring" kategoorias) +
+parandatud pre-existing viga, kus "heeringas" ei tabanud käändevorme
+nagu "heeringafilee" (tüvi "heering" kasutusele).
+
+v4.5.3 muudatused (ChatGPT kolmas ülevaatus):
+- SUBSTITUTION_RULES_VERSION tõstetud 3 -> 4 (vt quantity_service.py),
+  kuna v4.5.1/v4.5.2 muutsid otsust mõjutavat loogikat pärast esialgset
+  2->3 tõusu, aga versiooninumbrit ei uuendatud — vana cache oleks
+  jäänud kehtima kuni TTL lõpuni.
+- QuantityRejectionReason.UNKNOWN_UNIT lisatud, eraldatud
+  UNIT_MISMATCH'ist: UNIT_MISMATCH = kaks TUVASTATUD baasühikut, mis
+  erinevad (g vs ml, INCOMPATIBLE tier). UNKNOWN_UNIT = net_unit
+  väärtus ise on ebaselge/parsimatu (nt "pack" ilma tükiarvuta,
+  UNKNOWN tier) — need läksid varem sama "unit_mismatch" trace-võtme
+  alla, kuigi tegu on kahe erineva andmeprobleemiga.
+
 See fail on hetkel ISOLEERITUD — compare_service.py ei impordi seda.
 """
 
@@ -67,6 +128,7 @@ from quantity_service import (
     classify_quantity_match,
     get_rules_for_sub_code,
     QuantityTier,
+    QuantityRejectionReason,
     SUBSTITUTION_RULES_VERSION,
 )
 
@@ -272,7 +334,14 @@ def _cheese_form(text) -> Optional[str]:
 FISH_SPECIES_KEYWORDS: dict[str, tuple[str, ...]] = {
     "salmon": ("lõhe", "lohe", "salmon"),
     "cod": ("tursk", "cod"),
-    "herring": ("heeringas", "räim", "raim"),
+    # v4.5.2 (ChatGPT leid): heeringas ja räim on lähiliigid, aga mitte
+    # sama toode/toit Eesti kaubandustavas — lahutatud eraldi
+    # identiteetideks, et vältida vale AUTO-t nende vahel. "heering"
+    # (mitte "heeringas") kui tüvi, et tabada ka käändevorme
+    # (heeringafilee, heeringast jne — leitud testimisel, pre-existing
+    # bug juba v4.2 algsest nimekirjast).
+    "herring": ("heering",),
+    "baltic_herring": ("räim", "raim"),
     "trout": ("forell", "trout"),
     "pike": ("haug", "pike"),
     "tuna": ("tuunikala", "tuna"),
@@ -291,30 +360,47 @@ def _fish_species(text) -> Optional[str]:
     return None
 
 
-ANIMAL_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "beef": ("veise", "veiseliha", "härjaliha"),
-    "pork": ("sea", "sealiha", "seakarbonaad"),
-    "poultry": ("kana", "kalkuni", "kalkun", "linnuliha"),
-    "mixed": ("sea-veise", "veise-sea"),
-    "lamb": ("lamba", "lambaliha"),
+# v4.5.1 (ChatGPT leid): endine ANIMAL_TYPE_KEYWORDS kasutas puhast
+# substring-kontrolli ("sea" in text_lower), mis võib teoreetiliselt
+# tabada ka ingliskeelseid sõnu nagu "seasoned"/"sea salt" — regex koos
+# \b sõnapiiridega on turvalisem. Kana ja kalkun olid varem KOKKU
+# "poultry" all — see tähendas, et "kalkunihakkliha" sai vääralt
+# hard-check'i läbida "broilerihakkliha" vastu. Eraldatud: chicken/
+# turkey/duck/generic_poultry (viimane, kui liik pole täpsustatud).
+# Lisatud "deer" (hirv, esines juba reaalses testis).
+ANIMAL_TYPE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "mixed": (r"\bsea[\s-]?veise\w*", r"\bveise[\s-]?sea\w*"),
+    "beef": (r"\bveise\w*", r"\bhärjaliha\w*", r"\bbeef\b"),
+    "pork": (
+        r"\bsea(?:liha|hakk|filee|kaela|karbonaad|sisefilee|välisfilee|vorst|kõrvad?)\w*",
+        r"\bpork\b",
+    ),
+    "chicken": (r"\bkana\w*", r"\bbroileri\w*", r"\bchicken\b"),
+    "turkey": (r"\bkalkuni?\w*", r"\bturkey\b"),
+    "duck": (r"\bpardi\w*", r"\bduck\b"),
+    "generic_poultry": (r"\blinnuliha\w*", r"\bpoultry\b"),
+    "lamb": (r"\blamba\w*", r"\blambaliha\w*", r"\blamb\b"),
+    "deer": (r"\bhirve\w*", r"\bdeer\b", r"\bvenison\b"),
 }
 
 
 def _animal_type(text) -> Optional[str]:
-    """Lihaliik (veis/siga/kana/segu). ChatGPT näide: 'veiseliha
-    hakkliha 5%' ei tohi asenduda 'sea-veise hakkliha 20%'-ga lihtsalt
-    kaalu klappimise tõttu."""
+    """Lihaliik (veis/siga/kana/kalkun/part/lammas/hirv/segu). ChatGPT
+    näide: 'veiseliha hakkliha 5%' ei tohi asenduda 'sea-veise hakkliha
+    20%'-ga lihtsalt kaalu klappimise tõttu. v4.5.1: kana ja kalkun
+    eraldi (varem sama 'poultry' kategooria alla kokku pandud)."""
     if not text:
         return None
     text_lower = text.lower()
-    # "mixed" enne üksikuid liike, kuna "sea-veise" sisaldab ka "sea"
-    if any(kw in text_lower for kw in ANIMAL_TYPE_KEYWORDS["mixed"]):
-        return "mixed"
-    for animal, keywords in ANIMAL_TYPE_KEYWORDS.items():
+    for pattern in ANIMAL_TYPE_PATTERNS["mixed"]:
+        if re.search(pattern, text_lower):
+            return "mixed"
+    for animal, patterns in ANIMAL_TYPE_PATTERNS.items():
         if animal == "mixed":
             continue
-        if any(kw in text_lower for kw in keywords):
-            return animal
+        for pattern in patterns:
+            if re.search(pattern, text_lower):
+                return animal
     return None
 
 
@@ -357,6 +443,86 @@ def _meat_cut_type(text) -> Optional[str]:
     return None  # tundmatu lõige — ei blokeeri, jääb Claude'i hinnata
 
 
+# v4.5 UUS — Germund Kreeka pähkel -> metspähkel false-AUTO fix.
+# Pähkli/seemne LIIK on erinev toit, mitte maitsevariant — seega
+# hard_match (IDENTITY_RULES), mitte downgrade.
+NUT_SEED_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "walnut": ("kreeka pähk", "kreeka-pähk", "walnut"),
+    "hazelnut": ("sarapuu", "metsapähk", "metspähk", "hazelnut"),
+    "almond": ("mandli", "mandel", "almond"),
+    "cashew": ("kašu", "cashew"),
+    "pistachio": ("pistaatsia", "pistachio"),
+    "peanut": ("maapähk", "peanut"),
+    "chia": ("chia",),
+    "sunflower_seed": ("päevalille", "sunflower"),
+    "pumpkin_seed": ("kõrvitsaseemne", "kõrvitsaseeme", "pumpkin seed"),
+}
+
+
+def _nut_seed_type(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for nut, keywords in NUT_SEED_TYPE_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return nut
+    return None  # tundmatu pähkel/seeme — ei blokeeri, jääb Claude'i hinnata
+
+
+# v4.5 UUS — Virgin Mojito -> Corona Cero / Fassbrause Mojito ->
+# "alkoholivaba õlu" false-AUTO fix. Kõik on tehniliselt alkoholivabad,
+# aga õlu/siider/mocktail/Fassbrause EI ole omavahel asendatavad
+# tootetüübid. Parim jõupingutus (mitte täielik kaubamärgi-loend) —
+# vt v4.5 changelog docstringis, laiendatakse vajadusel järgmise
+# dry-run analüüsi põhjal.
+BEVERAGE_NONALC_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "beer_style": ("õlu", "beer", "cero", "pils", "lager"),
+    "cider_style": ("siider", "cider"),
+    "mocktail": ("mocktail", "virgin", "kokteil"),
+    "fassbrause": ("fassbrause",),
+}
+
+
+def _beverage_type_nonalc(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for bev_type, keywords in BEVERAGE_NONALC_TYPE_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return bev_type
+    return None  # tuvastamata tüüp — ei blokeeri, jääb Claude'i hinnata
+
+
+# v4.5 UUS — Rakvere verivorst vs Linnamäe šašlõkk on ühes sub_code'is
+# (meat_grill_blood_sausages), aga täiesti erinevad tooted.
+# v4.5.2 LAIENDUS (ChatGPT leid): esialgne 4-vormiline nimekiri ei
+# katnud ribisid/steike/toor-praevorsti/verikäkki/marineeritud lõikeid,
+# mis kõik esinevad samas sub_code'is — laiendatud, endiselt teadlikult
+# mitte-ammendav (tundmatu vorm ei blokeeri, jääb Claude'i hooleks).
+MEAT_FORM_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "blood_sausage": ("verivorst",),
+    "blood_dumpling": ("verikäkk", "verikook"),
+    "shashlik": ("šašlõkk", "sašlõkk", "saslõkk", "shashlik"),
+    "grill_sausage": ("grillvorst", "grill vorst"),
+    "raw_sausage": ("toorvorst",),
+    "fried_sausage": ("praevorst",),
+    "kebab": ("kebab",),
+    "ribs": ("ribi", "ribid", "ribiliha", "spare rib"),
+    "steak": ("steik", "steek"),
+    "marinated_cut": ("marineeritud", "marinaadis"),
+}
+
+
+def _meat_form(text) -> Optional[str]:
+    if not text:
+        return None
+    text_lower = text.lower()
+    for form, keywords in MEAT_FORM_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            return form
+    return None  # tuvastamata vorm — ei blokeeri, jääb Claude'i hinnata
+
+
 # --- DOWNGRADE check'id: erinevus EI eemalda kandidaati, vaid
 # langetab tier'i AUTO'lt SUGGESTED'ile. ChatGPT (viies ülevaatus):
 # kõik downgrade check'id tagastavad frozenset (MITTE üksik väärtus —
@@ -377,6 +543,15 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "smoky": (r"\bsuitsu\w*",),
     "spicy": (r"\bterav\w*", r"\bvürtsika\w*", r"\bvurtsika\w*"),
     "mild": (r"\bmahe\b",),
+    # v4.5 UUS — Borges basiilikuõli false-AUTO fix.
+    "basil": (r"\bbasiiliku\w*", r"\bbasil\w*"),
+    # v4.5 UUS — Balsnack soolane->juustumaitseline popcorn false-AUTO
+    # fix. sweets_snacks_salty kasutas v4.4-s ainult flavour_variant't
+    # (puuviljamaitsed), mis ei kata soolaste snäkkide päris-maitseid.
+    "salted": (r"\bsoola\w*",),
+    "cheese": (r"\bjuustu\w*",),
+    "paprika": (r"\bpaprika\w*",),
+    "sour_cream_onion": (r"\bhapukoore\w*",),
 }
 
 # Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
@@ -461,6 +636,82 @@ def _cheese_modifiers(text) -> frozenset:
     return _match_variants(text, CHEESE_MODIFIER_PATTERNS)
 
 
+# v4.5 UUS — Borges "ekstra vääris" vs "ekstra neitsi" pole kaks
+# erinevat klassi, vaid SAMA EL-i kategooria (extra virgin olive oil).
+# Ametlik eestikeelne termin muutus "neitsioliiviõli" -> "väärisoliiviõli"
+# 2022. aastal (Maaeluministeerium/EL turustusstandard). Seetõttu
+# normaliseeritakse mõlemad "extra_virgin" alla — need EI tohi
+# downgrade't vallandada. Rafineeritud/jääkõli/kerge on tegelikult
+# madalam klass ja PEAVAD downgrade'ima.
+def _oil_grade(text) -> frozenset:
+    if not text:
+        return frozenset()
+    t = text.lower()
+    if re.search(r"\bekstra[\s-]*v[aä]äris\w*", t) or re.search(r"\bekstra[\s-]*neitsi\w*", t) \
+            or re.search(r"\bextra\s+virgin\b", t):
+        return frozenset({"extra_virgin"})
+    if re.search(r"\bv[aä]äris\w*", t) or re.search(r"\bneitsi\w*", t):
+        return frozenset({"virgin"})
+    if re.search(r"\brafineeritud\w*", t) or re.search(r"\brefined\b", t):
+        return frozenset({"refined"})
+    if re.search(r"\bj[aä][aä]kõli\w*", t) or re.search(r"\bpomace\b", t):
+        return frozenset({"pomace"})
+    if re.search(r"\bkerge\w*", t) or re.search(r"\blight\b", t):
+        return frozenset({"light"})
+    return frozenset()
+
+
+# v4.5 UUS — Liivimaa "proteiinihakkliha" -> tavahakk false-AUTO fix
+# (sama muster mis Wyke Farms wine cheddar). Sümmeetriline downgrade:
+# kui KUMMALGI poolel on "proteiini" märgitud ja teisel pole, langeb
+# tier AUTO'lt SUGGESTED'ile.
+def _protein_enriched(text) -> frozenset:
+    if not text:
+        return frozenset()
+    if re.search(r"\bproteiini\w*", text.lower()) or re.search(r"\bprotein\w*", text.lower()):
+        return frozenset({"protein_enriched"})
+    return frozenset()
+
+
+# v4.5 UUS — leiva teraviljakoostise erinevus (rukis/kaer/nisu/täistera/
+# mitmevili) ignoreeriti seni täielikult ("5-vilja röst" -> "mitmevilja
+# röst" sai vääralt AUTO).
+GRAIN_TYPE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "rye": (r"\brukki\w*",),
+    "wheat": (r"\bnisu\w*",),
+    "oat": (r"\bkaera\w*",),
+    "barley": (r"\bodra\w*",),
+    "spelt": (r"\bspelta\w*",),
+    # "tõistera" lisatud (juuli 2026) — leitud reaalsest testandmestikust,
+    # ilmselt kodeeringu/andmesisestuse viga ("täistera" asemel), aga
+    # kuna see esineb päris tootenimedes, tuleb see ka ära tunda.
+    "wholegrain": (r"\bt[äõa]istera\w*",),
+    "multigrain": (r"\bmitmevilja\w*", r"\b\d+[\s-]?vilja\w*"),
+}
+
+
+def _grain_type(text) -> frozenset:
+    return _match_variants(text, GRAIN_TYPE_PATTERNS)
+
+
+# v4.5 UUS — Merrild In-Cup -> presskann false-AUTO fix. Jahvatusaste/
+# valmistusvorm erineb (in-cup on peenem jahvatus kui presskann),
+# seega ei tohi olla AUTO isegi kui bränd ja kogus klapivad.
+COFFEE_BREW_FORM_PATTERNS: dict[str, tuple[str, ...]] = {
+    "beans": (r"\buba\w*", r"\bbeans?\b"),
+    "filter_ground": (r"\bfiltrikohv\w*", r"\bfilter\b"),
+    "in_cup": (r"\bin[\s-]?cup\w*", r"\btassikohv\w*"),
+    "french_press": (r"\bpresskann\w*", r"\bfrench\s+press\b"),
+    "espresso_ground": (r"\bespresso\w*",),
+    "instant": (r"\blahustuv\w*", r"\binstant\w*"),
+    "capsule": (r"\bkapsli\w*", r"\bcapsule\w*"),
+}
+
+
+def _coffee_brew_form(text) -> frozenset:
+    return _match_variants(text, COFFEE_BREW_FORM_PATTERNS)
+
+
 def _product_identity_text(canonical_name, sample_product_name, brand) -> str:
     """Ühendab kõik saadaval identiteedisignaalid üheks tekstiks
     (v4.2, uus). Kasutatakse hard_check ja downgrade_check funktsioonide
@@ -491,6 +742,9 @@ IDENTITY_CHECKS = {
     "cheese_type": _cheese_type,
     "cheese_form": _cheese_form,
     "fish_species": _fish_species,
+    "nut_seed_type": _nut_seed_type,
+    "beverage_type": _beverage_type_nonalc,
+    "meat_form": _meat_form,
 }
 
 # hard_match: erinevus EEMALDAB kandidaadi täielikult.
@@ -511,6 +765,11 @@ IDENTITY_RULES: dict[str, list[str]] = {
     "fish_fresh": ["fish_species"],
     "fish_salted_smoked": ["fish_species"],
     "fish_processed": ["fish_species"],
+    # --- v4.5 UUS ---
+    "sweets_nuts_driedfruit": ["nut_seed_type"],
+    "drinks_non_alcoholic": ["beverage_type"],
+    "meat_sausages": ["animal_type"],
+    "meat_grill_blood_sausages": ["animal_type", "meat_form"],
 }
 
 # Kategooriad, kus AUTO on TÄIELIKULT keelatud, sõltumata kogusest või
@@ -520,12 +779,25 @@ AUTO_DISABLED_SUB_CODES = {
     "drinks_beer_cider", "drinks_spirits",
     "spirits_vodka", "spirits_whisky", "spirits_gin", "spirits_rum",
     "spirits_cognac", "spirits_liqueur", "spirits_other",
+    # v4.5.1 UUS (ChatGPT audit): ajutine turvavõrk kategooriatele, kus
+    # olemasolev flavour_variant/beverage_type sõnastik on liiga kitsas,
+    # et katta kõiki reaalseid variante (nt tea: ainult puuviljamaitsed,
+    # mitte tee TÜÜP musta/rohelise/ürditee vahel; sweets_candies:
+    # bränditud/tundmatud maitsenimed jäävad tuvastamata; drinks_non_
+    # alcoholic: beverage_type on ühesuunaline kontroll — kui originaali
+    # tüüp jääb tuvastamata, ei blokeeru miski). EEMALDA see rida
+    # alles pärast täielikumat identiteedimudelit iga kategooria jaoks.
+    "tea", "sweets_candies", "drinks_non_alcoholic",
 }
 
 DOWNGRADE_CHECKS = {
     "flavour_profile": _flavour_profile_set,
     "flavour_variant": _flavour_variants,
     "cheese_modifier": _cheese_modifiers,
+    "oil_grade": _oil_grade,
+    "protein_enriched": _protein_enriched,
+    "grain_type": _grain_type,
+    "coffee_brew_form": _coffee_brew_form,
 }
 
 # v4.4 LAIENDUS: uued maitsetundlikud kategooriad said flavour_variant
@@ -547,11 +819,23 @@ DOWNGRADE_RULES: dict[str, list[str]] = {
     "sweets_candies": ["flavour_variant"],
     "sweets_chocolate_bars": ["flavour_variant"],
     "sweets_nuts_driedfruit": ["flavour_variant"],
-    "sweets_snacks_salty": ["flavour_variant"],
+    "sweets_snacks_salty": ["flavour_variant", "flavour_profile"],
     "dry_soups_noodles": ["flavour_variant"],
     "produce_smoothies_fresh_juices": ["flavour_variant"],
     "drinks_juices": ["flavour_variant"],
     "bakery_cakes_pastries": ["flavour_variant"],
+
+    # --- v4.5 UUS ---
+    # tea: FLAVOUR_VARIANT_PATTERNS kattis "mustsõstra" juba varem
+    # (v4.3 pomelo fixi ajal lisatud üldisemalt), aga tea polnud KUNAGI
+    # DOWNGRADE_RULES's registreeritud — Earl Grey -> mustsõstratee sai
+    # seetõttu vääralt AUTO.
+    "tea": ["flavour_variant"],
+    "oils_olive": ["flavour_profile", "oil_grade"],
+    "meat_minced": ["protein_enriched"],
+    "bakery_bread_loaves": ["grain_type"],
+    "coffee_beans_ground": ["coffee_brew_form"],
+    "coffee_instant": ["coffee_brew_form"],
 }
 
 
@@ -622,6 +906,7 @@ def _empty_quantity_rejection_reasons() -> dict[str, int]:
         "missing_rule": 0,
         "missing_candidate_quantity": 0,
         "unit_mismatch": 0,
+        "unknown_unit": 0,
         "outside_allowed_range": 0,
     }
 
@@ -838,7 +1123,17 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
             trace["quantity_suggested_count"] += 1
         elif qmatch.tier == QuantityTier.INCOMPATIBLE:
             trace["quantity_incompatible_count"] += 1
-            trace["quantity_rejection_reasons"]["outside_allowed_range"] += 1
+            # v4.5.1 fix (ChatGPT leid): varem loeti KÕIK INCOMPATIBLE
+            # tulemused "outside_allowed_range" alla, ka päris
+            # baasühiku-mittevastavused (g vs ml) — unit_mismatch oli
+            # seetõttu trace's alati 0. qmatch.rejection_reason
+            # tuleb nüüd otse quantity_service.py'st.
+            reason_key = (
+                qmatch.rejection_reason.value
+                if qmatch.rejection_reason is not None
+                else QuantityRejectionReason.OUTSIDE_ALLOWED_RANGE.value
+            )
+            trace["quantity_rejection_reasons"][reason_key] += 1
         elif qmatch.tier == QuantityTier.UNKNOWN:
             trace["quantity_unknown_count"] += 1
             if not trace["quantity_rule_found"]:
@@ -846,7 +1141,13 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
             elif c["net_qty"] is None or c["net_unit"] is None or not str(c["net_unit"]).strip():
                 trace["quantity_rejection_reasons"]["missing_candidate_quantity"] += 1
             else:
-                trace["quantity_rejection_reasons"]["unit_mismatch"] += 1
+                # v4.5.3 fix (ChatGPT leid): see EI ole päris "unit_mismatch"
+                # (kaks TUVASTATUD baasühikut, mis erinevad — see tuleb
+                # INCOMPATIBLE tier'ist ja on juba eraldi loetud ülal).
+                # Siin on net_unit väärtus ISE ebaselge/parsimatu kuju
+                # (nt "pack" ilma tükiarvuta) — puuduv/parsimatu andmestik,
+                # mitte kahe teadaoleva ühiku konflikt.
+                trace["quantity_rejection_reasons"]["unknown_unit"] += 1
 
         if qmatch.tier in (QuantityTier.INCOMPATIBLE, QuantityTier.UNKNOWN):
             continue
