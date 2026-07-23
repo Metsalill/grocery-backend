@@ -552,6 +552,14 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "cheese": (r"\bjuustu\w*",),
     "paprika": (r"\bpaprika\w*",),
     "sour_cream_onion": (r"\bhapukoore\w*",),
+    # v4.5.4 UUS — Borges "Fruity" vs "Original" false-AUTO fix. Claude
+    # enda reasoning nimetas seda "maitsevariandiks" — konservatiivne
+    # käitumine on downgrade't rakendada, isegi kui "puuviljane" on
+    # mõnikord lihtsalt EVOO sensoorne kvaliteedikirjeldus, mitte
+    # lisatud maitseaine (vt v4.5 changelog Borges vääris/neitsi
+    # täpsustust — SEE on erinev juhtum, kuna "fruity" on eraldi
+    # tooteseeria nimi, "vääris"/"neitsi" on sama EL-i kvaliteediklass).
+    "fruity": (r"\bfruity\b", r"\bpuuviljane\w*", r"\bpuuvilja\w*"),
 }
 
 # Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
@@ -712,6 +720,31 @@ def _coffee_brew_form(text) -> frozenset:
     return _match_variants(text, COFFEE_BREW_FORM_PATTERNS)
 
 
+# v4.5.4 UUS — Lavazza "Qualita Oro" vs "Mountain Grown" false-AUTO
+# fix (ChatGPT leid). coffee_brew_form tuvastab ainult valmistusvormi
+# (filter/in-cup/press jne), mitte kohvi TOOTESEERIAT/segu — need on
+# eri kvaliteedi/maitseprofiiliga tooted samalt brändilt, mitte lihtsalt
+# "erinev kirjapilt". TEADLIKULT KITSAS valik: ainult selgelt eristuvad
+# Lavazza premium-seeria nimed. "Classic"/"Gold"/"Kronung" jäeti
+# TEADLIKULT VÄLJA — need on brändide "põhiliini" nimed (Jacobs
+# Kronung, Paulig Classic), mitte tegelik kvaliteeditaseme erinevus;
+# esialgne katse neid lisada tekitas regressiooni (Jacobs Kronung ->
+# Paulig Classic, mõlemad on lihtsalt oma brändi standardkohv, langes
+# vääralt SUGGESTED tasemele). Tundmatu seeria ei blokeeri — jääb
+# Claude'i hooleks.
+COFFEE_PRODUCT_LINE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "qualita_oro": (r"\bqualit[aà]\s*oro\b",),
+    "qualita_rossa": (r"\bqualit[aà]\s*rossa\b",),
+    "crema_gusto": (r"\bcrema\s*e?\s*gusto\b",),
+    "tierra": (r"\btierra\b",),
+    "mountain_grown": (r"\bmountain\s*grown\b",),
+}
+
+
+def _coffee_product_line(text) -> frozenset:
+    return _match_variants(text, COFFEE_PRODUCT_LINE_PATTERNS)
+
+
 def _product_identity_text(canonical_name, sample_product_name, brand) -> str:
     """Ühendab kõik saadaval identiteedisignaalid üheks tekstiks
     (v4.2, uus). Kasutatakse hard_check ja downgrade_check funktsioonide
@@ -798,6 +831,7 @@ DOWNGRADE_CHECKS = {
     "protein_enriched": _protein_enriched,
     "grain_type": _grain_type,
     "coffee_brew_form": _coffee_brew_form,
+    "coffee_product_line": _coffee_product_line,
 }
 
 # v4.4 LAIENDUS: uued maitsetundlikud kategooriad said flavour_variant
@@ -834,8 +868,8 @@ DOWNGRADE_RULES: dict[str, list[str]] = {
     "oils_olive": ["flavour_profile", "oil_grade"],
     "meat_minced": ["protein_enriched"],
     "bakery_bread_loaves": ["grain_type"],
-    "coffee_beans_ground": ["coffee_brew_form"],
-    "coffee_instant": ["coffee_brew_form"],
+    "coffee_beans_ground": ["coffee_brew_form", "coffee_product_line"],
+    "coffee_instant": ["coffee_brew_form", "coffee_product_line"],
 }
 
 
