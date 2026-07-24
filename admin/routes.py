@@ -353,10 +353,7 @@ async def _render_brand_dashboard(conn, partner_name: str, brand_filter: list, d
         SELECT
             COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
             COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-            COUNT(DISTINCT COALESCE(
-                CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
-                CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
-            )) AS unique_visitors
+            COUNT(DISTINCT device_key) FILTER (WHERE device_key IS NOT NULL AND device_key <> '') AS unique_devices
         FROM analytics_events
         WHERE product_id = ANY($1::int[])
           AND created_at >= CURRENT_DATE - ($2::int - 1)
@@ -367,10 +364,7 @@ async def _render_brand_dashboard(conn, partner_name: str, brand_filter: list, d
         SELECT
             COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
             COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-            COUNT(DISTINCT COALESCE(
-                CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
-                CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
-            )) AS unique_visitors
+            COUNT(DISTINCT device_key) FILTER (WHERE device_key IS NOT NULL AND device_key <> '') AS unique_devices
         FROM analytics_events
         WHERE product_id = ANY($1::int[])
           AND created_at >= CURRENT_DATE - (($2::int * 2) - 1)
@@ -728,23 +722,27 @@ async def _render_brand_dashboard(conn, partner_name: str, brand_filter: list, d
 
     total_adds = totals["total_adds"] or 0
     total_views = totals["total_views"] or 0
-    unique_visitors = totals["unique_visitors"] or 0
-    prev_unique_visitors = prev_totals["unique_visitors"] or 0
+    unique_devices = totals["unique_devices"] or 0
+    prev_unique_devices = prev_totals["unique_devices"] or 0
     basket_add_rate = round(total_adds / total_views * 100, 1) if total_views > 0 else None
 
     # Brand view has no admin exemption concept (there is no "admin
     # viewing a brand" case) — privacy threshold always applies here.
+    # Based on unique_devices, not the old user_id/device_key hybrid,
+    # which could double-count the same person as guest and later as a
+    # logged-in account within the same period. Partners never see a
+    # separate logged-in-account count — only the device metric.
     PRIVACY_THRESHOLD = 10
-    if unique_visitors < PRIVACY_THRESHOLD:
+    if unique_devices < PRIVACY_THRESHOLD:
         visitors_display = "&lt; 10"
         visitors_note_html = (
             'Privaatsuslävi rakendatud'
-            '<span class="info-dot" title="Loendab sisseloginud kasutajaid ja pseudonüümseid seadmetunnuseid. '
-            'Sama inimene mitmes seadmes võib lugeda mitme külastajana.">i</span>'
+            '<span class="info-dot" title="Põhineb pseudonüümsetel seadmetunnustel. '
+            'Sama inimene mitmes seadmes võib lugeda mitme seadmena.">i</span>'
         )
     else:
-        visitors_display = f"{unique_visitors:,}"
-        visitors_note_html = f'Aktiivsed külastajad {delta_html(unique_visitors, prev_unique_visitors)}'
+        visitors_display = f"{unique_devices:,}"
+        visitors_note_html = f'Aktiivsed seadmed {delta_html(unique_devices, prev_unique_devices)}'
 
     max_adds = max((r["adds"] for r in top_products_rows), default=0)
     products_html = "".join(
@@ -1001,7 +999,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
     </article>
     <article class="metric-card">
       <div class="metric-top">
-        <span class="metric-label">Unikaalsed külastajad</span>
+        <span class="metric-label">Unikaalsed seadmed</span>
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
       </div>
       <p class="metric-value">{visitors_display}</p>
@@ -1111,7 +1109,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
 
 
   <footer class="footer">
-    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsed külastajad arvestavad sisselogitud kasutajaid ja pseudonüümseid seadmetunnuseid.</span>
+    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsete seadmete näitaja põhineb pseudonümiseeritud seadmetunnustel — sama inimene mitmes seadmes võib arvestuda mitme seadmena.</span>
     <span>Seivy partneranalüütika</span>
   </footer>
 </main>
@@ -1474,10 +1472,8 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
                 COUNT(*) FILTER (WHERE event_type = 'basket_win') AS total_wins,
                 COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-                COUNT(DISTINCT COALESCE(
-                    CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
-                    CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
-                )) AS unique_visitors
+                COUNT(DISTINCT device_key) FILTER (WHERE device_key IS NOT NULL AND device_key <> '') AS unique_devices,
+                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS logged_in_users
             FROM analytics_events
             WHERE created_at >= CURRENT_DATE - ($1::int - 1)
               AND created_at < CURRENT_DATE + INTERVAL '1 day'
@@ -1489,10 +1485,8 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
                 COUNT(*) FILTER (WHERE event_type = 'basket_add') AS total_adds,
                 COUNT(*) FILTER (WHERE event_type = 'basket_win') AS total_wins,
                 COUNT(*) FILTER (WHERE event_type = 'product_view') AS total_views,
-                COUNT(DISTINCT COALESCE(
-                    CASE WHEN user_id IS NOT NULL THEN 'u:' || user_id::text END,
-                    CASE WHEN device_key IS NOT NULL AND device_key <> '' THEN 'd:' || device_key END
-                )) AS unique_visitors
+                COUNT(DISTINCT device_key) FILTER (WHERE device_key IS NOT NULL AND device_key <> '') AS unique_devices,
+                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS logged_in_users
             FROM analytics_events
             WHERE created_at >= CURRENT_DATE - (($1::int * 2) - 1)
               AND created_at < CURRENT_DATE - ($1::int - 1)
@@ -1520,8 +1514,8 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
     total_adds = totals['total_adds'] or 0
     total_wins = totals['total_wins'] or 0
     total_views = totals['total_views'] or 0
-    unique_visitors = totals['unique_visitors'] or 0
-    prev_unique_visitors = prev_totals['unique_visitors'] or 0
+    unique_devices = totals['unique_devices'] or 0
+    logged_in_users = totals['logged_in_users'] or 0
 
     delta_adds = delta_html(total_adds, prev_totals['total_adds'] or 0)
     delta_wins = delta_html(total_wins, prev_totals['total_wins'] or 0)
@@ -1529,19 +1523,29 @@ async def analytics_dashboard(request: Request, token: str = None, days: int = 3
 
     # Privaatsuslävi kehtib ainult partnerivaates — admin näeb alati täpset
     # arvu, kuna admin ei ole väline osapool, kelle eest väikest valimit
-    # varjata (is_admin on juba varem funktsioonis arvutatud).
+    # varjata (is_admin on juba varem funktsioonis arvutatud). Läviväärtus
+    # ja peamine KPI põhinevad NÜÜD unique_devices'il, mitte vanal
+    # user_id/device_key COALESCE hübriidil — hübriid lõi topeltloendust
+    # (sama inimene guest'ina JA hiljem kontoga samal perioodil).
     PRIVACY_THRESHOLD = 10
-    should_suppress_visitors = (not is_admin) and unique_visitors < PRIVACY_THRESHOLD
-    if should_suppress_visitors:
+    prev_unique_devices = prev_totals['unique_devices'] or 0
+    should_suppress_devices = (not is_admin) and unique_devices < PRIVACY_THRESHOLD
+    if should_suppress_devices:
         visitors_display = "&lt; 10"
         visitors_note_html = (
             'Privaatsuslävi rakendatud'
-            '<span class="info-dot" title="Loendab sisseloginud kasutajaid ja pseudonüümseid seadmetunnuseid. '
-            'Sama inimene mitmes seadmes võib lugeda mitme külastajana.">i</span>'
+            '<span class="info-dot" title="Põhineb pseudonüümsetel seadmetunnustel. '
+            'Sama inimene mitmes seadmes võib lugeda mitme seadmena.">i</span>'
         )
     else:
-        visitors_display = f"{unique_visitors:,}"
-        visitors_note_html = f'Aktiivsed külastajad {delta_html(unique_visitors, prev_unique_visitors)}'
+        visitors_display = f"{unique_devices:,}"
+        visitors_note_html = f'Aktiivsed seadmed {delta_html(unique_devices, prev_unique_devices)}'
+        if is_admin:
+            visitors_note_html += (
+                f'<br><span style="font-size:11px">{logged_in_users:,} sisseloginud kontot'
+                f'<span class="info-dot" title="Sisemine kasutaja-ID, serveris kontrollitud JWT-st. '
+                f'Mõõtmine algas 24.07.2026 — vanemad sündmused seda ei kajasta.">i</span></span>'
+            )
 
     basket_add_rate = round(total_adds / total_views * 100, 1) if total_views > 0 else None
     win_rate = round(total_wins / (all_wins_total or 1) * 100, 1) if chain and all_wins_total else None
@@ -2074,7 +2078,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
     </article>
     <article class="metric-card">
       <div class="metric-top">
-        <span class="metric-label">Unikaalsed külastajad</span>
+        <span class="metric-label">Unikaalsed seadmed</span>
         <span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2"></circle><path d="M15.5 15.5A5 5 0 0 1 21 20"></path></svg></span>
       </div>
       <p class="metric-value">{visitors_display}</p>
@@ -2176,7 +2180,7 @@ h1 {{ margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 760; letter-spaci
   </section>
 
   <footer class="footer">
-    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsed külastajad arvestavad sisselogitud kasutajaid ja pseudonüümseid seadmetunnuseid.</span>
+    <span>Näitajad põhinevad Seivy rakenduses kogutud koondatud kasutussündmustel. Unikaalsete seadmete näitaja põhineb pseudonümiseeritud seadmetunnustel — sama inimene mitmes seadmes võib arvestuda mitme seadmena.{" Sisselogitud kontod põhinevad serveris kontrollitud sisemisel kasutaja-ID-l." if is_admin else ""}</span>
     <span class="footer-brand">Seivy partneranalüütika{"&nbsp;·&nbsp;<a href='/' style='color:inherit'>← Admin</a>" if is_admin else ""}</span>
   </footer>
 </main>
