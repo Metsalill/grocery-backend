@@ -1,78 +1,13 @@
-import hashlib
-import hmac
-import os
 from fastapi import APIRouter, Request, HTTPException, Header
 from pydantic import BaseModel
 from typing import Optional
 import logging
 
-from jose import JWTError, jwt
-from auth import SECRET_KEY, ALGORITHM
+from api.analytics_identity import resolve_analytics_identity
 
 logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
-
-# Server-side secret for hashing device identifiers. The raw device ID sent
-# by the client (X-Device-Id header) is NEVER stored — only
-# HMAC_SHA256(secret, device_id) is written to the database. This means a
-# database leak does not expose the raw per-device identifier used in the
-# app, and the identifier cannot be recomputed without this secret.
-_DEVICE_HMAC_SECRET = os.environ.get("ANALYTICS_DEVICE_HMAC_SECRET", "")
-
-
-def _hash_device_id(raw_device_id: str) -> Optional[str]:
-    """Returns a stable pseudonymous hash for a raw device ID, or None if
-    no device ID was provided or no HMAC secret is configured (fail-safe:
-    we never fall back to storing the raw ID)."""
-    if not raw_device_id or not _DEVICE_HMAC_SECRET:
-        return None
-    digest = hmac.new(
-        _DEVICE_HMAC_SECRET.encode("utf-8"),
-        raw_device_id.encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
-    return digest
-
-
-async def _resolve_user_id(request: Request, authorization: Optional[str]) -> Optional[str]:
-    """Resolves the internal users.id (as text) from the Authorization
-    header, if present and valid. Never trusts a client-supplied user_id —
-    identity is derived only from a verified JWT, server-side. Returns None
-    for guests, expired/invalid tokens, or deleted accounts (fail-closed:
-    when in doubt, treat as anonymous rather than guessing an identity)."""
-    if not authorization:
-        return None
-
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token.strip():
-        return None
-    token = token.strip()
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    except JWTError as exc:
-        logger.debug("Analytics authentication failed: %s", type(exc).__name__)
-        return None
-
-    email = payload.get("sub")
-    if not email:
-        return None
-
-    db = request.app.state.db
-    try:
-        row_id = await db.fetchval(
-            """
-            SELECT id FROM users
-            WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
-            """,
-            email,
-        )
-    except Exception as e:
-        logger.warning(f"User lookup failed during analytics event: {e}")
-        return None
-
-    return str(row_id) if row_id is not None else None
 
 
 class AnalyticsEvent(BaseModel):
@@ -82,8 +17,8 @@ class AnalyticsEvent(BaseModel):
     chain: Optional[str] = None
     # Note: user_id is NOT accepted from the client anymore. Identity is
     # resolved server-side from the Authorization header (see
-    # _resolve_user_id). Any client-supplied user_id is ignored, so a guest
-    # can never claim to be a specific account.
+    # api/analytics_identity.py). Any client-supplied user_id is
+    # ignored, so a guest can never claim to be a specific account.
 
 
 @router.post("/event")
@@ -119,14 +54,10 @@ async def log_event(
         except Exception as e:
             logger.warning(f"Could not resolve chain for product {event.product_id}: {e}")
 
-    # Pseudonümiseeritud seadme-ID: ainult HMAC-hash salvestatakse, toores
-    # X-Device-Id ei jõua kunagi andmebaasi. Kasutatakse ainult koond-
-    # statistika (unikaalsete külastajate) jaoks, mitte kasutajaprofiiliks.
-    device_key = _hash_device_id(x_device_id) if x_device_id else None
-
-    # Kasutaja identiteet lahendatakse AINULT serveripoolselt, kontrollitud
-    # JWT-st — kunagi mitte kliendi enda väitest. Guest'i puhul jääb None.
-    user_id = await _resolve_user_id(request, authorization)
+    # Kasutaja identiteet (user_id, device_key) lahendatakse ühtse
+    # serveripoolse resolveriga, mida kasutab ka basket_compare logimine
+    # compare.py's — vt api/analytics_identity.py.
+    user_id, device_key = await resolve_analytics_identity(request, authorization, x_device_id)
 
     try:
         await db.execute(
