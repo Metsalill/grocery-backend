@@ -1,0 +1,48 @@
+name: Dry Run - Asendustoodete test (shadow-kandidaat kategooriad)
+
+# Käivitatakse AINULT käsitsi ("Run workflow" nupp GitHub Actions
+# vahekaardil) — mitte automaatselt, mitte ajastatult. See on
+# read-only kuivtest (READ ONLY transaktsioon + dry_run=True),
+# ei kirjuta product_substitutions tabelisse midagi.
+#
+# Erineb dry-run-substitution-test.yml'ist selle poolest, et katab
+# AINULT 8 kategooriat, mida plaanitakse esimesse Etapp 5B shadow
+# mode ringi lubada (dairy_milk, dairy_yogurt_kefir, cheese_regular,
+# cheese_delicatessen, dairy_cheese_slices, coffee_beans_ground,
+# coffee_instant, oils_olive) — värskete, põhikomplektiga mitte-
+# kattuvate group_id'dega (vt dry_run_test_shadow_candidates.py
+# docstring).
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run-test-shadow-candidates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install asyncpg httpx
+
+      - name: Run dry-run substitution test (shadow-kandidaat kategooriad)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PGSSLMODE: require
+        run: |
+          python dry_run_test_shadow_candidates.py
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-results-shadow-candidates
+          path: dry_run_results_shadow_candidates.json
+          retention-days: 30
