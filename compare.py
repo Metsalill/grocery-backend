@@ -1,10 +1,14 @@
 # compare.py
 import json
-from fastapi import APIRouter, HTTPException, Request
+import logging
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, confloat, conint
 from typing import List, Tuple, Dict, Any, Optional
 from utils.throttle import throttle
 from services.compare_service import compare_basket_service
+from api.analytics_identity import resolve_analytics_identity
+
+logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="")
 
@@ -100,18 +104,25 @@ async def _log_basket_compare(
     payload_out: Dict[str, Any],
     basket_size: int,
     radius_km: float,
+    user_id: Optional[str],
+    device_key: Optional[str],
 ) -> None:
     """Logs a basket_compare analytics event carrying the per-chain
     totals for this comparison, so the partner dashboard can later
-    compute "lost to the winner by less than X€" insights (V2.5).
+    compute "lost to the winner by less than X€" insights (V2.5), and
+    now also identity fields (user_id/device_key) so future analysis
+    can look at compares-per-device, guest vs account behaviour, and a
+    basket_compare -> basket_win funnel. Chain totals stay the
+    aggregate signal the dashboard already reads; identity is
+    additional context, not a replacement.
 
-    This is deliberately chain-level aggregate data, not tied to a
-    person or device — unlike product_view/basket_add/basket_win it
-    does not need user_id/device_key, so it doesn't touch that hashing
-    logic at all. Only logged when at least two chains produced a
-    complete total, since a single-chain result has nothing to be
-    compared against. Never raises: an analytics failure must not
-    break the actual /compare response.
+    Identity is resolved via the same server-side resolver used by
+    /analytics/event (api/analytics_identity.py) — this endpoint must
+    never re-implement its own JWT or HMAC handling, so both code paths
+    always agree on how a person is identified.
+
+    Never raises: an analytics failure must not break the actual
+    /compare response.
     """
     try:
         results = payload_out.get("results", [])
@@ -147,17 +158,21 @@ async def _log_basket_compare(
 
         await pool.execute(
             """
-            INSERT INTO analytics_events (event_type, chain, payload)
-            VALUES ($1, $2, $3::jsonb)
+            INSERT INTO analytics_events (event_type, chain, payload, user_id, device_key)
+            VALUES ($1, $2, $3::jsonb, $4, $5)
             """,
             "basket_compare",
             cheapest_chain,
             json.dumps(event_payload),
+            user_id,
+            device_key,
         )
-    except Exception:
+    except Exception as exc:
         # Analytics is best-effort — never let a logging problem affect
-        # the person's actual price comparison.
-        pass
+        # the person's actual price comparison. Still log the failure
+        # (exception type/message only — never the payload, token, or
+        # device id) so a broken insert doesn't go unnoticed forever.
+        logger.warning("basket_compare analytics logging failed: %s", exc)
 
 
 async def compute_compare(
@@ -198,7 +213,12 @@ async def compute_compare(
 
 @router.post("/compare")
 @throttle(limit=30, window=60)
-async def compare_basket(body: CompareRequest, request: Request):
+async def compare_basket(
+    body: CompareRequest,
+    request: Request,
+    x_device_id: Optional[str] = Header(default=None, alias="X-Device-Id"),
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
+):
     try:
         if not body.grocery_list.items:
             raise HTTPException(status_code=400, detail="Basket is empty")
@@ -230,11 +250,15 @@ async def compare_basket(body: CompareRequest, request: Request):
 
         payload_out = await compare_basket_service(pool, payload_in)
 
+        user_id, device_key = await resolve_analytics_identity(request, authorization, x_device_id)
+
         await _log_basket_compare(
             request,
             payload_out,
             basket_size=len(items_payload),
             radius_km=payload_out.get("radius_km", radius_km),
+            user_id=user_id,
+            device_key=device_key,
         )
 
         return {
