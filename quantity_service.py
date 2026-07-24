@@ -58,6 +58,13 @@ audit): kaks veel avastatud false-AUTO't oils_olive/coffee_beans_ground
 kategoorias (vt substitution_service.py FLAVOUR_PROFILE_KEYWORDS
 "fruity" + uus COFFEE_PRODUCT_LINE_PATTERNS/coffee_product_line).
 SUBSTITUTION_RULES_VERSION tõstetud 4 -> 5.
+
+v4.6.2 muudatus (269-testi v4.6.1 jooksu audit): dry_soups_noodles
+false-AUTO (Ajinomoto ramen sealihamaitseline -> kanamaitseline) —
+FLAVOUR_PROFILE_KEYWORDS laiendatud liha-/puljongimaitsetega (kana/
+sealiha/veise/krevett/miso/karri), dry_soups_noodles DOWNGRADE_RULES
+lisatud "flavour_profile" (vt substitution_service.py).
+SUBSTITUTION_RULES_VERSION tõstetud 5 -> 6.
 """
 
 from __future__ import annotations
@@ -68,7 +75,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 5
+SUBSTITUTION_RULES_VERSION = 6
 
 
 class QuantityTier(StrEnum):
