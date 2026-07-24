@@ -1,0 +1,44 @@
+name: Net Qty Backfill - Preview (loeb ainult, ei kirjuta)
+
+# Käivitatakse AINULT käsitsi ("Run workflow" nupp GitHub Actions
+# vahekaardil). See skript on 100% READ ONLY — ei tee ühtegi INSERT/
+# UPDATE/DELETE lauset, ainult loeb products/product_group_members
+# tabeleid ja parsib koguse nimest regex'iga. Ei kutsu Claude API't,
+# seega ANTHROPIC_API_KEY pole vajalik.
+#
+# Piiratud ulatus (ChatGPT soovitus, juuli 2026): AINULT
+# dry_run_test_shadow_candidates.py 111 testigrupi ja nende
+# grupiliikmete kohta (vt net_qty_backfill_preview.py docstring).
+on:
+  workflow_dispatch:
+
+jobs:
+  net-qty-backfill-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install asyncpg
+
+      - name: Run net_qty backfill preview (READ ONLY)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          PGSSLMODE: require
+        run: |
+          python net_qty_backfill_preview.py
+
+      - name: Upload preview results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: net-qty-backfill-preview
+          path: net_qty_backfill_preview.json
+          retention-days: 30
