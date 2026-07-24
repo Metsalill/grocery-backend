@@ -24,6 +24,19 @@ Väljund näitab täpselt, mida iga toode SAAKS, koos usaldusklassiga,
 et saaksid enne tegelikku kirjutamist kõik läbi vaadata ja "kinnitan"
 öelda.
 
+v2 fix (esimese preview-jooksu tulemuste käsitsi auditist leitud):
+"Cappuccino La Festa Klassik 10 X 12 5 G" (tegelik toode: 10x12,5g
+multipakk) parsiti algselt vääralt kui üksik 5g toode, kuna scraper
+kirjutas komakoha TÜHIKUNA ("12,5" -> "12 5"). Lisatud:
+  - _MULTIPACK_BROKEN_DECIMAL_RE, mis tuvastab "N x M D unit" mustri
+    ja taastab õige N x M.D unit väärtuse, aga märgib tulemuse
+    WOULD_SET_MULTIPACK_RECOVERED_DECIMAL (eraldi käsitsi kontrolliks,
+    mitte automaatselt usaldatud).
+  - Turvavõrk: kui üksikpakendi muster annab kahtlaselt väikese koguse
+    (<15 g/ml) ILMA multipaki mustrita ja see pole teadaolev legitiimne
+    üksikpakendi suurus (8/10/12/14/16g lahustuva kohvi kotikesed),
+    tulemus on SKIP_AMBIGUOUS_SMALL_QTY, mitte automaatne WOULD_SET.
+
 KÄIVITAMINE: identne dry_run_test.py-ga (READ ONLY transaktsioon,
 ei vaja isegi dry_run=True lippu, kuna siin pole üldse UPDATE-lauseid).
     export DATABASE_URL="postgresql://..."
@@ -83,29 +96,59 @@ def _to_base_unit(qty: float, unit: str) -> tuple[decimal.Decimal, str]:
     return decimal.Decimal(str(qty)), unit_lower  # juba g/ml
 
 
+# --- v2 fix (leitud reaalse vea põhjal: "Cappuccino La Festa Klassik
+# 10 X 12 5 G" tähendab "10 x 12,5 g", aga scraper kirjutas komakoha
+# TÜHIKUNA, mistõttu algne muster ei tuvastanud multipakki ja SINGLE_RE
+# võttis vääralt viimase "5 G" kui iseseisva 5-grammise toote — päris
+# toode on 10x12,5g multipakk). See muster tuvastab "N x M D unit",
+# kus D on üksik komakohajärgne number ilma koma/punktita.
+_MULTIPACK_BROKEN_DECIMAL_RE = re.compile(
+    r"(\d+)\s*[x×*]\s*(\d+)\s+(\d)\s*(kg|g|l|ml)\b", re.IGNORECASE
+)
+
+# Kui SINGLE_RE leiab kahtlaselt väikese koguse (alla 15 g/ml) ilma
+# multipaki mustrita, on see tõenäolisemalt katkine parsimine
+# (nt katkine komakoht) kui päris toode — ainsad teadaolevad
+# legitiimsed erandid on üksikud lahustuva kohvi kotikesed (8-16g).
+_PLAUSIBLE_SMALL_SINGLE_SERVE = {8, 10, 12, 14, 16}
+
+
 def classify_and_parse(name: str) -> dict:
     """Tagastab dict: {status, net_qty, net_unit, pack_count, reason}."""
     if not name:
         return {"status": "SKIP_UNPARSEABLE", "reason": "tühi nimi"}
 
     if _BARE_KG_SUFFIX_RE.search(name) and not _MULTIPACK_RE.search(name):
-        # Nimi lõpeb "kg"-ga, aga kontrolli, et see poleks osa "1kg" mustrist
-        # (_SINGLE_RE oleks selle juba varem tabanud "1kg" puhul, kuna
-        # \d+ nõuab numbrit VAHETULT enne ühikut, ilma tühikuta või
-        # tühikuga - regex katab mõlemad "1kg" ja "1 kg").
-        # Kontrolli veel kord otse: kas on numbrit vahetult enne "kg"-d
-        # (koos tühikuga või ilma).
         m = _SINGLE_RE.search(name)
         if m and m.group(2).lower() == "kg" and name.rstrip().lower().endswith("kg"):
-            # nt "500 g kg" ei juhtu, aga "Gouda 1kg" oleks siin match'inud
-            # SINGLE_RE juba - kontrolli kas match lõpeb sõne lõpus
             if name.rstrip()[-len(m.group(0)):].strip() == m.group(0).strip():
-                pass  # on tegelikult "1kg" tüüpi, lase edasi tavalisse harusse
+                pass
         else:
             return {
                 "status": "SKIP_KG_PRICED",
                 "reason": "nimi lõpeb kaalutoote 'kg'-ga ilma fikseeritud kogusenumbrita",
             }
+
+    # v2 fix: katkine komakoht multipakis KONTROLLITAKSE ENNE tavalist
+    # multipakk-mustrit, kuna "10 X 12 5 G" muidu ei tabaks kumbagi
+    # mustrit korrektselt.
+    m = _MULTIPACK_BROKEN_DECIMAL_RE.search(name)
+    if m:
+        pack_count = int(m.group(1))
+        per_unit_qty = float(f"{m.group(2)}.{m.group(3)}")
+        unit = m.group(4)
+        net_qty, net_unit = _to_base_unit(per_unit_qty, unit)
+        return {
+            "status": "WOULD_SET_MULTIPACK_RECOVERED_DECIMAL",
+            "net_qty": net_qty,
+            "net_unit": net_unit,
+            "pack_count": pack_count,
+            "reason": (
+                f"multipakk katkise komakohaga taastatud: '{m.group(0)}' "
+                f"tõlgendatud kui {pack_count}x{per_unit_qty}{unit} "
+                f"(KONTROLLI KÄSITSI enne UPDATE't)"
+            ),
+        }
 
     m = _MULTIPACK_RE.search(name)
     if m:
@@ -126,6 +169,19 @@ def classify_and_parse(name: str) -> dict:
         qty = float(m.group(1).replace(",", "."))
         unit = m.group(2)
         net_qty, net_unit = _to_base_unit(qty, unit)
+        # v2 fix: kahtlaselt väike kogus ilma multipaki mustrita ilma
+        # tuntud legitiimse üksikpakendi suuruseta — tõenäoliselt
+        # katkine parsimine (nt teine katkise komakoha variant, mida
+        # ülemine muster ei tabanud). Jäta käsitsi kontrolliks.
+        if net_unit in ("g", "ml") and net_qty < 15 and int(net_qty) not in _PLAUSIBLE_SMALL_SINGLE_SERVE:
+            return {
+                "status": "SKIP_AMBIGUOUS_SMALL_QTY",
+                "reason": (
+                    f"leitud kogus {net_qty}{net_unit} on kahtlaselt väike ega "
+                    f"vasta teadaolevale üksikpakendi suurusele — võimalik "
+                    f"katkine parsimine, vajab käsitsi kontrolli"
+                ),
+            }
         return {
             "status": "WOULD_SET_SINGLE",
             "net_qty": net_qty,
@@ -148,10 +204,12 @@ async def run_preview():
         async with conn.transaction(readonly=True):
             rows = await conn.fetch(
                 """
-                SELECT DISTINCT p.id, p.name, p.sub_code, p.net_qty, p.net_unit,
-                       p.pack_count, m.group_id
+                SELECT DISTINCT p.id, p.name, p.sub_code AS product_sub_code,
+                       pg.sub_code AS group_sub_code,
+                       p.net_qty, p.net_unit, p.pack_count, m.group_id
                 FROM products p
                 JOIN product_group_members m ON m.product_id = p.id
+                JOIN product_groups pg ON pg.id = m.group_id
                 WHERE m.group_id = ANY($1::int[])
                   AND p.net_qty IS NULL
                 ORDER BY p.sub_code, m.group_id, p.id
@@ -164,18 +222,71 @@ async def run_preview():
     print(f"Leitud {len(rows)} toodet (111 testigrupi liikmed), millel net_qty on NULL.\n")
 
     results = []
-    counts = {}
     for r in rows:
         parsed = classify_and_parse(r["name"])
-        counts[parsed["status"]] = counts.get(parsed["status"], 0) + 1
-        results.append({
+        item = {
             "product_id": r["id"],
             "group_id": r["group_id"],
-            "sub_code": r["sub_code"],
+            "sub_code": r["product_sub_code"],
+            "group_sub_code": r["group_sub_code"],
             "name": r["name"],
             "current_pack_count": r["pack_count"],
             **parsed,
-        })
+        }
+        # v3 fix (ChatGPT leid): toote enda sub_code võib erineda grupi
+        # sub_code'ist (nt Nescafe kohvijook product.sub_code=
+        # 'spirits_liqueur', kuigi grupp on 'coffee_instant' — päris
+        # taksonoomiaviga, avastatud selle preview käigus). See EI TOHI
+        # minna vaikimisi WOULD_SET alla — vajab eraldi uurimist.
+        if item["status"].startswith("WOULD_SET") and r["product_sub_code"] != r["group_sub_code"]:
+            item["status"] = "SKIP_CATEGORY_CONFLICT"
+            item["reason"] = (
+                f"toote sub_code ('{r['product_sub_code']}') erineb grupi "
+                f"sub_code'ist ('{r['group_sub_code']}') — TAKSONOOMIAVIGA, "
+                f"uuri eraldi enne backfilli"
+            )
+        results.append(item)
+
+    # v3 fix (ChatGPT leid): grupisisene koguse-konflikt — kui sama grupi
+    # liikmete parsitud (net_qty, net_unit, pack_count) väärtused EI ühti
+    # NUMBRILISELT (mitte string'ina — "960.00" ja "960.0" on sama
+    # väärtus, mitte konflikt), on tegu tõenäoliselt grupeerimise
+    # kvaliteediprobleemiga (nt üksikpakk ja karp valesti samasse
+    # gruppi pandud) — KOGU grupp jäetakse apply'st välja, mitte ainult
+    # üks rida, kuna me ei tea, milline väärtustest (kui üldse) on õige.
+    import decimal as _decimal
+    by_group = {}
+    for item in results:
+        by_group.setdefault(item["group_id"], []).append(item)
+
+    conflicted_groups = set()
+    for gid, items in by_group.items():
+        combos = set()
+        for it in items:
+            if it["status"].startswith("WOULD_SET"):
+                combos.add((
+                    _decimal.Decimal(str(it["net_qty"])).normalize(),
+                    it["net_unit"],
+                    it["pack_count"],
+                ))
+        if len(combos) > 1:
+            conflicted_groups.add(gid)
+
+    if conflicted_groups:
+        print(f"HOIATUS: {len(conflicted_groups)} grupis on liikmete koguste konflikt "
+              f"(tõenäoline grupeerimisviga, nt üksikpakk + karp samas grupis): "
+              f"{sorted(conflicted_groups)}\n")
+        for item in results:
+            if item["group_id"] in conflicted_groups and item["status"].startswith("WOULD_SET"):
+                item["status"] = "SKIP_GROUP_CONFLICT"
+                item["reason"] = (
+                    f"group_id={item['group_id']} liikmete parsitud kogused ei ühti "
+                    f"(vt HOIATUS ülal) — kogu grupp jäetud apply'st välja"
+                )
+
+    counts = {}
+    for r in results:
+        counts[r["status"]] = counts.get(r["status"], 0) + 1
 
     print("=== KOKKUVÕTE ===")
     for status, count in sorted(counts.items()):
@@ -188,7 +299,7 @@ async def run_preview():
     for status, items in sorted(by_status.items()):
         print(f"\n--- {status} ({len(items)}) ---")
         for item in items[:15]:
-            if status.startswith("WOULD_SET"):
+            if item["status"].startswith("WOULD_SET"):
                 print(
                     f"  [{item['sub_code']}] '{item['name']}' "
                     f"-> net_qty={item['net_qty']}, net_unit={item['net_unit']}, "
