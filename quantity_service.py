@@ -65,6 +65,22 @@ FLAVOUR_PROFILE_KEYWORDS laiendatud liha-/puljongimaitsetega (kana/
 sealiha/veise/krevett/miso/karri), dry_soups_noodles DOWNGRADE_RULES
 lisatud "flavour_profile" (vt substitution_service.py).
 SUBSTITUTION_RULES_VERSION tõstetud 5 -> 6.
+
+v4.6.4 muudatus (252-testi puhta v4.6.3 jooksu audit, duplikaadid
+eemaldatud): dairy_milk false-AUTO — "Kotimaista piim laktoosivaba 3%"
+sai AUTO 2,5% kandidaadi vastu, kuna _milk_fat_class bucketid olid
+liiga jämedad ("standard" = 2.0-3.19%, kattis mõlemad). Bucketid nüüd
+tihedamad reaalsete turuprotsentidega (0/0,5/1-1,5/2-2,5/3/3,5+).
+SUBSTITUTION_RULES_VERSION tõstetud 6 -> 7.
+
+v4.6.5 muudatus (ChatGPT leid enne shadow mode'i): v4.6.4 kitsamad
+bucketid jätsid ebajärjekindluse — 1% vs 1,5% ja 2% vs 2,5% olid
+endiselt AUTO-lubatud, aga 3% vs 2,5% mitte, kuigi vahe on mõlemal
+0,5 protsendipunkti. Asendatud põhimõttelise reegliga: iga 0,5% samm
+on oma bucket (ümardamine lähima 0,5% peale). Kontrollitud ChatGPT
+6-testilise deterministliku regressioonipaketiga (kõik läbisid) +
+reaalse group_id 2659 lisatud dry_run_test.py-sse.
+SUBSTITUTION_RULES_VERSION tõstetud 7 -> 8.
 """
 
 from __future__ import annotations
@@ -75,7 +91,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 6
+SUBSTITUTION_RULES_VERSION = 8
 
 
 class QuantityTier(StrEnum):
