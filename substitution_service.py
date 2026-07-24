@@ -246,17 +246,26 @@ def _milk_fat_class(text) -> Optional[str]:
     Selver keeldus samast kandidaadist), kuni see kontroll lisati.
     EI kasutata maitsestatud jookide peal (vt IDENTITY_RULES allpool —
     fat_class_milk on rakendatud ainult koos flavour_state kontrolliga,
-    mis juba eristab need eraldi)."""
+    mis juba eristab need eraldi).
+
+    v4.6.4 fix (dry-run leid): 2,5% vs 3% läks vääralt AUTO-ks jäme
+    "standard" bucket'i tõttu.
+
+    v4.6.5 TÄPSUSTUS (ChatGPT leid): v4.6.4 kitsamad bucketid ("light_2_5"
+    = 2-2,5%, "low_fat_1" = 1-1,5%) jätsid ebajärjekindluse — 1% vs 1,5%
+    ja 2% vs 2,5% oleksid endiselt lubatud AUTO, aga 3% vs 2,5% mitte,
+    kuigi vahe on mõlemal juhul 0,5 protsendipunkti. See polnud teadlik
+    äriotsus, vaid bucket-piiride juhuslik tagajärg. Asendatud
+    põhimõttelise reegliga: iga 0,5% samm on OMA bucket (ümardatud
+    lähima 0,5% peale) — 1% ja 1,5% on nüüd samuti erinevad, nagu 2,5%
+    ja 3%. Vahemikuga tooted (nt '3,6-4,2%' talupiim) keskmistatakse
+    _extract_percent'is juba enne siia jõudmist, nii et sama vahemiku-
+    tekstiga tooted saavad alati sama bucket'i, olenemata ümardamisest."""
     pct = _extract_percent(text)
     if pct is None:
         return None
-    if pct >= 3.2:
-        return "whole"
-    if pct >= 2.0:
-        return "standard"
-    if pct >= 0.5:
-        return "low_fat"
-    return "fat_free"
+    rounded = round(pct * 2) / 2  # lähim 0,5%
+    return f"pct_{rounded:.1f}"
 
 
 def _yogurt_fat_class(text) -> Optional[str]:
