@@ -71,7 +71,7 @@ TEST_CASES = [
     (7601, "rimi", "Head Ood piimapuder puuviljadega 190g puudub Rimist"),
 
     # --- Katmata/uncovered sub_code -> fail-closed (no_quantity_data VÕI no_eligible_candidates) ---
-    (3980, "maxima", "Kinder Maxi King 3x35g — sweets_chocolate_bars pole QUANTITY_RULES-is, fail-closed test"),
+    (3980, "maxima", "Kinder Maxi King 3x35g — sweets_chocolate_bars QUANTITY_RULES regressioonitest (v4.4-s lisatud)"),
     (3981, "coop", "Kinder Milk Slice 84g — sama uncovered-kategooria test"),
 
     # --- Munad (tükikaubad, dairy_eggs) ---
@@ -112,7 +112,7 @@ TEST_CASES = [
     (17117, "maxima", "Monster Mango Loco 500ml puudub Maximast"),
 
     # --- Õlid (oils_olive, katmata kategooria fail-closed test) ---
-    (14447, "maxima", "Borges ekstra neitsioliivioli fruity 500ml puudub Maximast — oils_olive pole QUANTITY_RULES-is"),
+    (14447, "maxima", "Borges ekstra neitsioliivioli fruity 500ml puudub Maximast — oil_grade + flavour_profile regressioonitest (v4.5/v4.5.4-s lisatud)"),
     (14452, "maxima", "Borges Original ekstra vaarioliivioli 250ml puudub Maximast"),
     (14454, "maxima", "Borges Original ekstra vaarioliivioli 1L puudub Maximast"),
 
@@ -139,7 +139,7 @@ TEST_CASES = [
     (11580, "coop", "Lihaveise lihaloiked 390g puudub Coopist"),
     (11580, "maxima", "Lihaveise lihaloiked 390g puudub Maximast"),
     (11594, "coop", "Rakvere veiseklops vasardatud 400g puudub Coopist"),
-    (11612, "rimi", "Linnamäe hirveliha steik 240g puudub Rimist — 'hirv' pole animal_type sõnastikus, edge case"),
+    (11612, "rimi", "Linnamäe hirveliha steik 240g puudub Rimist — animal_type=deer regressioonitest (v4.5.1-s lisatud)"),
     (11441, "rimi", "Rakvere seahakkliha 400g puudub Rimist — animal_type=pork test"),
     (11441, "selver", "Rakvere seahakkliha 400g puudub Selverist"),
 
@@ -238,7 +238,7 @@ TEST_CASES = [
     (11571, "rimi", "Liivimaa Mahe veise antrekoodi steik 240g puudub Rimist — cut_type=antrekoot"),
     (11577, "coop", "Liivimaa Mahe rohumaaveise romsteek 240g puudub Coopist — cut_type=romsteak"),
     (11591, "coop", "Karni antrekoodi viil 200g puudub Coopist"),
-    (11612, "selver", "Linnamäe hirveliha steik 240g puudub Selverist — 'hirv' pole animal_type sõnastikus"),
+    (11612, "selver", "Linnamäe hirveliha steik 240g puudub Selverist — animal_type=deer regressioonitest (v4.5.1-s lisatud)"),
 
     # --- meat_minced (animal_type) ---
     (11442, "selver", "Rakvere hakkliha sea-veiselihast 400g puudub Selverist — animal_type=mixed"),
@@ -467,6 +467,29 @@ TEST_CASES += [
 ]
 
 
+def _deduplicate_test_cases(test_cases):
+    """v4.6.3 UUS (ChatGPT leid): mitmes voorus lisatud testide seas
+    tekkis 17 (group_id, chain) duplikaati — sama juhtum kutsub Claude
+    API't mitu korda (raha), kallutab otsuste koondjaotust, ja kuna
+    Claude pole deterministlik, võib sama juhtum anda kaks erinevat
+    vastust ning näida ekslikult regressioonina. Eemaldab duplikaadid,
+    säilitades esimese kirjelduse, ja prindib hoiatuse iga eemaldatu
+    kohta (mitte vaikimisi vaikides)."""
+    seen = set()
+    unique = []
+    for group_id, chain, description in test_cases:
+        key = (group_id, chain.lower())
+        if key in seen:
+            print(f"HOIATUS: duplikaattest eemaldatud: group_id={group_id}, chain={chain} ({description})")
+            continue
+        seen.add(key)
+        unique.append((group_id, chain, description))
+    return unique
+
+
+TEST_CASES = _deduplicate_test_cases(TEST_CASES)
+
+
 class _IntentionalRollback(Exception):
     pass
 
@@ -487,19 +510,47 @@ async def run_dry_run_tests():
         async with conn.transaction(readonly=True):
             for group_id, chain, description in TEST_CASES:
                 print(f"\n{'='*70}\nTEST: group_id={group_id}, chain={chain}\n{description}\n{'='*70}")
-                try:
-                    # SAVEPOINT iga testi ümber — kui see test ebaõnnestub
-                    # (nt andmeviga), ROLLBACK toimub AINULT selle testi
-                    # tasandil, mitte kogu READ ONLY transaktsiooni jaoks.
-                    # Ilma selleta rikub üks Postgres-tasandi viga kõik
-                    # järgnevad testid ("current transaction is aborted").
-                    async with conn.transaction():
-                        result = await get_or_create_substitution(
-                            conn, group_id, chain, dry_run=True, use_cache=False
-                        )
-                except Exception as e:
-                    print(f"TEHNILINE VIGA: {e}")
-                    result = {"error": str(e), "trace": {"original_group_id": group_id, "chain": chain}}
+                # v4.6.3 UUS (ChatGPT soovitus): provider_error (API timeout
+                # või mitte-JSON vastus) on üksik transientne viga, mitte
+                # substitution-loogika viga — proovime uuesti kuni 3 korda.
+                # Retry AINULT provider_error puhul, mitte semantiliste
+                # otsuste (auto/suggested/no_eligible_candidates/jne) korral.
+                result = None
+                for attempt in range(3):
+                    try:
+                        # SAVEPOINT iga testi ümber — kui see test ebaõnnestub
+                        # (nt andmeviga), ROLLBACK toimub AINULT selle testi
+                        # tasandil, mitte kogu READ ONLY transaktsiooni jaoks.
+                        # Ilma selleta rikub üks Postgres-tasandi viga kõik
+                        # järgnevad testid ("current transaction is aborted").
+                        async with conn.transaction():
+                            result = await get_or_create_substitution(
+                                conn, group_id, chain, dry_run=True, use_cache=False
+                            )
+                    except Exception as e:
+                        print(f"TEHNILINE VIGA (katse {attempt + 1}/3): {e}")
+                        # v4.6.3 fix (ChatGPT leid): varem oli tulemus
+                        # {"error": ..., "trace": ...} ILMA decision_type
+                        # väljata. See küll ei retry'nud (None != "provider_
+                        # error" == True, break), aga hilisem raport luges
+                        # "dt = r.get('decision_type', 'ERROR')" ja tulemus
+                        # oli implitsiitne "ERROR", mitte masinloetav. Nüüd
+                        # eksplitsiitne "test_error" + error_type väli, ja
+                        # break kohe — geneerilist Python/Postgres viga EI
+                        # retry'ta, ainult provider_error (Claude API poolt
+                        # tagastatud struktuur) retry'takse.
+                        result = {
+                            "decision_type": "test_error",
+                            "error_type": type(e).__name__,
+                            "reasoning": str(e),
+                            "trace": {"original_group_id": group_id, "chain": chain},
+                        }
+                        break
+
+                    if result is not None and result.get("decision_type") != "provider_error":
+                        break
+                    if attempt < 2:
+                        print(f"provider_error (katse {attempt + 1}/3), proovin uuesti...")
 
                 if result is None:
                     result = {
