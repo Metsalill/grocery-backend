@@ -464,6 +464,9 @@ TEST_CASES += [
     # --- wine_red / wine_white (AUTO_DISABLED + ebatavalised formaadid) ---
     (29332, "coop", "Dreamer Sweet Red 1L tetra puudub Coopist — AUTO_DISABLED + ebatavaline pakend"),
     (29368, "selver", "Barone Montalto Nero d Avola 187ml puudub Selverist — väike formaat"),
+
+    # --- v4.6.5 (ChatGPT soovitatud sihitud kinnitustest) ---
+    (2659, "rimi", "3% laktoosivaba piim ei tohi asenduda 2,5% piimaga — fat_class_milk regressioonitest"),
 ]
 
 
