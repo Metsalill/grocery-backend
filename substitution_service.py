@@ -560,6 +560,17 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     # täpsustust — SEE on erinev juhtum, kuna "fruity" on eraldi
     # tooteseeria nimi, "vääris"/"neitsi" on sama EL-i kvaliteediklass).
     "fruity": (r"\bfruity\b", r"\bpuuviljane\w*", r"\bpuuvilja\w*"),
+    # v4.6.2 UUS — Ajinomoto/Oyakata ramen "sealihamaitseline" vs
+    # "kanamaitseline" false-AUTO fix (dry_soups_noodles). Claude enda
+    # reasoning tunnistas "erinevus on ainult maitses (kana vs sealiha)"
+    # — FLAVOUR_VARIANT_PATTERNS kattis ainult puuviljamaitseid, mitte
+    # kiirnuudlite/suppide liha-/puljongimaitseid.
+    "chicken_flavour": (r"\bkana\w*", r"\bchicken\b"),
+    "pork_flavour": (r"\bsealiha\w*", r"\bpork\b"),
+    "beef_flavour": (r"\bveise\w*", r"\bbeef\b"),
+    "shrimp_flavour": (r"\bkrevet\w*", r"\bshrimp\b"),
+    "miso_flavour": (r"\bmiso\w*",),
+    "curry_flavour": (r"\bkarri\w*", r"\bcurry\b"),
 }
 
 # Maitsevariandid — regex-mustrid, MITTE lihtsad substring'id, et
@@ -854,7 +865,7 @@ DOWNGRADE_RULES: dict[str, list[str]] = {
     "sweets_chocolate_bars": ["flavour_variant"],
     "sweets_nuts_driedfruit": ["flavour_variant"],
     "sweets_snacks_salty": ["flavour_variant", "flavour_profile"],
-    "dry_soups_noodles": ["flavour_variant"],
+    "dry_soups_noodles": ["flavour_variant", "flavour_profile"],
     "produce_smoothies_fresh_juices": ["flavour_variant"],
     "drinks_juices": ["flavour_variant"],
     "bakery_cakes_pastries": ["flavour_variant"],
