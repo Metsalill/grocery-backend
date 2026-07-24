@@ -6,6 +6,9 @@ from pydantic import BaseModel
 from typing import Optional
 import logging
 
+from jose import JWTError, jwt
+from auth import SECRET_KEY, ALGORITHM
+
 logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -32,12 +35,55 @@ def _hash_device_id(raw_device_id: str) -> Optional[str]:
     return digest
 
 
+async def _resolve_user_id(request: Request, authorization: Optional[str]) -> Optional[str]:
+    """Resolves the internal users.id (as text) from the Authorization
+    header, if present and valid. Never trusts a client-supplied user_id —
+    identity is derived only from a verified JWT, server-side. Returns None
+    for guests, expired/invalid tokens, or deleted accounts (fail-closed:
+    when in doubt, treat as anonymous rather than guessing an identity)."""
+    if not authorization:
+        return None
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token.strip():
+        return None
+    token = token.strip()
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError as exc:
+        logger.debug("Analytics authentication failed: %s", type(exc).__name__)
+        return None
+
+    email = payload.get("sub")
+    if not email:
+        return None
+
+    db = request.app.state.db
+    try:
+        row_id = await db.fetchval(
+            """
+            SELECT id FROM users
+            WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
+            """,
+            email,
+        )
+    except Exception as e:
+        logger.warning(f"User lookup failed during analytics event: {e}")
+        return None
+
+    return str(row_id) if row_id is not None else None
+
+
 class AnalyticsEvent(BaseModel):
     event_type: str  # 'product_view', 'basket_add', 'basket_win'
     product_id: Optional[int] = None
     group_id: Optional[int] = None
     chain: Optional[str] = None
-    user_id: Optional[str] = None
+    # Note: user_id is NOT accepted from the client anymore. Identity is
+    # resolved server-side from the Authorization header (see
+    # _resolve_user_id). Any client-supplied user_id is ignored, so a guest
+    # can never claim to be a specific account.
 
 
 @router.post("/event")
@@ -45,6 +91,7 @@ async def log_event(
     event: AnalyticsEvent,
     request: Request,
     x_device_id: Optional[str] = Header(default=None, alias="X-Device-Id"),
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
 ):
     valid_event_types = {"product_view", "basket_add", "basket_win"}
     if event.event_type not in valid_event_types:
@@ -77,6 +124,10 @@ async def log_event(
     # statistika (unikaalsete külastajate) jaoks, mitte kasutajaprofiiliks.
     device_key = _hash_device_id(x_device_id) if x_device_id else None
 
+    # Kasutaja identiteet lahendatakse AINULT serveripoolselt, kontrollitud
+    # JWT-st — kunagi mitte kliendi enda väitest. Guest'i puhul jääb None.
+    user_id = await _resolve_user_id(request, authorization)
+
     try:
         await db.execute(
             """
@@ -87,7 +138,7 @@ async def log_event(
             event.product_id,
             event.group_id,
             chain_normalized,
-            event.user_id,
+            user_id,
             device_key,
         )
         return {"status": "ok"}
