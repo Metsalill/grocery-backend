@@ -122,14 +122,38 @@ def new_browser(pw):
     return browser, ctx, page
 
 
+def new_db_connection():
+    """Opens a fresh DB connection with autocommit enabled.
+
+    autocommit=True is deliberate and important here: each product's
+    UPDATE is an independent, single-row write with a slow Playwright/
+    requests/R2 network call in between (page load, image download,
+    R2 upload — each can take many seconds, and a "no image found" skip
+    does no DB write at all before moving to the next product). With
+    autocommit=False and only a periodic commit() every 50 uploads, the
+    connection could sit "idle in transaction" across dozens of slow
+    network calls in a row. Since Railway's Postgres now has
+    idle_in_transaction_session_timeout='60s' (added to prevent zombie
+    scraper transactions from locking tables for hours), that idle
+    transaction gets killed mid-run, the cursor becomes unusable, and
+    every subsequent write fails with "cursor already closed" — which
+    is exactly what happened here. With autocommit=True, every write
+    commits immediately, so there is never an open transaction sitting
+    idle during the slow parts, regardless of how long a single
+    product's Playwright/R2 work takes.
+    """
+    conn = psycopg2.connect(DATABASE_URL)
+    conn.autocommit = True
+    return conn
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=5000)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.autocommit = False
+    conn = new_db_connection()
 
     with conn.cursor() as cur:
         cur.execute("""
@@ -148,93 +172,117 @@ def main():
     skipped = 0
     failed = 0
 
+    def run_update(pid: int, public_url: str) -> bool:
+        """Runs the per-product UPDATE, transparently reopening the DB
+        connection once if it was dropped for any reason (idle timeout,
+        network blip, server restart) instead of aborting the whole
+        multi-hour run over a single lost connection. Returns True on
+        success, False if the retry also failed."""
+        nonlocal conn
+        for attempt in (1, 2):
+            try:
+                with conn.cursor() as cur2:
+                    cur2.execute("UPDATE products SET image_url = %s WHERE id = %s", (public_url, pid))
+                return True
+            except (psycopg2.InterfaceError, psycopg2.OperationalError) as e:
+                print(f"[{pid}] DB connection issue ({e}); reconnecting (attempt {attempt})", file=sys.stderr)
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+                conn = new_db_connection()
+        return False
+
     with sync_playwright() as pw:
         browser, ctx, page = new_browser(pw)
 
-        with conn.cursor() as cur:
-            for i, row in enumerate(rows):
-                pid, source_url = row[0], row[1]
+        for i, row in enumerate(rows):
+            pid, source_url = row[0], row[1]
 
+            try:
+                page.goto(source_url, timeout=25000, wait_until="domcontentloaded")
                 try:
-                    page.goto(source_url, timeout=25000, wait_until="domcontentloaded")
-                    try:
-                        page.wait_for_selector("img.wp-post-image", timeout=4000)
-                    except PWTimeout:
-                        pass
-                    html = page.content()
-                    image_url = extract_image_url(html)
-                except Exception as e:
-                    print(f"[{pid}] page load failed: {e}", file=sys.stderr)
-                    failed += 1
-                    try:
-                        page.close(); ctx.close(); browser.close()
-                    except Exception:
-                        pass
-                    browser, ctx, page = new_browser(pw)
-                    continue
-
-                if not image_url:
-                    print(f"[{pid}] no image found")
-                    skipped += 1
-                    jitter(0.2, 0.5)
-                    continue
-
-                if args.dry_run:
-                    print(f"[DRY] [{pid}] {image_url}")
-                    uploaded += 1
-                    continue
-
-                r2_key = r2_key_from_source_url(source_url, pid)
-
+                    page.wait_for_selector("img.wp-post-image", timeout=4000)
+                except PWTimeout:
+                    pass
+                html = page.content()
+                image_url = extract_image_url(html)
+            except Exception as e:
+                print(f"[{pid}] page load failed: {e}", file=sys.stderr)
+                failed += 1
                 try:
-                    if image_exists_in_r2(r2_key):
-                        public_url = r2_public_url(r2_key)
-                        cur.execute("UPDATE products SET image_url = %s WHERE id = %s", (public_url, pid))
-                        uploaded += 1
-                        if uploaded % 50 == 0:
-                            conn.commit()
-                            print(f"  ... {uploaded} processed")
-                        jitter(0.1, 0.3)
-                        continue
+                    page.close(); ctx.close(); browser.close()
                 except Exception:
                     pass
+                browser, ctx, page = new_browser(pw)
+                continue
 
-                data, content_type = download_image(image_url)
-                if not data:
-                    print(f"[{pid}] download failed: {image_url}")
-                    failed += 1
-                    jitter(0.3, 0.8)
+            if not image_url:
+                print(f"[{pid}] no image found")
+                skipped += 1
+                jitter(0.2, 0.5)
+                continue
+
+            if args.dry_run:
+                print(f"[DRY] [{pid}] {image_url}")
+                uploaded += 1
+                continue
+
+            r2_key = r2_key_from_source_url(source_url, pid)
+
+            try:
+                if image_exists_in_r2(r2_key):
+                    public_url = r2_public_url(r2_key)
+                    if run_update(pid, public_url):
+                        uploaded += 1
+                        if uploaded % 50 == 0:
+                            print(f"  ... {uploaded} processed")
+                    else:
+                        print(f"[{pid}] DB update failed after retry (image already in R2)", file=sys.stderr)
+                        failed += 1
+                    jitter(0.1, 0.3)
                     continue
+            except Exception:
+                pass
 
-                try:
-                    public_url = upload_image_to_r2(data, r2_key, content_type or "image/jpeg")
-                    cur.execute("UPDATE products SET image_url = %s WHERE id = %s", (public_url, pid))
-                    uploaded += 1
-                    print(f"[{pid}] ✅ {r2_key}")
-                    if uploaded % 50 == 0:
-                        conn.commit()
-                        print(f"  ... {uploaded} uploaded")
-                except Exception as e:
-                    print(f"[{pid}] R2 upload failed: {e}", file=sys.stderr)
-                    failed += 1
+            data, content_type = download_image(image_url)
+            if not data:
+                print(f"[{pid}] download failed: {image_url}")
+                failed += 1
+                jitter(0.3, 0.8)
+                continue
 
+            try:
+                public_url = upload_image_to_r2(data, r2_key, content_type or "image/jpeg")
+            except Exception as e:
+                print(f"[{pid}] R2 upload failed: {e}", file=sys.stderr)
+                failed += 1
                 jitter(0.5, 1.0)
+                continue
 
-                if (i + 1) % 200 == 0:
-                    try:
-                        page.close(); ctx.close(); browser.close()
-                    except Exception:
-                        pass
-                    browser, ctx, page = new_browser(pw)
-                    print(f"[info] browser restarted after {i+1} products")
+            if run_update(pid, public_url):
+                uploaded += 1
+                print(f"[{pid}] ✅ {r2_key}")
+                if uploaded % 50 == 0:
+                    print(f"  ... {uploaded} uploaded")
+            else:
+                print(f"[{pid}] DB update failed after retry (image uploaded to R2 as {r2_key})", file=sys.stderr)
+                failed += 1
+
+            jitter(0.5, 1.0)
+
+            if (i + 1) % 200 == 0:
+                try:
+                    page.close(); ctx.close(); browser.close()
+                except Exception:
+                    pass
+                browser, ctx, page = new_browser(pw)
+                print(f"[info] browser restarted after {i+1} products")
 
         try:
             page.close(); ctx.close(); browser.close()
         except Exception:
             pass
-
-    if not args.dry_run:
-        conn.commit()
 
     conn.close()
     print(f"\nDone. Uploaded: {uploaded}, Failed: {failed}, Skipped: {skipped}")
