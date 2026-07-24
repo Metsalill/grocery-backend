@@ -356,6 +356,114 @@ TEST_CASES = [
 
     # --- baby_porridge_cereal ---
     (7649, "maxima", "Nogel Mahe raudne tatrapuder pirniga 190g puudub Maximast — beebitoit"),
+
+    # --- v4.6 LAIENDUS (juuli 2026): reaalsed group_id'd gap-päringust,
+    # sihitud v4.5.x uute kooditeede (meat_form 10 vormi, animal_type
+    # kana/kalkun/part eristus, coffee_product_line, oil_grade/
+    # flavour_profile) laiemale valideerimisele reaalse andmega ---
+
+    # --- meat_grill_blood_sausages: uued meat_form vormid reaalsel andmel ---
+    (16256, "rimi", "Matsimoka toorvorstid paprika ja tšilliga lambasooles 300g puudub Rimist — lambaliha animal_type test"),
+    (16294, "rimi", "Rannamõisa toorvorstid broilerilihast tomati-sulajuustuga 300g puudub Rimist — kana vs muu liik"),
+    (16311, "maxima", "Linnamäe BBQ grillribi 600g puudub Maximast — ribs vorm"),
+    (16312, "rimi", "Rakvere Grill-Ribi kg puudub Rimist — ribs vorm, teine bränd"),
+    (16322, "selver", "Rakvere verikakk viilutatud 300g puudub Selverist — blood_dumpling, ei tohi sobida toorvorstiga"),
+    (44333, "maxima", "Grillvorst MM saksa praevorst 400g puudub Maximast — fried_sausage vorm"),
+    (44335, "rimi", "Grillvorst MM shashlakivorstid 400g puudub Rimist — shashlik-vorst"),
+    (50641, "rimi", "Grillsteik suvises marinaadis Matsimoka 500g puudub Rimist — steak vorm"),
+    (51661, "maxima", "Grillitud searibi SELVER kg puudub Maximast — ribs, kaubamärgita toode"),
+
+    # --- meat_poultry: kalkun/part vs kana eristus reaalsel andmel ---
+    (23408, "rimi", "Kalkunifilee Rannamõisa kg puudub Rimist — kalkun ei tohi sobida kana/pardiga"),
+    (23434, "rimi", "Jahutatud pardikoib Rannamõisa kg puudub Rimist — part ei tohi sobida kana/kalkuniga"),
+    (23438, "coop", "Pardi-confit Rannamõisa 500g puudub Coopist — ebatavaline valmistoode"),
+    (23448, "rimi", "Pekingi part 1/2 kondita röstitud 600g puudub Rimist"),
+
+    # --- meat_sausages: brändidevaheline doktorivorsti + liigitest ---
+    (44073, "rimi", "Doktorivorst UVIC kg puudub Rimist — brändidevaheline doktorivorst"),
+    (44076, "coop", "Doktorivorst Pormet 400g puudub Coopist"),
+    (12792, "rimi", "Antu Gurmee mahekana viiner 350g puudub Rimist — animal_type=chicken"),
+
+    # --- coffee_beans_ground: brändi/tooteseeria mitmekesisus (coffee_product_line + coffee_brew_form) ---
+    (25616, "coop", "Starbucks Blonde Espresso kohvioad 450g puudub Coopist — espresso vorm"),
+    (25615, "maxima", "Starbucks Pike Place röst 450g puudub Maximast — sama bränd, teine seeria kui Blonde Espresso"),
+    (25639, "maxima", "Merrild In-Cup tassikohv 400g puudub Maximast — in_cup regressioonikontroll"),
+    (25637, "coop", "LOR Classic kohvioad 1kg puudub Coopist — uus bränd, koodile tundmatu tooteseeria"),
+
+    # --- oils_olive: brändi mitmekesisus (oil_grade + flavour_profile) ---
+    (14192, "maxima", "Ekstra väärisoliiviõli Elinikon 500ml puudub Maximast — uus bränd"),
+    (14234, "rimi", "Colavita oliiviõli extra virgin Kreeka 750ml puudub Rimist"),
+    (14235, "maxima", "Colavita oliiviõli extra virgin premium 750ml puudub Maximast — 'premium' vs 'Kreeka' sama bränd sees"),
+    (14189, "rimi", "Coop sidrunimaitsega oliiviõli 250ml puudub Rimist — flavour_profile lemon test"),
+]
+
+# v4.6.1 LAIENDUS (juuli 2026): teine gap-päringu voor, katab kategooriad
+# mis olid QUANTITY_RULES's, aga 238-testi valimis puudusid täielikult
+# või olid ala-esindatud. Valitud teadlikult (mitte kõik 460 leitud
+# rida), fookusega päris lünkadel:
+# - dairy_eggs: munavalge vs terve muna (identity check puudub täielikult)
+# - dry_soups_noodles: vegan/taimne ramen (plant_based läbi kogu koodi test)
+# - fish_fresh: liigid mis pole FISH_SPECIES_KEYWORDS sõnastikus (lest,
+#   homaar, austrid) — kontrollib fail-open käitumist tundmatu liigi puhul
+# - fish_processed: tuunikala vs lõhe sama sub_code'i sees (fish_species
+#   hard-check peaks blokeerima)
+# - pet_cat_wet: kana vs lõhe vs tuunikala — DOWNGRADE_RULES's pole
+#   pet_cat_wet jaoks flavour-kontrolli üldse, potentsiaalne lünk
+# - meat_beef_lamb_game: lõiketüüpide (antrekoot/burgeripihv/picanha/
+#   klops) laiem valideerimine cut_type kontrollile
+TEST_CASES += [
+    # --- dairy_eggs (auto_pct=0, munavalge vs terve muna identity-lünk) ---
+    (2549, "selver", "Vutimunad 18tk puudub Selverist — vutimuna kogus"),
+    (2517, "maxima", "Dava õrrekana munad L 10tk puudub Maximast"),
+    (2518, "rimi", "Dava munavalge 1kg puudub Rimist — munavalge vs terve muna, identity check puudub"),
+
+    # --- drinks_beer_cider (AUTO_DISABLED regressioonikontroll) ---
+    (33978, "coop", "Margarita kokteil 330ml puudub Coopist — AUTO_DISABLED regressioonikontroll"),
+    (33973, "selver", "Mojito kokteil 330ml puudub Selverist"),
+    (33971, "rimi", "ALC Long Citrus 330ml puudub Rimist"),
+
+    # --- dry_soups_noodles (vegan/plant_based + liha maitsevariant) ---
+    (21335, "rimi", "Oyakata ramen kanalihamaitseline kiirnuudlisupp 83g puudub Rimist"),
+    (21330, "rimi", "Oyakata kiirnuudliroog karrimaitselise kastmega 90g vegan puudub Rimist — plant_based test"),
+    (21346, "rimi", "Daryna kiirnuudlid veisemaitselised 50g puudub Rimist — veis vs kana maitse"),
+    (21345, "maxima", "Daryna kiirnuudlid kanamaitselised 50g puudub Maximast"),
+
+    # --- fish_fresh (liigid mis pole FISH_SPECIES_KEYWORDS sõnastikus) ---
+    (11938, "rimi", "Lest roogitud jahutatud kg puudub Rimist — lest pole fish_species sõnastikus"),
+    (11920, "rimi", "Keedetud homaar tk puudub Rimist — homaar, tk-ühik"),
+    (11907, "rimi", "Austrid tk puudub Rimist — austrid, tk-ühik"),
+    (11915, "selver", "Haug roogitud jahutatud kg puudub Selverist"),
+
+    # --- fish_processed (tuunikala vs lõhe sama sub_code sees) ---
+    (23624, "coop", "Lohepasteet Rio Mare 100g puudub Coopist"),
+    (23608, "coop", "Tuunisalat laatsede teriyaki kastmes Kaija 160g puudub Coopist — tuunikala vs lõhe cross-species"),
+
+    # --- hh_paper (esmakordne test sellele kategooriale) ---
+    (17458, "selver", "Zewa Exclusive Ultra Soft 4kih 4rl puudub Selverist — esmakordne hh_paper test"),
+    (17464, "coop", "Grite Blossom 3kih 8rl puudub Coopist"),
+
+    # --- meat_beef_lamb_game (cut_type laiem katvus) ---
+    (11571, "maxima", "Rohumaaveise antrekoodi steik 240g puudub Maximast"),
+    (11578, "coop", "Rohumaaveise burgeripihv 170g puudub Coopist"),
+    (11592, "rimi", "Karni Picanha steik 200g puudub Rimist"),
+    (11594, "maxima", "Rakvere veiseklops vasardatud 400g puudub Maximast"),
+
+    # --- pet_cat_wet (flavour downgrade puudub täielikult — potentsiaalne lünk) ---
+    (16807, "selver", "Sheba Kiisueine 85g kanalihaga puudub Selverist — kana vs lõhe/tuunikala flavour gap test"),
+    (16808, "coop", "Sheba Kiisueine 85g lõhega puudub Coopist"),
+    (16810, "rimi", "Sheba Kiisueine 85g tuunikalaga puudub Rimist"),
+
+    # --- spices_herbs_spice_mix (flavour_profile laiem katvus) ---
+    (11296, "maxima", "Santa Maria BBQ marinaad küüslauguga 75g puudub Maximast"),
+    (24853, "selver", "Broilerimaitseaine Meira 38g puudub Selverist"),
+
+    # --- sweets_chocolate_bars (terve vs purustatud pähkel) ---
+    (40118, "coop", "Piimašokolaad tervete metsapähklitega 200g puudub Coopist — terve vs purustatud pähkel"),
+    (40119, "maxima", "Piimašokolaad purustatud metsapähklitega 100g puudub Maximast"),
+
+    # --- wine_red / wine_white (AUTO_DISABLED + ebatavalised formaadid) ---
+    (29332, "coop", "Dreamer Sweet Red 1L tetra puudub Coopist — AUTO_DISABLED + ebatavaline pakend"),
+    (29368, "selver", "Barone Montalto Nero d Avola 187ml puudub Selverist — väike formaat"),
 ]
 
 
