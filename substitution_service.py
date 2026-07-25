@@ -624,6 +624,13 @@ FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
     "kiwi": (r"\bkiivi\w*",),
     "rhubarb": (r"\brabarberi\w*",),
     "pohla": (r"\bpohla\w*",),
+    # v4.6.7 UUS — Baltais leivajogurt musta ploomiga -> Farmi koorejogurt
+    # rukkileiva-kaneeli false-AUTO fix. Claude ise ütles "maitse
+    # erinevus on asendatavuse seisukohast tähtsusetu", kuigi ploom vs
+    # rukkileib-kaneel on täiesti erinevad maitseprofiilid.
+    "plum": (r"\bploomi\w*",),
+    "cinnamon": (r"\bkaneeli\w*",),
+    "rye_bread": (r"\brukkileiva\w*", r"\bleiva\w*"),
     "blackcurrant": (r"\bmustsõstra\w*", r"\bmustsostra\w*"),
     "redcurrant": (r"\bpunas[eõ]stra\w*", r"\bpunase\s+sõstra\w*", r"\bredcurrant\w*"),
     "forest_berries": (r"\bmetsamarja\w*",),
@@ -651,6 +658,20 @@ CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
     "walnut": (r"\bpähkli\w*", r"\bpahkli\w*", r"\bwalnut\w*"),
     "caraway": (r"\bköömne\w*", r"\bkoomne\w*", r"\bcaraway\w*"),
     "wine": (r"\bveini\w*", r"\bportveini\w*", r"\bwine\b", r"\bport wine\b"),
+    # v4.6.7 UUS — kolm eraldi kinnitatud false-AUTO fixi:
+    # 1) "Eesti juust light" -> tavaline täispiimast juust: Claude ise
+    #    tunnistas erinevust, aga lubas ikka AUTO.
+    "light": (r"\blight\b", r"\bkerge\w*", r"\bv[aä]hendatud rasva\w*"),
+    # 2) "Old Saare Special 12 kuud" / "Landana 1000 päeva" -> tavaline
+    #    küps juust: laagerdusaeg on tugev tootetunnus, mida cheese_type
+    #    ei taba (Old Saare/Landana pole CHEESE_TYPE_KEYWORDS sõnastikus).
+    "aged_long": (r"\b\d+\s*kuud\w*", r"\b\d+\s*p[aä]eva\w*", r"\bvintage\b",
+                  r"\bmature\b", r"\baged\b"),
+    # 3) "Sulatatud juust Forte" -> "Hiirte Juust originaal": Forte on
+    #    Valio nimeline tootesari (nagu Lavazza Qualita Oro), mitte
+    #    lihtsalt "originaal" ilma lisanditeta — sai 3 dry-run vooru
+    #    järjest vääralt AUTO.
+    "forte": (r"\bforte\b",),
 }
 
 
