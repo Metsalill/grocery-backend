@@ -131,73 +131,102 @@ async def run_apply(commit: bool):
               "WOULD_SET_* ridadega enne käivitamist.", file=sys.stderr)
         sys.exit(1)
 
-    conn = await asyncpg.connect(database_url)
-    rollback_log = []
-    applied = 0
-    skipped_already_set = 0
+    # v2 fix (reaalne DeadlockDetectedError esimesel jooksul, tõenäoliselt
+    # paralleelselt jooksva scraper'i tõttu, kes samal ajal products
+    # tabelit muutis): sorteeri product_id järgi, et lukkude
+    # omandamisjärjekord oleks JÄRJEKINDEL — see on standardne deadlock'i
+    # ennetusvõte, kuna deadlock tekib enamasti siis, kui kaks
+    # transaktsiooni omandavad samu ridu VASTASSUUNAS järjekorras.
+    sorted_rows = sorted(APPLY_ROWS, key=lambda r: r[0])
 
-    try:
-        async with conn.transaction():
-            for product_id, net_qty, net_unit, pack_count in APPLY_ROWS:
-                before = await conn.fetchrow(
-                    "SELECT id, name, net_qty, net_unit, pack_count "
-                    "FROM products WHERE id = $1",
-                    product_id,
-                )
-                if before is None:
-                    print(f"HOIATUS: product_id={product_id} ei leitud, vahele jäetud.")
-                    continue
-
-                result = await conn.execute(
-                    """
-                    UPDATE products
-                    SET net_qty = $1, net_unit = $2, pack_count = $3
-                    WHERE id = $4 AND net_qty IS NULL
-                    """,
-                    float(net_qty), net_unit, pack_count, product_id,
-                )
-                rows_affected = int(result.split()[-1])
-
-                if rows_affected == 0:
-                    skipped_already_set += 1
-                    print(
-                        f"HOIATUS: product_id={product_id} ('{before['name']}') "
-                        f"net_qty pole enam NULL (praegu {before['net_qty']} "
-                        f"{before['net_unit']}) — ei kirjutatud üle."
+    max_attempts = 3
+    committed = False
+    for attempt in range(1, max_attempts + 1):
+        conn = await asyncpg.connect(database_url)
+        rollback_log = []
+        applied = 0
+        skipped_already_set = 0
+        try:
+            async with conn.transaction():
+                for product_id, net_qty, net_unit, pack_count in sorted_rows:
+                    before = await conn.fetchrow(
+                        "SELECT id, name, net_qty, net_unit, pack_count "
+                        "FROM products WHERE id = $1",
+                        product_id,
                     )
-                    continue
+                    if before is None:
+                        print(f"HOIATUS: product_id={product_id} ei leitud, vahele jäetud.")
+                        continue
 
-                applied += 1
-                rollback_log.append({
-                    "product_id": product_id,
-                    "name": before["name"],
-                    "before": {
-                        "net_qty": None, "net_unit": None, "pack_count": before["pack_count"],
-                    },
-                    "after": {
-                        "net_qty": net_qty, "net_unit": net_unit, "pack_count": pack_count,
-                    },
-                })
-                print(f"OK: product_id={product_id} ('{before['name']}') -> "
-                      f"net_qty={net_qty}, net_unit={net_unit}, pack_count={pack_count}")
+                    result = await conn.execute(
+                        """
+                        UPDATE products
+                        SET net_qty = $1, net_unit = $2, pack_count = $3
+                        WHERE id = $4 AND net_qty IS NULL
+                        """,
+                        float(net_qty), net_unit, pack_count, product_id,
+                    )
+                    rows_affected = int(result.split()[-1])
 
-            print(f"\n{'='*70}\nKOKKUVÕTE\n{'='*70}")
-            print(f"Kirjutatud: {applied}")
-            print(f"Vahele jäetud (juba täidetud): {skipped_already_set}")
-            print(f"Kokku APPLY_ROWS: {len(APPLY_ROWS)}")
+                    if rows_affected == 0:
+                        skipped_already_set += 1
+                        print(
+                            f"HOIATUS: product_id={product_id} ('{before['name']}') "
+                            f"net_qty pole enam NULL (praegu {before['net_qty']} "
+                            f"{before['net_unit']}) — ei kirjutatud üle."
+                        )
+                        continue
 
-            if not commit:
-                print("\n--commit LIPPU EI ANTUD — ROLLBACK, midagi ei salvestatud.")
-                raise _ApplyAborted()
+                    applied += 1
+                    rollback_log.append({
+                        "product_id": product_id,
+                        "name": before["name"],
+                        "before": {
+                            "net_qty": None, "net_unit": None, "pack_count": before["pack_count"],
+                        },
+                        "after": {
+                            "net_qty": net_qty, "net_unit": net_unit, "pack_count": pack_count,
+                        },
+                    })
+                    print(f"OK: product_id={product_id} ('{before['name']}') -> "
+                          f"net_qty={net_qty}, net_unit={net_unit}, pack_count={pack_count}")
 
-            print("\n--commit ANTUD — muudatused salvestatakse (COMMIT).")
+                print(f"\n{'='*70}\nKOKKUVÕTE (katse {attempt}/{max_attempts})\n{'='*70}")
+                print(f"Kirjutatud: {applied}")
+                print(f"Vahele jäetud (juba täidetud): {skipped_already_set}")
+                print(f"Kokku APPLY_ROWS: {len(APPLY_ROWS)}")
 
-    except _ApplyAborted:
-        pass
-    finally:
-        await conn.close()
+                if not commit:
+                    print("\n--commit LIPPU EI ANTUD — ROLLBACK, midagi ei salvestatud.")
+                    raise _ApplyAborted()
 
-    if rollback_log:
+                print("\n--commit ANTUD — muudatused salvestatakse (COMMIT).")
+
+        except _ApplyAborted:
+            await conn.close()
+            break  # kavatsetud ROLLBACK (dry preview) — edukas, ei retry'ta
+
+        except asyncpg.exceptions.DeadlockDetectedError as e:
+            await conn.close()
+            print(f"\nDEADLOCK (katse {attempt}/{max_attempts}): {e}")
+            if attempt < max_attempts:
+                wait_s = 2 * attempt
+                print(f"Tõenäoliselt paralleelselt jooksev scraper. Ootan {wait_s}s ja proovin uuesti...")
+                await asyncio.sleep(wait_s)
+                continue
+            else:
+                print("\nVIGA: deadlock kordus kõigil katsetel. EI KIRJUTATUD MIDAGI "
+                      "(transaktsioon rullus alati tervikuna tagasi). Proovi hiljem "
+                      "uuesti, eelistatult ajal mil scraper-workflow'd ei jookse "
+                      "(vt cron ajastust barbora-fast-scrape.yml jt).", file=sys.stderr)
+                sys.exit(1)
+
+        else:
+            await conn.close()
+            committed = True
+            break  # edukas COMMIT
+
+    if committed and rollback_log:
         with open("net_qty_backfill_rollback_log.json", "w", encoding="utf-8") as f:
             json.dump(rollback_log, f, indent=2, ensure_ascii=False)
         print(f"\nRollback-logi salvestatud: net_qty_backfill_rollback_log.json "
