@@ -326,8 +326,16 @@ def _cheese_type(text) -> Optional[str]:
 
 
 def _cheese_form(text) -> Optional[str]:
-    """Juustu vorm (viilutatud/riivitud/plokk/määrdejuust). ChatGPT:
-    'riivjuust -> juustuplokk' ei tohi olla AUTO."""
+    """Juustu vorm (viilutatud/riivitud/plokk/määrdejuust/salatijuust).
+    ChatGPT: 'riivjuust -> juustuplokk' ei tohi olla AUTO.
+
+    v4.6.6 TÄPSUSTUS (reaalse dry-run leid): "Coop salatijuustu plokina"
+    (kuubikud/soolvees, nt fetatüüpi) sai vääralt sama "block" vormi
+    mis "Valio Atleet võileivajuust" (viilutatav söögijuust) — need on
+    kasutuselt erinevad tooted (salat vs võileib), kuigi kumbki nimi ei
+    sisalda "riiv"/"viil"/"määrde" märksõna. Lisatud eraldi kategooria
+    enne vaikimisi "block" harusse langemist.
+    """
     if not text:
         return None
     text_lower = text.lower()
@@ -337,6 +345,8 @@ def _cheese_form(text) -> Optional[str]:
         return "sliced"
     if any(kw in text_lower for kw in ("määrde", "maarde", "spread")):
         return "spread"
+    if any(kw in text_lower for kw in ("salatijuust", "soolvesi", "soolvees", "kuubik")):
+        return "salad_brined"
     return "block"  # vaikimisi plokk, kui ükski erivorm pole mainitud
 
 
@@ -569,6 +579,12 @@ FLAVOUR_PROFILE_KEYWORDS: dict[str, tuple[str, ...]] = {
     # täpsustust — SEE on erinev juhtum, kuna "fruity" on eraldi
     # tooteseeria nimi, "vääris"/"neitsi" on sama EL-i kvaliteediklass).
     "fruity": (r"\bfruity\b", r"\bpuuviljane\w*", r"\bpuuvilja\w*"),
+    # v4.6.6 UUS — Borges "Harmony" false-AUTO fix (sama muster mis
+    # "fruity"): Claude tunnistas "Harmony on lihtsalt selle konkreetse
+    # variandi nimi" ja jättis siiski AUTO-ks — nimeline tooteseeria
+    # väärib vähemalt downgrade't, kuni on kinnitatud, et see on
+    # sisuliselt sama toode.
+    "harmony": (r"\bharmony\b",),
     # v4.6.2 UUS — Ajinomoto/Oyakata ramen "sealihamaitseline" vs
     # "kanamaitseline" false-AUTO fix (dry_soups_noodles). Claude enda
     # reasoning tunnistas "erinevus on ainult maitses (kana vs sealiha)"
@@ -841,6 +857,20 @@ AUTO_DISABLED_SUB_CODES = {
     # tüüp jääb tuvastamata, ei blokeeru miski). EEMALDA see rida
     # alles pärast täielikumat identiteedimudelit iga kategooria jaoks.
     "tea", "sweets_candies", "drinks_non_alcoholic",
+
+    # v4.6.6 UUS (shadow-kandidaat 111-testi audit, pärast net_qty
+    # backfilli): coffee_beans_ground/coffee_instant AUTO-otsustest
+    # 6/10 olid kaheldavad — Claude ignoreeris korduvalt röstiastme
+    # erinevust ("erinevad sordi/rösti astmed on vahetatavad"),
+    # segas kokku eri kaubamärkide nimelisi tooteseeriaid (Merrild
+    # Barista Cremoso -> Lavazza Crema e Aroma), ja pani kaubamärgita
+    # tooteid vastu nimelisi premium-seeriaid (Rimi jahvatatud kohv ->
+    # Paulig Classic Aromatico) ilma selget põhjendust. Olemasolev
+    # COFFEE_PRODUCT_LINE_PATTERNS katab ainult Lavazza peamisi
+    # seeriaid, mitte Presidentti/Juhla Mokka/Crema e Aroma jt.
+    # EEMALDA alles pärast COFFEE_PRODUCT_LINE_PATTERNS laiendamist +
+    # röstiastme (roast_level) kontrolli lisamist.
+    "coffee_beans_ground", "coffee_instant",
 }
 
 DOWNGRADE_CHECKS = {
@@ -1070,7 +1100,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
 
     original_sample = await conn.fetchrow(
         """
-        SELECT p.name AS sample_product_name, p.net_qty, p.net_unit
+        SELECT p.name AS sample_product_name, p.net_qty, p.net_unit, p.pack_count
         FROM product_group_members m
         JOIN products p ON p.id = m.product_id
         WHERE m.group_id = $1
@@ -1084,7 +1114,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
     if not original_sample:
         original_sample = await conn.fetchrow(
             """
-            SELECT p.name AS sample_product_name, p.net_qty, p.net_unit
+            SELECT p.name AS sample_product_name, p.net_qty, p.net_unit, p.pack_count
             FROM product_group_members m
             JOIN products p ON p.id = m.product_id
             WHERE m.group_id = $1
@@ -1097,6 +1127,13 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
     original_sample_name = original_sample["sample_product_name"] if original_sample else ""
     original_qty = original_sample["net_qty"] if original_sample else None
     original_unit = original_sample["net_unit"] if original_sample else None
+    # v4.6.6 fix (ChatGPT + reaalse dry-run leid): pack_count LOETI
+    # veergu, aga EI ANTUD kunagi classify_quantity_match'ile edasi —
+    # multipakid (nt "3x380g") võrdusid vale net_qty alusel üksik-
+    # pakendiga (380g vs 380g), kuigi tegelik kogus on 3x suurem.
+    # Kinnitatud dry-run'is: "Kogus erineb (3x380g vs 380g), kuid see
+    # jäetakse arvesse võtmata" — Claude ise tunnistas vea reasoning'us.
+    original_pack_count = original_sample["pack_count"] if original_sample else None
 
     # v4.2: ühendatud identiteeditekst (canonical_name + sample_name + brand)
     original_identity_text = _product_identity_text(
@@ -1127,7 +1164,7 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
         """
         SELECT DISTINCT ON (pg.id)
             pg.id, pg.canonical_name, pg.brand,
-            p.name AS sample_product_name, p.net_qty, p.net_unit
+            p.name AS sample_product_name, p.net_qty, p.net_unit, p.pack_count
         FROM product_groups pg
         JOIN product_group_members m ON m.group_id = pg.id
         JOIN products p ON p.id = m.product_id
@@ -1166,6 +1203,9 @@ async def get_or_create_substitution(conn, group_id, chain, dry_run=False, use_c
     for c in candidates:
         qmatch = classify_quantity_match(
             original_qty, original_unit, c["net_qty"], c["net_unit"], original["sub_code"],
+            original_pack_count=original_pack_count,
+            candidate_pack_count=c["pack_count"],
+            apply_pack_count=True,
         )
 
         # v4.3: kogusekihi läbipaistvus — loendame KÕIK tier'id, mitte
