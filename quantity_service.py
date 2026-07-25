@@ -100,6 +100,19 @@ false-AUTO), coffee_beans_ground + coffee_instant ajutiselt
 AUTO_DISABLED (6/10 auditeeritud AUTO-t olid kaheldavad — röstiastme
 ignoreerimine, cross-brand nimelised tooteseeriad).
 SUBSTITUTION_RULES_VERSION tõstetud 8 -> 9.
+
+v4.6.7 muudatus (ChatGPT audit pärast pack_count fix'i, 111-testi
+kolmas jooks): pack_count arvutus töötas tehniliselt õigesti, aga
+paljastas uue ärireegli-lünga — sama KOGUKAAL erineva PAKENDI-
+STRUKTUURIGA (4x120g vs 1x400g) läbis siiski AUTO piiri. Lisatud
+eraldi downgrade: kui üks pool on multipakk (pack_count>1) ja teine
+mitte, langeb AUTO maksimaalselt SUGGESTED'ile, sõltumata kogusevahe
+protsendist. Lisaks (substitution_service.py): jogurti maitseprofiil
+laiendatud ploomi/kaneeli/rukkileivaga (Baltais leivajogurt false-AUTO
+fix), juustu modifikaatorid laiendatud light/laagerdusaeg/Forte
+tootesarjaga (kolm eraldi kinnitatud false-AUTO fixi: Eesti juust
+light, Old Saare/Landana pika laagerdusega, Forte).
+SUBSTITUTION_RULES_VERSION tõstetud 9 -> 10.
 """
 
 from __future__ import annotations
@@ -110,7 +123,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 9
+SUBSTITUTION_RULES_VERSION = 10
 
 
 class QuantityTier(StrEnum):
@@ -396,6 +409,24 @@ def classify_quantity_match(
         tier = QuantityTier.INCOMPATIBLE
         reason = f"kogusevahe {diff_percent:.1f}% > soovituse piir {suggested_pct}% ({sub_code})"
         rejection_reason = QuantityRejectionReason.OUTSIDE_ALLOWED_RANGE
+
+    # v4.6.7 UUS (ChatGPT leid): "Activia 4x120g" (480g kokku) vs "Farmi
+    # koorene jogurt 400g" (üksikpakend) läbis kogusepiiri (16,7% <
+    # auto-piir), kuna kogukaal oli piisavalt lähedal — aga pakendi-
+    # STRUKTUUR (4 eraldi portsjonit vs 1 suur tops) on tarbija jaoks
+    # erinev toode, mida pelk kogukaalu võrdlus ei taba. Kui üks pool
+    # on multipakk (pack_count>1) ja teine mitte, langetab see AUTO
+    # maksimaalselt SUGGESTED tasemele, isegi kui kogus muidu klapib.
+    if apply_pack_count and tier == QuantityTier.AUTO:
+        o_is_multipack = original_pack_count is not None and original_pack_count > 1
+        c_is_multipack = candidate_pack_count is not None and candidate_pack_count > 1
+        if o_is_multipack != c_is_multipack:
+            tier = QuantityTier.SUGGESTED
+            reason = (
+                f"kogusevahe {diff_percent:.1f}% oleks AUTO piires, aga pakendi "
+                f"struktuur erineb (originaal pack_count={original_pack_count}, "
+                f"kandidaat pack_count={candidate_pack_count}) — langetatud SUGGESTED'ile"
+            )
 
     return QuantityMatch(
         tier=tier,
