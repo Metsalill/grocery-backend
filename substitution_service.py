@@ -311,6 +311,12 @@ CHEESE_TYPE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "maasdam": ("maasdam",),
     "suluguni": ("suluguni",),
     "kohupiima": ("kohupiim",),
+    # v4.6.8 UUS — "Xtra Edam" -> "E-Piim Eesti juust" false-AUTO fix.
+    # Claude'i väide "Edam on Eesti juustu tüüp" pole korrektne
+    # taksonoomiline põhjendus — mõlemad on poolkõvad võileivajuustud,
+    # aga erinevad juustusordid, samal tasemel kui mozzarella vs Gouda.
+    "edam": ("edam",),
+    "eesti_juust": ("eesti juust",),
 }
 
 
@@ -646,6 +652,23 @@ FLAVOUR_VARIANT_PATTERNS: dict[str, tuple[str, ...]] = {
 # jms ei ole hard_match (ei eemalda kandidaati), vaid downgrade.
 #
 # v4.2: ingliskeelsed märksõnad lisatud (Wyke Farms wine/whisky fix).
+# v4.6.8 UUS — "AB-jogurt teravilja SIPSIKU jäätise" -> teine
+# küpsisemaitseline jogurt false-AUTO fix (püsis AUTO-na mitmes
+# järjestikuses dry-run voorus). "Teravili"/"jäätis"/"küpsis" on
+# lisandi PROFIIL, mitte lihtsalt puuviljamaitse — eraldi sõnastik,
+# kuna FLAVOUR_VARIANT_PATTERNS katab ainult puuvilju.
+DESSERT_ADDON_PATTERNS: dict[str, tuple[str, ...]] = {
+    "cereal": (r"\bteravilja\w*", r"\bm[uü]sli\w*", r"\bmuesli\w*"),
+    "cookie": (r"\bküpsise\w*", r"\bkeksi\w*"),
+    "ice_cream": (r"\bjäätise\w*", r"\bjaatise\w*"),
+    "chocolate_addon": (r"\bšokolaaditükk\w*", r"\bsokolaaditukk\w*"),
+}
+
+
+def _dessert_addon(text) -> frozenset:
+    return _match_variants(text, DESSERT_ADDON_PATTERNS)
+
+
 CHEESE_MODIFIER_PATTERNS: dict[str, tuple[str, ...]] = {
     "whisky": (r"\bviski\w*", r"\bwhisky\b", r"\bwhiskey\b"),
     "truffle": (r"\btrühvli\w*", r"\btruffel\w*", r"\btruffle\w*"),
@@ -898,6 +921,7 @@ DOWNGRADE_CHECKS = {
     "flavour_profile": _flavour_profile_set,
     "flavour_variant": _flavour_variants,
     "cheese_modifier": _cheese_modifiers,
+    "dessert_addon": _dessert_addon,
     "oil_grade": _oil_grade,
     "protein_enriched": _protein_enriched,
     "grain_type": _grain_type,
@@ -914,7 +938,7 @@ DOWNGRADE_CHECKS = {
 # juures juba parandatud).
 DOWNGRADE_RULES: dict[str, list[str]] = {
     "spices_herbs_spice_mix": ["flavour_profile"],
-    "dairy_yogurt_kefir": ["flavour_variant"],
+    "dairy_yogurt_kefir": ["flavour_variant", "dessert_addon"],
     "drinks_energy": ["flavour_variant"],
     "drinks_soft_soda": ["flavour_variant"],
     "cheese_regular": ["cheese_modifier"],
