@@ -1,0 +1,53 @@
+name: Net Qty Backfill - Apply (kirjutab products tabelisse)
+
+# Käivitatakse AINULT käsitsi ("Run workflow" nupp). Vaikimisi (kui
+# "commit" sisend jäetakse "false"-ks) teeb skript kõik peale COMMIT'i
+# ja ROLLBACK'ib — turvaline "viimane kontroll" enne päris kirjutamist.
+# COMMIT toimub AINULT kui valid "commit: true".
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Kas päriselt kirjutada (true) või ainult ROLLBACK-testida (false)?'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  net-qty-backfill-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install asyncpg
+
+      - name: Run net_qty backfill apply
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          PGSSLMODE: require
+        run: |
+          if [ "${{ github.event.inputs.commit }}" = "true" ]; then
+            python net_qty_backfill_apply.py --commit
+          else
+            python net_qty_backfill_apply.py
+          fi
+
+      - name: Upload rollback log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: net-qty-backfill-rollback-log
+          path: net_qty_backfill_rollback_log.json
+          retention-days: 90
+          if-no-files-found: ignore
