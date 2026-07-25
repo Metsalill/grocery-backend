@@ -81,6 +81,25 @@ on oma bucket (ümardamine lähima 0,5% peale). Kontrollitud ChatGPT
 6-testilise deterministliku regressioonipaketiga (kõik läbisid) +
 reaalse group_id 2659 lisatud dry_run_test.py-sse.
 SUBSTITUTION_RULES_VERSION tõstetud 7 -> 8.
+
+v4.6.6 muudatus (KRIITILINE, 111-testi shadow-kandidaat jooksu audit
+pärast net_qty backfilli): pack_count parameetrid EKSISTEERISID juba
+classify_quantity_match funktsioonis (original_pack_count,
+candidate_pack_count, apply_pack_count), aga substitution_service.py
+EI ANDNUD neid kunagi edasi (apply_pack_count vaikimisi False) —
+multipakid (nt "3x380g") võrdusid ainult ühiku-koguse (380g) alusel
+üksikpakendiga (380g), ignoreerides 3x tegelikku erinevust. Kinnitatud
+otse dry-run reasoning'ust: "Kogus erineb (3x380g vs 380g), kuid see
+jäetakse arvesse võtmata" — Claude ise tunnistas vea. Parandatud
+substitution_service.py's: pack_count nüüd loetakse SQL-ist
+(original + kandidaadid) ja antakse classify_quantity_match'ile edasi
+apply_pack_count=True'ga. Samas voorus: cheese_form lisatud
+"salad_brined" kategooria (salatijuust vs võileivajuust polnud
+eristatud), oils_olive "harmony" flavour_profile tag (Borges Harmony
+false-AUTO), coffee_beans_ground + coffee_instant ajutiselt
+AUTO_DISABLED (6/10 auditeeritud AUTO-t olid kaheldavad — röstiastme
+ignoreerimine, cross-brand nimelised tooteseeriad).
+SUBSTITUTION_RULES_VERSION tõstetud 8 -> 9.
 """
 
 from __future__ import annotations
@@ -91,7 +110,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 8
+SUBSTITUTION_RULES_VERSION = 9
 
 
 class QuantityTier(StrEnum):
