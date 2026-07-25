@@ -113,6 +113,16 @@ fix), juustu modifikaatorid laiendatud light/laagerdusaeg/Forte
 tootesarjaga (kolm eraldi kinnitatud false-AUTO fixi: Eesti juust
 light, Old Saare/Landana pika laagerdusega, Forte).
 SUBSTITUTION_RULES_VERSION tõstetud 9 -> 10.
+
+v4.6.8 muudatus (ChatGPT audit pärast v4.6.7, 111-testi neljas jooks —
+AUTO langes 17 -> 11): kaks viimast deterministlikku kaitset. 1) "Xtra
+Edam" -> "Eesti juust" false-AUTO: cheese_type sõnastikku lisatud
+"edam" ja "eesti_juust" (varem tundmatud, seega hard-check ei
+rakendunud). 2) "AB-jogurt teravilja SIPSIKU jäätise" -> teine
+küpsisejogurt false-AUTO, mis püsis AUTO-na mitmes järjestikuses
+voorus: uus DESSERT_ADDON_PATTERNS (cereal/cookie/ice_cream) +
+dairy_yogurt_kefir downgrade rule.
+SUBSTITUTION_RULES_VERSION tõstetud 10 -> 11.
 """
 
 from __future__ import annotations
@@ -123,7 +133,7 @@ from enum import StrEnum
 from typing import Optional
 
 
-SUBSTITUTION_RULES_VERSION = 10
+SUBSTITUTION_RULES_VERSION = 11
 
 
 class QuantityTier(StrEnum):
