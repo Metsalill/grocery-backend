@@ -297,30 +297,103 @@ async def get_alternatives(
 
             sub_code = sub_code_row["sub_code"]
 
-            # 2. Leia selle poe tooted samast sub_code-st
+            # 2. Leia selle poe tooted samast sub_code'ist.
+            #
+            # v2 fix (ChatGPT leid, august 2026): varem kusiti otse
+            # "pr.store_id = $2" (fuusilise poe ID), mis eeldas, et
+            # sellel real on OMA varsked hinnaread. Aga pärast
+            # trg_prices_mirror_from_online trigger'i eemaldamist
+            # (juuli 2026, joudluse tottu) EI PEEGELDU online-allika
+            # (nt Barbora = Maxima e-pood) hinnad enam automaatselt
+            # koigi fuusiliste poodide ridadele - need read jaid
+            # KULMUNUD trigger'i viimase kaivitumise kuupaevale.
+            # Tulemus: fuusilise Maxima poe ("Veskitammi 3, Laagri")
+            # store_id otsing ei leidnud MITTE UHTEGI toodet, kuigi
+            # allikas (Barbora, store_id=441) oli paevakohaselt varske.
+            #
+            # Parandus: sama "effective_source" muster, mida
+            # services/compare_service.py _latest_prices() juba
+            # kasutab - COALESCE(store_price_source.source_store_id,
+            # fuusiline_store_id). See on query-time mapping, mitte
+            # andmete dubleerimine, seega pole vaja mingit
+            # sunkroniseerimist ega backfilli.
+            #
+            # v3 fix (ChatGPT teine leid): esialgne v2 patch valis
+            # DISTINCT ON + ORDER BY price ASC abil 7-paeva akna
+            # ODAVAIMA rea, mitte UUSIMA - kui tootel oli nadal tagasi
+            # kampaaniahind ja praegu on tavahind, naidati vana
+            # kampaaniahinda. Samuti kasutati ainult pr.price, mitte
+            # COALESCE(NULLIF(promo_price,0), price) nagu mujal
+            # rakenduses. Ja DISTINCT ON (dedup_key) + ORDER BY
+            # dedup_key, price LIMIT $3 tahendas, et LIMIT rakendus
+            # dedup_key tekstilisele jarjekorrale, MITTE hinnale -
+            # PostgreSQL nouab, et ORDER BY algaks DISTINCT ON
+            # valjaga, seega tagastati esimesed N gruppi
+            # dedup_key jarjekorras, mitte N odavaimat.
+            #
+            # Parandus kolme-CTE struktuuriga: (1) latest_prices leiab
+            # IGA toote UUSIMA hinnakirje source-store'is (promo_price
+            # arvestusega), (2) candidates dedupib gruppide kaupa
+            # (uks toode grupi kohta), (3) valimine ORDER BY price
+            # ASC LIMIT toimub alles VALIMISE tulemuse peal, mitte
+            # dedup-sammu sees.
+            #
+            # Varskuse aken tihendatud 14 -> 7 paeva (ChatGPT
+            # soovitus: aktiivses hinnavordluses on 2 nadalat vana
+            # hind juba tuup, mis "peidab viga" - kampaania voib olla
+            # loppenud, sortiment muutunud jne).
+            # v4 fix (ChatGPT kolmas leid): lisatud "pr.id DESC" tiebreaker
+            # latest_prices'is - kui samal product_id'l on kaks rida
+            # TÄPSELT sama collected_at vaartusega, poleks valik ilma
+            # tiebreaker'ita uheselt maaratud. Eeldab, et prices tabelil
+            # on "id" veerg (nagu koigil teistel selle projekti tabelitel,
+            # nt substitution_shadow_events.id) - kui see eeldus on vale,
+            # eemalda ", pr.id DESC" osa.
             rows = await conn.fetch("""
-                SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
-                    p.id,
-                    p.name,
-                    p.brand,
-                    p.size_text,
-                    p.image_url,
-                    p.sub_code,
-                    pgm.group_id,
-                    pg.canonical_name,
-                    pg.brand AS group_brand,
-                    pr.price
-                FROM products p
-                JOIN prices pr ON pr.product_id = p.id
-                LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
-                LEFT JOIN product_groups pg ON pg.id = pgm.group_id
-                WHERE p.sub_code = $1
-                  AND pr.store_id = $2
-                  AND pr.price > 0
-                  AND pr.collected_at > NOW() - INTERVAL '14 days'
-                ORDER BY
-                    COALESCE(pgm.group_id::text, 'u_' || p.id::text),
-                    pr.price ASC
+                WITH effective_source AS (
+                    SELECT COALESCE(sps.source_store_id, $2::int) AS source_store_id
+                    FROM (SELECT $2::int AS store_id) s
+                    LEFT JOIN (
+                        SELECT DISTINCT ON (store_id) store_id, source_store_id
+                        FROM store_price_source
+                        ORDER BY store_id, source_store_id
+                    ) sps ON sps.store_id = s.store_id
+                ),
+                latest_prices AS (
+                    SELECT DISTINCT ON (pr.product_id)
+                        pr.product_id,
+                        COALESCE(NULLIF(pr.promo_price, 0), pr.price) AS effective_price,
+                        pr.collected_at
+                    FROM prices pr
+                    WHERE pr.store_id = (SELECT source_store_id FROM effective_source)
+                      AND pr.price > 0
+                      AND pr.collected_at > NOW() - INTERVAL '7 days'
+                    ORDER BY pr.product_id, pr.collected_at DESC, pr.id DESC
+                ),
+                candidates AS (
+                    SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
+                        p.id,
+                        p.name,
+                        p.brand,
+                        p.size_text,
+                        p.image_url,
+                        p.sub_code,
+                        pgm.group_id,
+                        pg.canonical_name,
+                        pg.brand AS group_brand,
+                        lp.effective_price AS price
+                    FROM products p
+                    JOIN latest_prices lp ON lp.product_id = p.id
+                    LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+                    LEFT JOIN product_groups pg ON pg.id = pgm.group_id
+                    WHERE p.sub_code = $1
+                    ORDER BY
+                        COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+                        lp.effective_price ASC,
+                        p.id
+                )
+                SELECT * FROM candidates
+                ORDER BY price ASC, name ASC
                 LIMIT $3
             """, sub_code, store_id, limit)
 
