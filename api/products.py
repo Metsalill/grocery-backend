@@ -1,16 +1,141 @@
 # api/products.py
 
+import logging
 import re
 from fastapi import APIRouter, Request, Query, HTTPException, Header
 from typing import Optional, List, Dict, Any
 
 from utils.throttle import throttle
 
+logger = logging.getLogger("uvicorn.error")
+
 router = APIRouter()
 
 MAX_LIMIT = 50  # server-side hard cap
 
 PRICE_FRESHNESS_FILTER = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id AND pr.collected_at > NOW() - INTERVAL '14 days')"
+
+# v10 fix (ChatGPT lopplik soovitus): asendatud jarjekorra-pohine
+# sonastik EKSPLITSIITSE prioriteediga reeglite loendiga. Eelmine
+# PRODUCE_FAMILIES dict tootas oigesti, aga tugines VAIKIMISI
+# insertion-order'ile ("chili enne pepper", "cauliflower enne cabbage",
+# "zucchini enne pumpkin") - see on habras: jargmine uus markssona voib
+# vaikselt uuesti mone kollisiooni tekitada, kui keegi ei mainita
+# kommentaare loe. Nyyd on prioriteet OTSE nahtav (100 = spetsiifilisem
+# liitsona/alamliik, mis voidab yldisema 50-prioriteediga vaste ule,
+# soltumata sellest, millises jarjekorras loend on kirjutatud).
+#
+# Eestikeelsed markssonad on TYVED (mitte taisvormid), et katta
+# kaandeid ILIKE '%tyvi%' substring-matchiga. Kaashaalikuuhenduse tottu
+# (nt kurk->kurgi, peet->peedi) on mone perekonna jaoks kaks tyve.
+PRODUCE_FAMILY_RULES: List[tuple] = [
+    # Prioriteet 100: TEADAOLEVALT spetsiifilisemad/liitsona-markssonad,
+    # mis peavad voitma uldisema 50-prioriteediga vaste ule.
+    ("chili", ("tšilli", "tsilli", "chili"), 100),       # voidab "pepper" (paprika)
+    ("cauliflower", ("lillkaps",), 100),                  # voidab "cabbage" (kapsa)
+    ("zucchini", ("suvikõrvits", "suvikorvits"), 100),    # voidab "pumpkin" (kõrvits)
+    # Prioriteet 50: pohiperekonnad.
+    ("tomato", ("tomat",), 50),  # katab tomat/tomatid/kirsstomat/ploomtomat/kobartomat
+    ("potato", ("kartul",), 50),
+    ("onion", ("sibul",), 50),
+    ("garlic", ("küüslauk", "kuuslauk"), 50),
+    ("leek", ("porru",), 50),
+    ("cucumber", ("kurk", "kurgi"), 50),  # kurk (nom) / kurgi (gen, k->g gradatsioon)
+    ("pepper", ("paprika",), 50),
+    ("carrot", ("porgand",), 50),
+    ("broccoli", ("brokoli",), 50),
+    ("cabbage", ("kapsa",), 50),  # katab kapsas/kapsad/kapsaga/punane kapsas
+    ("beet", ("peet", "peedi"), 50),  # peet (nom) / peedi (gen, t->d gradatsioon)
+    ("radish", ("redis",), 50),
+    ("turnip", ("naeris", "naeri"), 50),
+    ("swede", ("kaalikas", "kaalika"), 50),
+    ("celery", ("seller",), 50),
+    ("eggplant", ("baklažaan", "baklazaan"), 50),
+    ("pumpkin", ("kõrvits", "korvits"), 50),
+    ("corn", ("mais",), 50),
+    ("asparagus", ("spargel",), 50),
+]
+
+# v12 fix: assert ei toimi Python -O (optimeeritud) rezhiimis, kus
+# koik assert-laused eemaldatakse taielikult - "kukub deploy'l kohe"
+# poleks siis garanteeritud. Eksplitsiitne RuntimeError kontrollib
+# seda IGAS rezhiimis. Kontroll on ka teadlikult ENNE
+# _FAMILY_KEYWORDS_BY_NAME loomist, et duplikaadi korral ei looda
+# isegi ajutiselt juba vaikides yle kirjutatud lookup'i.
+_family_names = [family for family, _keywords, _priority in PRODUCE_FAMILY_RULES]
+_duplicate_family_names = sorted({
+    family for family in _family_names if _family_names.count(family) > 1
+})
+if _duplicate_family_names:
+    raise RuntimeError(
+        f"PRODUCE_FAMILY_RULES sisaldab duplikaat family nimesid: {_duplicate_family_names}"
+    )
+
+# Tuletatud lookup ILIKE mustrite jaoks (sub_code candidate filter).
+_FAMILY_KEYWORDS_BY_NAME: Dict[str, tuple] = {
+    family: keywords for family, keywords, _priority in PRODUCE_FAMILY_RULES
+}
+
+# Kategooriad, kus tooteperekonna hard filter rakendub (ChatGPT: ÄRGE
+# kasutage dünaamilist "kui >200 toodet" reeglit - suurus on riskisignaal,
+# mitte piisav otsus. Alustame käsitsi teadaoleva laia kategooriaga,
+# laiendame hiljem, kui automaatne heterogeensuse audit on tehtud).
+ALTERNATIVE_FAMILY_FILTER_SUB_CODES = {"produce_root_veg"}
+
+
+def _detect_produce_family(name: str) -> Optional[str]:
+    """Tuvastab tooteperekonna (tomato/potato/onion/...) nime pohjal.
+    Tagastab None, kui yhtegi teadaolevat perekonda ei tuvastata - sel
+    juhul EI rakendata hard filtrit (fail-open, mitte fail-closed),
+    kuna vale negatiiv oleks siin halvem kui filtri puudumine.
+
+    Kasutab EKSPLITSIITSET prioriteeti (vt PRODUCE_FAMILY_RULES), MITTE
+    stringi pikkust ega loendi jarjekorda. "Pikim vaste voidab" katsetati
+    ja lykati tagasi (vt v9 ajalugu) - see lohkus tšillipaprika juhtumi,
+    kuna "paprika" (7 tahte) on stringina pikem kui "tšilli" (6 tahte),
+    kuigi "tšilli" on siin oige/spetsiifilisem valik. Tšillipaprika on
+    liitsona, kus molemad markssonad esinevad SOLTUMATULT (mitte
+    uksteise sees) - stringi pikkus ei korreleeru siin oigsusega,
+    seetottu on vaja eraldi, KASITSI maaratud prioriteeti.
+
+    v11 fix (ChatGPT leid): varasem versioon kasutas max(matches, key=...),
+    mis VORDSE korgeima prioriteedi korral tagastas vaikimisi ESIMESE
+    loendis oleva vaste - see oli endiselt jarjekorra-pohine hapruse
+    jaak, lihtsalt varjatud kujul (praegu 100/50 kahe astmega ei teki
+    kollisiooni, aga tulevane 50-prioriteediga lisandus voiks tekitada).
+    Nyyd TUVASTATAKSE vordsed korgeima prioriteediga vasted eraldi ja
+    tagastatakse fail-open (None) + hoiatuslogi, MITTE ei valita
+    vaikides yht neist juhuslikult/jarjekorra jargi."""
+    if not name:
+        return None
+    name_lower = name.lower()
+    matches = [
+        (priority, family)
+        for family, keywords, priority in PRODUCE_FAMILY_RULES
+        if any(kw in name_lower for kw in keywords)
+    ]
+    if not matches:
+        return None
+
+    highest_priority = max(priority for priority, _family in matches)
+    winners = {family for priority, family in matches if priority == highest_priority}
+
+    if len(winners) > 1:
+        logger.warning(
+            "Ambiguous produce family: name=%r families=%s priority=%s",
+            name, sorted(winners), highest_priority,
+        )
+        return None
+
+    return next(iter(winners))
+
+
+
+
+def _family_ilike_patterns(family: str) -> List[str]:
+    """Tagastab ILIKE ANY() mustrid antud perekonna jaoks, nt
+    'tomato' -> ['%tomat%']."""
+    return [f"%{kw}%" for kw in _FAMILY_KEYWORDS_BY_NAME.get(family, ())]
 
 # Tuvastab mahu nimes -- nt "500ml", "0.5L", "75cl", "1.5 l", "6x568ml", "24x330ml"
 _SIZE_IN_NAME_RE = re.compile(
@@ -281,21 +406,63 @@ async def get_alternatives(
 
     try:
         async with pool.acquire() as conn:
-            # 1. Leia puuduva toote sub_code nime jargi
+            # v6 fix (ChatGPT leid): originaali kategooria pidi tulema
+            # SAMAST allikast, mida /products ja /products/search juba
+            # kasutavad - COALESCE(pg.sub_code, p.sub_code), mitte ainult
+            # p.sub_code. Kureeritud grupikategooria (pg.sub_code) voib
+            # erineda algsest toote-tasandi väärtusest, kui grupp on
+            # kasitsi ymber klassifitseeritud (nt taksonoomia parandus),
+            # aga products.sub_code pole veel jarele sunkroniseeritud.
+            # v7 fix (ChatGPT leid): originaali otsing kontrollis varem
+            # AINULT p.name't. Kui klient (Flutter) saadab product_name'iks
+            # kureeritud pg.canonical_name vaartuse (mida kasutajale
+            # kuvatakse: "canonical_name if canonical_name else p.name"),
+            # ja see EI KLAPI uhegi toore products.name reaga sona-sonalt,
+            # ei leidnud paring midagi ja tagastas tuhja tulemuse, isegi
+            # kui toode ja sub_code on olemas.
             sub_code_row = await conn.fetchrow("""
-                SELECT p.sub_code
+                SELECT COALESCE(NULLIF(TRIM(pg.sub_code), ''), NULLIF(TRIM(p.sub_code), '')) AS sub_code
                 FROM products p
-                WHERE p.name ILIKE $1
-                  AND p.sub_code IS NOT NULL
-                  AND p.sub_code != ''
-                ORDER BY p.id
+                LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+                LEFT JOIN product_groups pg ON pg.id = pgm.group_id
+                WHERE (
+                        p.name ILIKE $1
+                        OR pg.canonical_name ILIKE $1
+                      )
+                  AND COALESCE(NULLIF(TRIM(pg.sub_code), ''), NULLIF(TRIM(p.sub_code), '')) IS NOT NULL
+                ORDER BY
+                    CASE
+                        WHEN lower(p.name) = lower($2) THEN 0
+                        WHEN lower(pg.canonical_name) = lower($2) THEN 1
+                        ELSE 2
+                    END,
+                    p.id
                 LIMIT 1
-            """, f"%{product_name}%")
+            """, f"%{product_name}%", product_name)
 
             if not sub_code_row:
                 return {"items": [], "sub_code": None, "store_id": store_id}
 
             sub_code = sub_code_row["sub_code"]
+
+            # v5 UUS (ChatGPT "Variant A"): tuvastame puuduva toote
+            # tooteperekonna otse KLIENDI antud product_name pohjal (mitte
+            # DB-st tagasi loetud nimest - lihtsam ja piisav, kuna
+            # product_name ONGI see, mille jargi kasutaja midagi otsib).
+            family = _detect_produce_family(product_name)
+            apply_family_filter = (
+                family is not None and sub_code in ALTERNATIVE_FAMILY_FILTER_SUB_CODES
+            )
+            family_patterns = _family_ilike_patterns(family) if apply_family_filter else None
+
+            # v6 fix (ChatGPT leid): word_similarity() peab kasutama PUHAST
+            # vordlusteksti, mitte kogu product_name't (mis sisaldab brandi/
+            # kogust/varvi/paritolu - "myra", mis voib jarjestust nihutada
+            # vale kandidaadi kasuks). Kui family tuvastati, kasutame
+            # perekonna pohimarksona (nt "tomat"), mitte tervet nime.
+            similarity_query = (
+                _FAMILY_KEYWORDS_BY_NAME[family][0] if apply_family_filter else product_name
+            )
 
             # 2. Leia selle poe tooted samast sub_code'ist.
             #
@@ -349,6 +516,19 @@ async def get_alternatives(
             # on "id" veerg (nagu koigil teistel selle projekti tabelitel,
             # nt substitution_shadow_events.id) - kui see eeldus on vale,
             # eemalda ", pr.id DESC" osa.
+            # v5 UUS (ChatGPT "Variant A", laiade katuskategooriate fix):
+            # 1) word_similarity(product_name, kandidaadi nimi) lisatud
+            #    JARJESTUSSKOORINA koigile kategooriatele (mitte hard
+            #    filtrina - ChatGPT: puhas token-overlap annaks liiga
+            #    palju false negative'e, nt "Kirsstomat pun IntsuTalu"
+            #    vs "Tomat ploom 500g" ei jaga uhtegi taiselikku tokenit,
+            #    aga on semantiliselt lahedased).
+            # 2) tooteperekonna hard filter (family_patterns) rakendub
+            #    AINULT teadaolevalt laiadele kategooriatele
+            #    (ALTERNATIVE_FAMILY_FILTER_SUB_CODES) JA ainult siis, kui
+            #    family tuvastati - kui perekonda ei tuvastatud, on
+            #    kaitumine fail-open (vana sub_code-pohine kaitumine,
+            #    nyyd similarity jargi jarjestatuna).
             rows = await conn.fetch("""
                 WITH effective_source AS (
                     SELECT COALESCE(sps.source_store_id, $2::int) AS source_store_id
@@ -377,25 +557,39 @@ async def get_alternatives(
                         p.brand,
                         p.size_text,
                         p.image_url,
-                        p.sub_code,
+                        COALESCE(NULLIF(TRIM(pg.sub_code), ''), p.sub_code) AS sub_code,
                         pgm.group_id,
                         pg.canonical_name,
                         pg.brand AS group_brand,
-                        lp.effective_price AS price
+                        lp.effective_price AS price,
+                        word_similarity(
+                            unaccent(lower($4)),
+                            unaccent(lower(COALESCE(NULLIF(pg.canonical_name, ''), p.name)))
+                        ) AS similarity_score
                     FROM products p
                     JOIN latest_prices lp ON lp.product_id = p.id
                     LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
                     LEFT JOIN product_groups pg ON pg.id = pgm.group_id
-                    WHERE p.sub_code = $1
+                    WHERE COALESCE(NULLIF(TRIM(pg.sub_code), ''), p.sub_code) = $1
+                      AND (
+                            $5::text[] IS NULL
+                            OR p.name ILIKE ANY($5::text[])
+                            OR pg.canonical_name ILIKE ANY($5::text[])
+                          )
                     ORDER BY
                         COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+                        word_similarity(
+                            unaccent(lower($4)),
+                            unaccent(lower(COALESCE(NULLIF(pg.canonical_name, ''), p.name)))
+                        ) DESC,
                         lp.effective_price ASC,
                         p.id
                 )
                 SELECT * FROM candidates
-                ORDER BY price ASC, name ASC
+                ORDER BY similarity_score DESC, price ASC, name ASC
                 LIMIT $3
-            """, sub_code, store_id, limit)
+            """, sub_code, store_id, limit, similarity_query, family_patterns)
+
 
         items = []
         for r in rows:
@@ -426,6 +620,7 @@ async def get_alternatives(
             "sub_code": sub_code,
             "store_id": store_id,
             "product_name": product_name,
+            "family": family,
         }
 
     except Exception as e:
