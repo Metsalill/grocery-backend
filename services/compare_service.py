@@ -10,6 +10,21 @@ from typing import Any, Dict, List, Optional, Tuple, Iterable
 import asyncpg
 from asyncpg import exceptions as pgerr
 
+
+# v4.6.9 UUS — Etapp 5B shadow mode (vt substitution_shadow.py docstring
+# turvapõhimõtete kohta). v2 fix (ChatGPT leid #8): püüdmine oli liiga
+# lai (paljas ImportError) — see peidaks ka substitution_shadow.py enda
+# SISEMISE dependency vea (nt substitution_service.py import ebaõnnestub
+# muul põhjusel). Nüüd lubatakse vaikimisi shadow'ta töötamine AINULT
+# siis, kui fail substitution_shadow.py ISE pole veel repos olemas —
+# iga muu impordiviga tõuseb edasi ja peatab deploy'i nähtavalt.
+try:
+    import substitution_shadow
+except ModuleNotFoundError as _exc:
+    if _exc.name != "substitution_shadow":
+        raise
+    substitution_shadow = None
+
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
@@ -287,6 +302,43 @@ async def _expand_groups(
     return result
 
 
+# v4.6.9 UUS — Etapp 5B shadow mode: iga ostukorvi toote group_id ja
+# sub_code, et saaks substitution_shadow.py'le anda edasi PIISAVA info
+# (get_or_create_substitution vajab group_id't, allowlist-kontroll
+# vajab sub_code't). Eraldi funktsioon _expand_groups'ist, kuna sealne
+# päring ei tagasta group_id't ega sub_code't, ainult liikmete pid'sid.
+async def _fetch_group_info_for_pids(
+    conn: asyncpg.Connection,
+    basket_pids: List[int],
+) -> Dict[int, Tuple[int, str]]:
+    """Tagastab {basket_pid: (group_id, sub_code)}. Kui toode kuulub
+    mitmesse gruppi (ei tohiks juhtuda praeguse skeemi juures), võetakse
+    esimene. Kui toode ei kuulu ühtegi gruppi, jääb basket_pid välja —
+    kutsuja peab seda kontrollima enne shadow'i käivitamist."""
+    if not basket_pids:
+        return {}
+    try:
+        rows = await conn.fetch(
+            """
+            SELECT DISTINCT ON (m.product_id)
+                m.product_id AS basket_pid, m.group_id, pg.sub_code
+            FROM product_group_members m
+            JOIN product_groups pg ON pg.id = m.group_id
+            WHERE m.product_id = ANY($1::int[])
+              AND pg.sub_code IS NOT NULL
+            ORDER BY m.product_id, m.group_id
+            """,
+            basket_pids,
+        )
+    except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+        return {}
+
+    return {
+        int(r["basket_pid"]): (int(r["group_id"]), r["sub_code"])
+        for r in rows
+    }
+
+
 # ---------------- stores ----------------
 
 async def _candidate_stores(
@@ -474,6 +526,25 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if pid not in metadata:
                     metadata[pid] = rec
             group_members = await _expand_groups(conn, basket_pids)
+            # v3 fix (ChatGPT leid #1): varem kontrolliti siin ainult
+            # "kas shadow on env muutujaga sisse lülitatud", mis
+            # tähendas, et see lisapäring tehti 100% request'idest,
+            # kuigi ainult SAMPLE_RATE (nt 5%) neist oleks tegelikult
+            # shadow'd käivitanud. Nüüd usaldatakse body["_shadow_sampled"]
+            # väärtust, mille compare.py router otsustas ÜKS KORD juba
+            # ENNE seda funktsiooni kutsumist (vt compare.py). Kui
+            # kutsuja seda võtit ei anna (nt otsene programmaatiline
+            # kasutus ilma routerita), on vaikeväärtus False — see
+            # tähendab lihtsalt, et shadow ei käivitu selle kutsuja
+            # kaudu, mis on ohutu vaikekäitumine.
+            _shadow_active = (
+                substitution_shadow is not None and bool(body.get("_shadow_sampled"))
+            )
+            group_info_by_pid: Dict[int, Tuple[int, str]] = (
+                await _fetch_group_info_for_pids(conn, basket_pids)
+                if _shadow_active
+                else {}
+            )
             all_pids_for_prices = sorted({
                 mid for pid in basket_pids
                 for mid in group_members.get(pid, [pid])
@@ -505,6 +576,11 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         required_total = required_normal + required_recipe
 
         results: List[Dict] = []
+        # v4.6.9 UUS — kogub kokku kõik (group_id, sub_code, chain,
+        # store_id) kombinatsioonid, kus täpne toode jäi poest leidmata.
+        # Shadow mode kasutab neid PÄRAST kogu vastuse valmimist —
+        # see nimekiri ise EI MÕJUTA tulemust kuidagi, ainult kogutakse.
+        shadow_missing_items: List[Tuple[int, str, str, Optional[int]]] = []
 
         for s in stores:
             sid = int(_rv(s, "id"))
@@ -528,6 +604,13 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if best_price is None:
                     meta = metadata.get(pid)
                     not_found.append(_rv(meta, "name") if meta else f"#{pid}")
+                    # v4.6.9 UUS — shadow kandidaat. See EI muuda
+                    # not_found/total/lines_found — puhtalt kõrvalkanal.
+                    group_info = group_info_by_pid.get(pid)
+                    if group_info is not None:
+                        shadow_missing_items.append(
+                            (group_info[0], group_info[1], chain, sid)
+                        )
                     continue
                 lines_found += 1
                 total += best_price * qty
@@ -615,7 +698,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 "cheapest_store_name": winner["store_name"],
             }
 
-        return {
+        response = {
             "results": results,
             "totals": totals,
             "stores": [
@@ -632,6 +715,25 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             "radius_km": float(radius_km),
             "missing_products": missing_products,
         }
+
+        # v4.6.9/v2 UUS — Etapp 5B shadow mode. v2 fix (ChatGPT leid #1
+        # + #3): EI käivitata enam siin otse await'iga (see (a) andis
+        # jagatud conn'i paralleelsetele ülesannetele, mis asyncpg's
+        # pole lubatud, ja (b) lisas /compare vastusele kuni
+        # SUBSTITUTION_SHADOW_TIMEOUT_SECONDS latentsust vaatamata
+        # kommentaarile). Selle asemel lisatakse shadow-kontekst
+        # response'i SISEMISE võtmena "_shadow_missing_items" —
+        # compare.py router (kellel on juba pool, mitte ainult conn)
+        # kasutab seda FastAPI BackgroundTasks kaudu PÄRAST vastuse
+        # kliendile saatmist. See "_shadow_missing_items" võti EI JÕUA
+        # kliendini, kuna compare.py router koostab kliendivastuse
+        # ainult valitud teadaolevatest võtmetest (results/totals/
+        # stores/radius_km/missing_products).
+        if substitution_shadow is not None and shadow_missing_items:
+            response["_shadow_missing_items"] = shadow_missing_items
+            response["_shadow_compare_request_id"] = body.get("request_id")
+
+        return response
 
     finally:
         if should_release:
