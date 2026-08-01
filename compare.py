@@ -1,7 +1,7 @@
 # compare.py
 import json
 import logging
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 from pydantic import BaseModel, confloat, conint
 from typing import List, Tuple, Dict, Any, Optional
 from utils.throttle import throttle
@@ -9,6 +9,19 @@ from services.compare_service import compare_basket_service
 from api.analytics_identity import resolve_analytics_identity
 
 logger = logging.getLogger("uvicorn.error")
+
+# v4.6.9/v2 UUS — Etapp 5B shadow mode. Vt substitution_shadow.py
+# docstring turvapõhimõtete kohta. Sama kitsas import-kaitse mis
+# services/compare_service.py's (ChatGPT leid #8): lubatud on AINULT
+# see, et substitution_shadow.py ISE pole veel repos — iga muu
+# impordiviga (nt substitution_service.py sisemine katkine dependency)
+# tõuseb edasi ja peatab käivituse nähtavalt, mitte ei vaiki.
+try:
+    import substitution_shadow
+except ModuleNotFoundError as _exc:
+    if _exc.name != "substitution_shadow":
+        raise
+    substitution_shadow = None
 
 router = APIRouter(prefix="")
 
@@ -208,7 +221,16 @@ async def compute_compare(
         "include_lines": True,
         "require_all_items": True,
     }
-    return await compare_basket_service(pool, payload)
+    result = await compare_basket_service(pool, payload)
+    # v3 fix (ChatGPT leid #3) — compare_basket_service() võib lisada
+    # sisemised "_shadow_*" võtmed, mida /compare router teadlikult
+    # eemaldab kliendivastuse koostamisel. See legacy helper aga
+    # tagastas varem tulemuse OTSE, ilma sama filtreerimiseta, mistõttu
+    # iga TEINE compute_compare() kutsuja oleks need sisemised võtmed
+    # nähtavaks saanud. Eemalda need siin samamoodi.
+    result.pop("_shadow_missing_items", None)
+    result.pop("_shadow_compare_request_id", None)
+    return result
 
 
 @router.post("/compare")
@@ -216,6 +238,7 @@ async def compute_compare(
 async def compare_basket(
     body: CompareRequest,
     request: Request,
+    background_tasks: BackgroundTasks,
     x_device_id: Optional[str] = Header(default=None, alias="X-Device-Id"),
     authorization: Optional[str] = Header(default=None, alias="Authorization"),
 ):
@@ -237,6 +260,19 @@ async def compare_basket(
         limit_stores = int(_clamp_int(int(body.limit_stores), 1, MAX_STORES))
         offset_stores = max(0, int(body.offset_stores))
 
+        # v3 fix (ChatGPT leid #1) — sampling otsustatakse SIIN, ÜKS
+        # KORD, ENNE compare_basket_service() kutsumist. Varem tehti
+        # see otsus alles background-task'i sees, mis tähendas, et
+        # compare_service.py tegi lisapäringu (group_info) IGAL
+        # request'il, kui shadow oli globaalselt sisse lülitatud —
+        # sõltumata sample rate'ist. Nüüd teeb seda päringut ainult
+        # see osa (nt 5%) request'idest, mis on juba sample'itud.
+        shadow_sampled = bool(
+            substitution_shadow is not None
+            and substitution_shadow.shadow_enabled()
+            and substitution_shadow.should_sample_this_request()
+        )
+
         payload_in = {
             "items": items_payload,
             "lat": body.lat,  # None lubatud
@@ -246,9 +282,30 @@ async def compare_basket(
             "offset_stores": offset_stores,
             "include_lines": bool(body.include_lines),
             "require_all_items": bool(body.require_all_items),
+            "_shadow_sampled": shadow_sampled,
         }
 
         payload_out = await compare_basket_service(pool, payload_in)
+
+        # v4.6.9/v3 UUS — Etapp 5B shadow mode. compare_service.py lisab
+        # (kui shadow-kandidaate leiti JA see request oli sample'itud)
+        # sisemised võtmed "_shadow_missing_items"/
+        # "_shadow_compare_request_id" — need EI JÕUA kliendini, kuna
+        # allpool koostatav vastus valib ainult teadaolevad väljad.
+        # Kasutame FastAPI BackgroundTasks't, et shadow käivituks alles
+        # PÄRAST vastuse kliendile saatmist — see EI mõjuta /compare
+        # latentsust üldse. already_sampled=True, kuna otsus on juba
+        # tehtud ülal — run_shadow_batch_safely EI TOHI enam teist
+        # korda randomiseerida (topelt-sampling'u vältimiseks).
+        shadow_missing_items = payload_out.get("_shadow_missing_items")
+        if shadow_sampled and shadow_missing_items:
+            background_tasks.add_task(
+                substitution_shadow.run_shadow_batch_safely,
+                pool,
+                payload_out.get("_shadow_compare_request_id"),
+                shadow_missing_items,
+                already_sampled=True,
+            )
 
         user_id, device_key = await resolve_analytics_identity(request, authorization, x_device_id)
 
