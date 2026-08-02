@@ -347,9 +347,24 @@ async def login(user: LoginUser, request: Request):
 @router.post("/auth/login/google", response_model=TokenOut)
 @throttle(limit=20, window=60)
 async def login_with_google(payload: GoogleLoginIn, request: Request):
-    audience = os.getenv("GOOGLE_AUDIENCE")
-    if not audience:
+    # GOOGLE_AUDIENCE toetab nüüd komaga eraldatud loendit -- see on
+    # VAJALIK, mitte lihtsalt mugavus: iOS'i google_sign_in pakett annab
+    # idToken'i, mille 'aud' on ALATI iOS OAuth Client ID (GoogleService-
+    # Info.plist'ist), sõltumata serverClientId parameetrist -- see
+    # mõjutab iOS'il ainult serverAuthCode'i, mitte idToken'it ennast.
+    # Android'il serverClientId mõjutab idToken'i audience'i õigesti (aud
+    # = Web client), seega Android ja iOS vajavad backendis KAHTE erinevat
+    # lubatud audience'i. Vt Railway logi 2026-08-02: aud=iOS client,
+    # expected=Web client -- kinnitatud reaalse ebaõnnestunud loginiga.
+    #
+    # Railway GOOGLE_AUDIENCE väärtus peab nüüd olema:
+    #   <WEB_CLIENT_ID>,<IOS_CLIENT_ID>
+    # (Android client ID'sid EI ole vaja lisada, kuna Android idToken'i
+    # aud on juba Web client ID tänu serverClientId parameetrile.)
+    audience_env = os.getenv("GOOGLE_AUDIENCE")
+    if not audience_env:
         raise HTTPException(status_code=500, detail="Server missing GOOGLE_AUDIENCE")
+    audience = [a.strip() for a in audience_env.split(",") if a.strip()]
 
     # DIAGNOSTIKA (2026-08): dekodeeri metadata ENNE verify't, et see oleks
     # käepärast ka siis kui verify_oauth2_token() kohe ValueError'iga
