@@ -168,7 +168,7 @@ async def verify_apple_identity_token(identity_token: str) -> dict:
     except Exception as e:
         raise ValueError(f"Apple token verification failed: {e}")
 
-def _get_google_token_metadata(id_token: str, expected_audience: str) -> dict:
+def _get_google_token_metadata(id_token: str, expected_audiences: list[str]) -> dict:
     """
     DIAGNOSTIKA (2026-08): dekodeerib Google ID tokeni VERIFITSEERIMATA
     claim'id ainult logimise jaoks -- kunagi EI kasutata neid autentimis-
@@ -189,7 +189,7 @@ def _get_google_token_metadata(id_token: str, expected_audience: str) -> dict:
         "has_hd": bool(claims.get("hd")),
         "kid": header.get("kid"),
         "alg": header.get("alg"),
-        "expected_aud": expected_audience,
+        "expected_audiences": expected_audiences,
     }
 
 
@@ -347,24 +347,35 @@ async def login(user: LoginUser, request: Request):
 @router.post("/auth/login/google", response_model=TokenOut)
 @throttle(limit=20, window=60)
 async def login_with_google(payload: GoogleLoginIn, request: Request):
-    # GOOGLE_AUDIENCE toetab nüüd komaga eraldatud loendit -- see on
-    # VAJALIK, mitte lihtsalt mugavus: iOS'i google_sign_in pakett annab
-    # idToken'i, mille 'aud' on ALATI iOS OAuth Client ID (GoogleService-
-    # Info.plist'ist), sõltumata serverClientId parameetrist -- see
-    # mõjutab iOS'il ainult serverAuthCode'i, mitte idToken'it ennast.
-    # Android'il serverClientId mõjutab idToken'i audience'i õigesti (aud
-    # = Web client), seega Android ja iOS vajavad backendis KAHTE erinevat
-    # lubatud audience'i. Vt Railway logi 2026-08-02: aud=iOS client,
-    # expected=Web client -- kinnitatud reaalse ebaõnnestunud loginiga.
+    # GOOGLE_AUDIENCE toetab komaga eraldatud lubatud OAuth Client ID'de
+    # loendit. Railway diagnostika (2026-08-02) näitas, et osa iOS
+    # login'e saadavad Google ID tokeni, mille 'aud' on rakenduse iOS
+    # OAuth Client ID, samal ajal kui backend ootas ainult Web/server
+    # OAuth Client ID't.
     #
-    # Railway GOOGLE_AUDIENCE väärtus peab nüüd olema:
+    # NB: Google'i ametliku iOS SDK dokumentatsiooni järgi PEAKS korrektselt
+    # rakendatud serverClientId määrama ID tokeni audience'i (vt
+    # GIDConfiguration.serverClientID) -- seega see pole "iOS käitubki
+    # alati nii", vaid viitab, et serverClientId ei rakendunud mingil
+    # põhjusel selle kasutaja build'is (nt plugina versioon, .env
+    # laadimise ajastus, või GoogleService-Info.plist konfiguratsioon).
+    # Root cause vajab eraldi Flutter-poolset uurimist. Mitme audience'i
+    # lubamine on ühilduvusparandus olemasolevatele tootmisversioonidele,
+    # mitte lõplik fix.
+    #
+    # Railway GOOGLE_AUDIENCE väärtus:
     #   <WEB_CLIENT_ID>,<IOS_CLIENT_ID>
-    # (Android client ID'sid EI ole vaja lisada, kuna Android idToken'i
-    # aud on juba Web client ID tänu serverClientId parameetrile.)
     audience_env = os.getenv("GOOGLE_AUDIENCE")
     if not audience_env:
         raise HTTPException(status_code=500, detail="Server missing GOOGLE_AUDIENCE")
-    audience = [a.strip() for a in audience_env.split(",") if a.strip()]
+
+    audience = [value.strip() for value in audience_env.split(",") if value.strip()]
+
+    if not audience or any(
+        not value.endswith(".apps.googleusercontent.com") for value in audience
+    ):
+        print(f"❌ GOOGLE CONFIG ERROR: invalid GOOGLE_AUDIENCE format: {audience_env!r}")
+        raise HTTPException(status_code=500, detail="Server Google authentication misconfigured")
 
     # DIAGNOSTIKA (2026-08): dekodeeri metadata ENNE verify't, et see oleks
     # käepärast ka siis kui verify_oauth2_token() kohe ValueError'iga
