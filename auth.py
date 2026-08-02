@@ -5,6 +5,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 import uuid
+import hashlib
 import httpx
 import asyncpg
 
@@ -167,9 +168,38 @@ async def verify_apple_identity_token(identity_token: str) -> dict:
     except Exception as e:
         raise ValueError(f"Apple token verification failed: {e}")
 
+def _get_google_token_metadata(id_token: str, expected_audience: str) -> dict:
+    """
+    DIAGNOSTIKA (2026-08): dekodeerib Google ID tokeni VERIFITSEERIMATA
+    claim'id ainult logimise jaoks -- kunagi EI kasutata neid autentimis-
+    otsuse tegemiseks (see läbib alati eraldi google_id_token.
+    verify_oauth2_token()). Logime ainult tehnilised väljad (aud/azp/iss/
+    iat/exp/kid/alg), MITTE email'i, sub'i ega tokeni sisu -- vt ChatGPT
+    review 2026-08-02, mis soovitas seda turvalist piirjoont.
+    """
+    claims = jwt.get_unverified_claims(id_token)
+    header = jwt.get_unverified_header(id_token)
+    return {
+        "token_hash": hashlib.sha256(id_token.encode("utf-8")).hexdigest()[:12],
+        "aud": claims.get("aud"),
+        "azp": claims.get("azp"),
+        "iss": claims.get("iss"),
+        "iat": claims.get("iat"),
+        "exp": claims.get("exp"),
+        "has_hd": bool(claims.get("hd")),
+        "kid": header.get("kid"),
+        "alg": header.get("alg"),
+        "expected_aud": expected_audience,
+    }
+
+
 # ===== Auth dependency =====
 async def get_current_user(request: Request, authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
+        # DIAGNOSTIKA (2026-08): logi puuduva/vigase Authorization headeriga
+        # päringu path, et eristada "äpp ei saatnud tokenit üldse" juhtumeid
+        # neist, kus token saadeti aga oli vigane/aegunud (vt allpool).
+        print(f"🔒 AUTH 401: missing/invalid Authorization header, path={request.url.path}")
         raise HTTPException(status_code=401, detail="Missing or invalid token")
 
     token = authorization.split(" ")[1]
@@ -178,6 +208,7 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = (payload.get("sub") or "").lower()
         if not email:
+            print(f"🔒 AUTH 401: token decoded but 'sub' claim missing, path={request.url.path}")
             raise HTTPException(status_code=401, detail="Invalid token")
 
         if email == "marko@minetech.ee":
@@ -201,10 +232,29 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
                 email
             )
             if not user:
+                # DIAGNOSTIKA (2026-08): see on peamine kahtlusalune "äpp
+                # viskab sisselogimisel välja" bugi jaoks -- token oli
+                # kehtiv (JWT dekodeerus õigesti), aga vastavat kasutaja
+                # rida ei leitud (deleted_at IS NULL filter ei läbinud).
+                # Kui see rida hakkab ilmuma Railway logides kohe pärast
+                # /login, /auth/login/google või /auth/login/apple 200
+                # vastust samalt kliendilt, on põhjus siin, mitte Flutteri
+                # poolel.
+                exp = payload.get("exp")
+                print(
+                    f"🔒 AUTH 404: valid JWT for email={email} but no matching "
+                    f"non-deleted user row found. token_exp={exp}, path={request.url.path}"
+                )
                 raise HTTPException(status_code=404, detail="User not found")
             return dict(user)
 
-    except JWTError:
+    except JWTError as e:
+        # DIAGNOSTIKA (2026-08): JWTError katab nii "signature verification
+        # failed" (nt JWT_SECRET erineb sellest, millega token loodi -- nt
+        # Railway env var muutus/deploy vahetas secreti) kui ka "expired
+        # signature" (aegunud token) kui ka lihtsalt vigase tokeni. Need on
+        # sisuliselt erinevad bugid, seega logi täpne exception-tekst.
+        print(f"🔒 AUTH 401: JWTError decoding token -- {type(e).__name__}: {e}, path={request.url.path}")
         raise HTTPException(status_code=401, detail="Invalid token")
 
 # ===== Routes =====
@@ -301,6 +351,17 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
     if not audience:
         raise HTTPException(status_code=500, detail="Server missing GOOGLE_AUDIENCE")
 
+    # DIAGNOSTIKA (2026-08): dekodeeri metadata ENNE verify't, et see oleks
+    # käepärast ka siis kui verify_oauth2_token() kohe ValueError'iga
+    # nurjub. Ebaõnnestunud dekodeerimine ei tohi kunagi takistada
+    # tavapärast login-voogu -- seepärast oma try/except, mis vaikimisi
+    # lihtsalt jätab meta = None.
+    token_meta = None
+    try:
+        token_meta = _get_google_token_metadata(payload.id_token, audience)
+    except Exception:
+        token_meta = {"metadata_decode": "failed"}
+
     try:
         claims = google_id_token.verify_oauth2_token(
             payload.id_token,
@@ -343,9 +404,26 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
         return {"access_token": access_token}
 
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        # DIAGNOSTIKA (2026-08): see haru oli varem täiesti vaikne -- kõik
+        # senised Google login 401'd (vt Railway HTTP logi 2026-08-02)
+        # tulid siit, aga Railway Deploy Logs'is polnud selle kohta MITTE
+        # ÜHTEGI kirjet, sest siin ei olnud print()'i. google_id_token.
+        # verify_oauth2_token() viskab ValueError'i audience/issuer/
+        # signature/aegumise probleemide korral -- token_meta annab siia
+        # juurde aud/azp/exp, et otsustada KUMB neist see täpselt oli
+        # (vt ChatGPT review 2026-08-02).
+        #
+        # NB (turve): kliendile EI tagastata str(e) enam otse -- see
+        # paljastaks oodatud OAuth client ID (audience) igale ründajale,
+        # kes login-voogu proovib. Täpne tekst jääb ainult Railway
+        # serverilogisse.
+        print(f"⚠️ GOOGLE LOGIN 401: {type(e).__name__}: {e}; meta={token_meta}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token verification failed",
+        )
     except Exception as e:
-        print("❌ GOOGLE LOGIN ERROR:", str(e))
+        print(f"❌ GOOGLE LOGIN ERROR: {type(e).__name__}: {e}; meta={token_meta}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
 
 @router.post("/auth/login/apple", response_model=TokenOut)
